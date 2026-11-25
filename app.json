@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Who da Boss ?",
+    "slug": "who-da-boss",
+    "scheme": "whodaboss",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "backgroundColor": "#FFE014",
+    "ios": {
+      "bundleIdentifier": "fr.hellomoira.whodaboss",
+      "supportsTablet": false,
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "fr.hellomoira.whodaboss",
+      "adaptiveIcon": { "backgroundColor": "#FFE014" }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-apple-authentication",
+      "expo-localization",
+      ["expo-notifications", { "color": "#E3170A" }],
+      ["expo-splash-screen", { "backgroundColor": "#FFE014" }]
+    ],
+    "experiments": { "typedRoutes": true },
+    "extra": {
+      "eas": { "projectId": "REMPLACER_PAR_TON_PROJECT_ID_EAS" }
+    }
+  }
+}
