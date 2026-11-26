@@ -3,7 +3,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Burst, ComicButton, Star, SpeedLinesBackground } from '../../src/components/comic';
+import { Burst, ComicButton, SpeedLinesBackground } from '../../src/components/comic';
 import { getLang, setLang, t, type Lang } from '../../src/i18n';
 import { useSession } from '../../src/lib/session';
 import { supabase } from '../../src/lib/supabase';
@@ -12,20 +12,16 @@ import { StatsDashboard } from '../../src/components/StatsDashboard';
 import { colors, comicShadow, fonts } from '../../src/theme';
 import { Alert } from '../../src/lib/alert';
 
-type HeldTitle = { title_key: string; scope: string; value: number };
 
 export default function ProfileScreen() {
   const P = t().profile;
   const { profile, session, refreshProfile } = useSession();
   const router = useRouter();
-  const [held, setHeld] = useState<HeldTitle[]>([]);
   const [cards, setCards] = useState(0);
   const [stats, setStats] = useState<MyStats | null>(null);
 
   const load = useCallback(async () => {
     if (!session) return;
-    const { data } = await supabase.from('title_holders').select('title_key, scope, value').eq('holder', session.user.id);
-    setHeld((data as HeldTitle[]) ?? []);
     const { count } = await supabase.from('cards').select('id', { count: 'exact', head: true })
       .is('used_at', null).gt('expires_at', new Date().toISOString());
     setCards(count ?? 0);
@@ -90,10 +86,6 @@ export default function ProfileScreen() {
     ]);
   }
 
-  const titleName = (key: string) => {
-    if (key.startsWith('theme_boss:')) return t().titles.theme_boss(key.split(':')[1]);
-    return (t().titles as Record<string, unknown>)[key] as string ?? key;
-  };
 
   return (
     <SpeedLinesBackground cx={22} cy={8}>
@@ -114,17 +106,6 @@ export default function ProfileScreen() {
           )}
 
           <StatsDashboard stats={stats} />
-
-          <Text style={styles.section}>{t().board.titles}</Text>
-          <View style={styles.chips}>
-            {held.length === 0 && <Text style={styles.small}>—</Text>}
-            {held.map((h) => (
-              <View key={`${h.scope}-${h.title_key}`} style={[styles.chip, comicShadow(3)]}>
-                <Star size={16} fill={colors.red} />
-                <Text style={styles.chipText}>{titleName(h.title_key)}</Text>
-              </View>
-            ))}
-          </View>
 
           <Text style={styles.section}>{P.language}</Text>
           <View style={styles.chips}>
