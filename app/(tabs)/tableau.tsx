@@ -3,7 +3,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { SpeedLinesBackground, Star } from '../../src/components/comic';
+import { CardBeams, SpeedLinesBackground, Star } from '../../src/components/comic';
 import { getLang, t } from '../../src/i18n';
 import { api, type TitleRow } from '../../src/lib/api';
 import { useSession } from '../../src/lib/session';
@@ -118,6 +118,7 @@ export default function Board() {
           ) : (
             scores.length > 0 && (
               <View style={[styles.scores, comicShadow(6)]}>
+                <CardBeams />
                 {scores.map((s, i) => {
                   const mine = s.userId === me;
                   return (
@@ -135,6 +136,7 @@ export default function Board() {
 
           <Text style={styles.cardTitle}>{B.titles}</Text>
           <View style={[styles.titles, comicShadow(5)]}>
+            <CardBeams />
             {MAIN_TITLES.map((key) => {
               const row = holderOf(key);
               return (

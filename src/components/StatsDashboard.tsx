@@ -1,6 +1,6 @@
 // Tableau de bord du profil : parties, % de victoires et de défaites, catégories, fun facts.
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { Burst, Star } from './comic';
+import { Burst, CardBeams, Star } from './comic';
 import { BURST_A, BURST_B } from '../theme';
 import { getLang, t } from '../i18n';
 import type { MyStats } from '../lib/api';
@@ -62,14 +62,9 @@ export function StatsDashboard({ stats }: { stats: MyStats | null }) {
   if (stats.cards_won > 0) facts.push(F.cardsWon(stats.cards_won));
   if (stats.forfeits > 0) facts.push(F.forfeits(stats.forfeits));
   if (stats.wins > 0) facts.push(F.wins(stats.wins));
-  // Un fun fact par mini-jeu du Boost déjà joué : ton meilleur score
-  const bb = stats.boost_bests ?? {};
-  if (bb.frappe?.display) facts.push(F.frappe(bb.frappe.display));
-  if (bb.rebus?.display) facts.push(F.rebus(bb.rebus.display));
-  if (bb.chiffre) facts.push(F.chiffre(Number(bb.chiffre.score).toLocaleString('fr-FR')));
-  if (bb.reflexe?.display) facts.push(F.reflexe(bb.reflexe.display));
-  if (bb.memoire?.display) facts.push(F.memoire(bb.memoire.display));
-  if (bb.chrono?.display) facts.push(F.chrono(bb.chrono.display));
+  // Boost : meilleure série et points rapportés
+  if ((stats.boost_best_streak ?? 0) > 0) facts.push(F.boostStreak(stats.boost_best_streak ?? 0));
+  if ((stats.boost_points ?? 0) > 0) facts.push(F.boostPoints(stats.boost_points ?? 0));
 
   return (
     <>
@@ -91,6 +86,7 @@ export function StatsDashboard({ stats }: { stats: MyStats | null }) {
         <>
           <Text style={styles.section}>{P.funFacts}</Text>
           <View style={[styles.card, comicShadow(5), { gap: 8 }]}>
+            <View style={[StyleSheet.absoluteFill, { borderRadius: 11, overflow: 'hidden' }]} pointerEvents="none"><CardBeams /></View>
             {facts.map((f) => (
               <View key={f} style={styles.fact}>
                 <View style={{ marginTop: 2 }}><Star size={16} fill={colors.red} /></View>

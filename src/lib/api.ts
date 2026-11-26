@@ -50,6 +50,7 @@ export type MyStats = {
   boosts_played: number; boosts_won: number; bonus_earned: number; cards_won: number; best_streak: number;
   themes: { slug: string; name: string; answered: number; correct: number }[];
   boost_bests?: Partial<Record<BoostGame, { score: number; display: string | null }>>;
+  boost_best_streak?: number; boost_runs?: number; boost_points?: number;
   favorite_rival: { pseudo: string; games: number } | null;
   nemesis: { pseudo: string; they_won: number } | null;
   victim: { pseudo: string; i_won: number } | null;
@@ -70,8 +71,14 @@ export type BoostChallenge = {
   i_finished: boolean; winner: string | null; winner_points: number | null;
 };
 export type MyBoosts = {
-  tokens: { connection_id: string | null; group_id: string | null; count: number }[];
+  tokens: { connection_id: string | null; group_id: string | null; count: number; is_last: boolean }[];
+  active_run: string | null;
   challenges: BoostChallenge[];
+};
+export type BoostRunState = {
+  run_id?: string; ended?: boolean; correct?: boolean; streak: number; points: number; theme?: string;
+  question?: { prompt: string; choices: string[] } | null; elapsed_ms?: number;
+  correct_index?: number | null; explanation?: string | null;
 };
 export type BoostInfo = {
   id: string; game: BoostGame; status: 'open' | 'closed'; closes_at: string; launcher: string | null; label: string | null;
@@ -106,6 +113,10 @@ export const api = {
   finish: (matchId: string) => rpc<boolean>('finish_my_match', { p_match: matchId }),
   reveal: (matchId: string) => rpc<Reveal>('get_reveal', { p_match: matchId }),
   myBoosts: () => rpc<MyBoosts>('my_boosts'),
+  startBoostRun: (theme: string, connectionId?: string, groupId?: string) =>
+    rpc<BoostRunState>('start_boost_run', { p_connection: connectionId ?? null, p_group: groupId ?? null, p_theme: theme }),
+  answerBoostRun: (runId: string, choice: number | null) => rpc<BoostRunState>('answer_boost_run', { p_run: runId, p_choice: choice }),
+  getBoostRun: (runId: string) => rpc<BoostRunState>('get_boost_run', { p_run: runId }),
   launchBoost: (connectionId?: string, groupId?: string) =>
     rpc<string>('launch_boost', { p_connection: connectionId ?? null, p_group: groupId ?? null }),
   getBoost: (id: string) => rpc<BoostInfo>('get_boost', { p_challenge: id }),

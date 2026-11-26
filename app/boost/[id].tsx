@@ -1,89 +1,126 @@
-// Boost : un des 6 mini-jeux, joué par tout le duo / groupe pendant 24 h.
-// Le meilleur gagne autant de points que sa place au classement (le leader : 0).
+// Boost : série dans la catégorie choisie. 9 s par question, +2 points par bonne réponse,
+// ça continue tant qu'on répond juste ; à la première erreur (ou temps écoulé), la série s'arrête.
+import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Bomb, Burst, ComicButton, Panel, SpeedLinesBackground } from '../../src/components/comic';
+import { Burst, ComicButton, Panel, SpeedLinesBackground } from '../../src/components/comic';
 import { t } from '../../src/i18n';
 import { Alert } from '../../src/lib/alert';
-import { api, type BoostContent, type BoostGame, type BoostInfo } from '../../src/lib/api';
-import { BURST_B, colors, comicShadow, fonts } from '../../src/theme';
+import { api, type BoostRunState } from '../../src/lib/api';
+import { colors, comicShadow, fonts } from '../../src/theme';
 
-const EMOJIS = ['💣', '⭐', '🔥', '💥', '🎯', '👑'];
-type Submit = (payload: Record<string, unknown>) => void;
+const SECONDS = 9;
 
-export default function BoostScreen() {
+export default function BoostRun() {
   const B = t().boost;
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const [info, setInfo] = useState<BoostInfo | null>(null);
-  const [content, setContent] = useState<BoostContent | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [run, setRun] = useState<BoostRunState | null>(null);
+  const [lastQuestion, setLastQuestion] = useState<BoostRunState['question']>(null);
+  const [picked, setPicked] = useState<number | null>(null);
+  const [left, setLeft] = useState(SECONDS);
+  const [flash, setFlash] = useState(false);
+  const busy = useRef(false);
+  const startedAt = useRef(Date.now());
 
-  const load = useCallback(() => {
-    api.getBoost(id).then(setInfo).catch((e: Error) => { Alert.alert(t().errors.generic, e.message); router.back(); });
-  }, [id, router]);
-  useEffect(() => { load(); }, [load]);
+  const apply = useCallback((r: BoostRunState, elapsedMs = 0) => {
+    setRun(r);
+    if (r.question) {
+      setLastQuestion(r.question);
+      setPicked(null);
+      startedAt.current = Date.now() - elapsedMs;
+      setLeft(Math.max(0, SECONDS - Math.floor(elapsedMs / 1000)));
+    }
+  }, []);
 
-  async function start() {
-    setBusy(true);
-    try { setContent((await api.startBoostGame(id)).content); }
-    catch (e) { Alert.alert(t().errors.generic, (e as Error).message); load(); }
-    setBusy(false);
-  }
+  useEffect(() => {
+    api.getBoostRun(id).then((r) => apply(r, r.elapsed_ms ?? 0))
+      .catch((e: Error) => { Alert.alert(t().errors.generic, e.message); router.back(); });
+  }, [id, apply, router]);
 
-  const submit: Submit = async (payload) => {
-    setBusy(true);
+  const answer = useCallback(async (choice: number | null) => {
+    if (busy.current || !run || run.ended) return;
+    busy.current = true;
+    setPicked(choice);
     try {
-      await api.submitBoostGame(id, payload);
-      setContent(null);
-      load();
+      const r = await api.answerBoostRun(id, choice);
+      if (r.correct) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+        setFlash(true);
+        setTimeout(() => setFlash(false), 600);
+        apply(r);
+      } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+        setRun(r);
+      }
     } catch (e) { Alert.alert(t().errors.generic, (e as Error).message); }
-    setBusy(false);
-  };
+    busy.current = false;
+  }, [id, run, apply]);
 
-  if (!info) return <SpeedLinesBackground><ActivityIndicator style={{ flex: 1 }} color={colors.ink} /></SpeedLinesBackground>;
-  const game = info.game;
-  const playing = !!content && !info.me?.finished && info.status === 'open';
+  // Chrono de 9 secondes : à zéro, la série s'arrête
+  useEffect(() => {
+    if (!run || run.ended) return;
+    const timer = setInterval(() => {
+      const remaining = SECONDS - Math.floor((Date.now() - startedAt.current) / 1000);
+      setLeft(Math.max(0, remaining));
+      if (remaining <= 0) { clearInterval(timer); answer(null); }
+    }, 200);
+    return () => clearInterval(timer);
+  }, [run, answer]);
+
+  if (!run) return <SpeedLinesBackground><ActivityIndicator style={{ flex: 1 }} color={colors.ink} /></SpeedLinesBackground>;
+  const q = run.ended ? lastQuestion : run.question;
 
   return (
-    <SpeedLinesBackground cy={20}>
+    <SpeedLinesBackground cy={18}>
       <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={styles.wrap}>
           <View style={styles.top}>
-            <Pressable onPress={() => router.back()} style={[styles.pill, comicShadow(3)]} accessibilityRole="button">
-              <Text style={styles.pillText}>{B.back}</Text>
-            </Pressable>
-            <Text style={styles.counter}>{B.title}</Text>
+            <Text style={styles.counter}>{run.theme?.toUpperCase()}</Text>
+            <View style={[styles.score, comicShadow(3)]}>
+              <Text style={styles.scoreText}>+{run.points} PTS · {B.streak(run.streak)}</Text>
+            </View>
           </View>
 
-          <Burst width={300} height={180} fill={colors.yellow} glow="#FFF6B0" stroke={colors.red} outline={4} shadow={7}
-            rotate={-5} style={{ alignSelf: 'center' }}>
-            <Text style={styles.boostTitle}>{B.title}</Text>
-            <Text style={styles.boostSub}>{B.short[game]}</Text>
-          </Burst>
+          <View style={{ alignItems: 'center' }}>
+            <Burst width={250} height={150} fill={colors.yellow} glow="#FFF6B0" stroke={colors.red} outline={4} shadow={7} rotate={-5}>
+              <Text style={styles.boostTitle}>{flash ? B.plus2 : run.ended ? B.runOver : B.title}</Text>
+            </Burst>
+          </View>
 
-          {playing ? (
-            <Game game={game} content={content!} busy={busy} onSubmit={submit} />
-          ) : info.status === 'closed' ? (
-            <Results info={info} />
-          ) : info.me?.finished ? (
-            <Panel tilt={-1} style={{ gap: 8 }}>
-              <Text style={styles.title}>{B.played}</Text>
-              {!!info.me.display && <Text style={styles.text}>{B.yourScore(info.me.display)}</Text>}
-              <Text style={styles.small}>{B.waiting}</Text>
-              <Players info={info} />
-            </Panel>
-          ) : (
+          {!run.ended && (
+            <View style={[styles.timer, comicShadow(3)]}>
+              <View style={[styles.timerFill, { width: `${(left / SECONDS) * 100}%` }]} />
+            </View>
+          )}
+
+          {q && (
             <>
-              <Panel tilt={-1} style={{ gap: 8 }}>
-                <Text style={styles.small}>{B.launchedBy(info.launcher ?? '?', info.label ?? '')}</Text>
-                <Text style={styles.text}>{B.howto[game]}</Text>
-                <Text style={styles.small}>{B.rule}</Text>
+              <Panel tilt={-1}><Text style={styles.prompt}>{q.prompt}</Text></Panel>
+              <View style={styles.grid}>
+                {q.choices.map((c, i) => {
+                  const right = run.ended && run.correct_index === i;
+                  const wrong = run.ended && picked === i && run.correct_index !== i;
+                  return (
+                    <Pressable key={`${q.prompt}-${i}`} disabled={!!run.ended} onPress={() => answer(i)} accessibilityRole="button"
+                      style={[styles.answer, comicShadow(4), right && { backgroundColor: colors.green }, wrong && { backgroundColor: colors.red }]}>
+                      <Text style={[styles.answerText, (right || wrong) && { color: colors.white }]} numberOfLines={2}>{c}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </>
+          )}
+
+          {run.ended && (
+            <>
+              {!!run.explanation && <Text style={styles.small}>{run.explanation}</Text>}
+              <Panel tilt={1}>
+                <Text style={styles.total}>{run.streak > 0 ? B.runTotal(run.streak, run.points) : B.runZero}</Text>
               </Panel>
-              <ComicButton label={B.start} size={32} color={colors.blue} textColor={colors.yellow} disabled={busy} onPress={start} />
-              <Players info={info} />
+              <ComicButton label={B.finish} size={30} onPress={() => router.replace('/rivaux')} />
             </>
           )}
         </ScrollView>
@@ -92,260 +129,21 @@ export default function BoostScreen() {
   );
 }
 
-function Players({ info }: { info: BoostInfo }) {
-  const B = t().boost;
-  return (
-    <View style={{ gap: 4 }}>
-      {info.players.map((p) => (
-        <Text key={p.pseudo} style={styles.small}>
-          {p.me ? B.you.toUpperCase() : p.pseudo} · {p.finished ? (p.display ?? '✓') : B.notPlayed}
-        </Text>
-      ))}
-    </View>
-  );
-}
-
-function Results({ info }: { info: BoostInfo }) {
-  const B = t().boost;
-  return (
-    <Panel tilt={-1} style={{ gap: 10 }}>
-      <Text style={styles.title}>{B.results}</Text>
-      {info.winner
-        ? <Text style={styles.text}>{(info.winner_points ?? 0) > 0 ? B.winner(info.winner, info.winner_points ?? 0) : B.winnerLeader(info.winner)}</Text>
-        : <Text style={styles.text}>{B.noWinner}</Text>}
-      {info.answer !== null && <Text style={styles.small}>{B.answer(info.answer.toLocaleString('fr-FR'), '')}</Text>}
-      {info.players.map((p, i) => (
-        <View key={p.pseudo} style={[styles.resultRow, i === 0 && info.winner && { backgroundColor: colors.yellow }]}>
-          <Text style={styles.resultName}>{i + 1}. {p.me ? B.you.toUpperCase() : p.pseudo.toUpperCase()}</Text>
-          <Text style={styles.small}>{p.display ?? B.notPlayed}</Text>
-          {p.points > 0 && <Text style={styles.resultPts}>+{p.points}</Text>}
-        </View>
-      ))}
-    </Panel>
-  );
-}
-
-function Game({ game, content, busy, onSubmit }: { game: BoostGame; content: BoostContent; busy: boolean; onSubmit: Submit }) {
-  switch (game) {
-    case 'frappe': return <Frappe content={content} busy={busy} onSubmit={onSubmit} />;
-    case 'rebus': return <Rebus content={content} busy={busy} onSubmit={onSubmit} />;
-    case 'chiffre': return <Chiffre content={content} busy={busy} onSubmit={onSubmit} />;
-    case 'reflexe': return <Reflexe content={content} onSubmit={onSubmit} />;
-    case 'memoire': return <Memoire content={content} onSubmit={onSubmit} />;
-    default: return <Chrono onSubmit={onSubmit} />;
-  }
-}
-
-// 1. Frappe éclair : le chrono tourne côté serveur depuis « JE JOUE ! »
-function Frappe({ content, busy, onSubmit }: { content: BoostContent; busy: boolean; onSubmit: Submit }) {
-  const B = t().boost;
-  const [text, setText] = useState('');
-  return (
-    <>
-      <Panel tilt={-1}><Text style={styles.big}>{content.text}</Text></Panel>
-      <TextInput style={[styles.input, { height: 90 }]} multiline autoFocus value={text} onChangeText={setText}
-        placeholder={B.typeHere} autoCorrect={false} autoCapitalize="none" spellCheck={false} accessibilityLabel={B.typeHere} />
-      <ComicButton label={B.send} size={28} disabled={busy || text.trim().length === 0} onPress={() => onSubmit({ text })} />
-    </>
-  );
-}
-
-// 2. Rébus emoji : 5 rébus à la suite
-function Rebus({ content, busy, onSubmit }: { content: BoostContent; busy: boolean; onSubmit: Submit }) {
-  const items = content.items ?? [];
-  const [i, setI] = useState(0);
-  const answers = useRef<number[]>([]);
-  const item = items[i];
-  if (!item) return null;
-  const pick = (c: number) => {
-    answers.current[i] = c;
-    if (i + 1 >= items.length) onSubmit({ answers: answers.current });
-    else setI(i + 1);
-  };
-  return (
-    <>
-      <Text style={styles.counter}>{`${i + 1} / ${items.length}`}</Text>
-      <Panel tilt={-1}><Text style={styles.emoji}>{item.emoji}</Text></Panel>
-      <View style={{ gap: 10 }}>
-        {item.choices.map((c, k) => (
-          <Pressable key={`${i}-${k}`} disabled={busy} onPress={() => pick(k)} accessibilityRole="button" style={[styles.answer, comicShadow(4)]}>
-            <Text style={styles.answerText}>{c}</Text>
-          </Pressable>
-        ))}
-      </View>
-    </>
-  );
-}
-
-// 3. Le juste chiffre
-function Chiffre({ content, busy, onSubmit }: { content: BoostContent; busy: boolean; onSubmit: Submit }) {
-  const B = t().boost;
-  const [value, setValue] = useState('');
-  const n = Number(value.replace(/\s/g, '').replace(',', '.'));
-  return (
-    <>
-      <Panel tilt={-1}><Text style={styles.big}>{content.q}</Text></Panel>
-      <View style={styles.inline}>
-        <TextInput style={[styles.input, { flex: 1, fontSize: 26 }]} keyboardType="decimal-pad" autoFocus value={value}
-          onChangeText={setValue} placeholder={B.yourGuess} accessibilityLabel={B.yourGuess} />
-        {!!content.unit && <Text style={styles.title}>{content.unit}</Text>}
-      </View>
-      <ComicButton label={B.send} size={28} disabled={busy || value.trim() === '' || Number.isNaN(n)} onPress={() => onSubmit({ value: n })} />
-    </>
-  );
-}
-
-// 4. Réflexe : 3 essais, moyenne des temps de réaction ; un faux départ = essai raté
-function Reflexe({ content, onSubmit }: { content: BoostContent; onSubmit: Submit }) {
-  const B = t().boost;
-  const delays = content.delays ?? [2000, 3000, 2500];
-  const [tryN, setTryN] = useState(0);
-  const [state, setState] = useState<'ready' | 'wait' | 'boom' | 'early'>('ready');
-  const times = useRef<number[]>([]);
-  const boomAt = useRef(0);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
-
-  const begin = () => {
-    setState('wait');
-    timer.current = setTimeout(() => { boomAt.current = Date.now(); setState('boom'); }, delays[tryN] ?? 2000);
-  };
-  const tap = () => {
-    if (state === 'ready') return begin();
-    if (state === 'wait') {
-      if (timer.current) clearTimeout(timer.current);
-      setState('early');
-      setTimeout(() => onSubmit({ ms: 0 }), 900);
-      return;
-    }
-    if (state === 'boom') {
-      times.current.push(Date.now() - boomAt.current);
-      if (tryN + 1 >= 3) {
-        onSubmit({ ms: Math.round(times.current.reduce((a, b) => a + b, 0) / times.current.length) });
-      } else { setTryN(tryN + 1); setState('ready'); }
-    }
-  };
-  return (
-    <>
-      <Text style={styles.counter}>{B.tryN(Math.min(tryN + 1, 3))}</Text>
-      <Pressable onPressIn={tap} accessibilityRole="button"
-        style={[styles.zone, comicShadow(6), { backgroundColor: state === 'boom' ? colors.red : state === 'early' ? colors.grey : colors.white }]}>
-        {state === 'boom'
-          ? <Burst width={220} height={170} fill={colors.yellow} shape={BURST_B}><Text style={[styles.burstText, { color: colors.red }]}>{B.tap}</Text></Burst>
-          : <>
-              <Bomb size={90} />
-              <Text style={styles.title}>{state === 'ready' ? B.go : state === 'wait' ? B.wait : B.tooEarly}</Text>
-            </>}
-      </Pressable>
-    </>
-  );
-}
-
-// 5. Mémoire : la suite s'allonge d'un emoji à chaque tour réussi
-function Memoire({ content, onSubmit }: { content: BoostContent; onSubmit: Submit }) {
-  const B = t().boost;
-  const seq = content.sequence ?? [];
-  const [len, setLen] = useState(3);
-  const [phase, setPhase] = useState<'show' | 'input'>('show');
-  const [shown, setShown] = useState(-1);
-  const [pos, setPos] = useState(0);
-
-  useEffect(() => {
-    if (phase !== 'show') return;
-    let k = -1;
-    setShown(-1);
-    const iv = setInterval(() => {
-      k += 1;
-      if (k >= len) { clearInterval(iv); setShown(-1); setPhase('input'); setPos(0); return; }
-      setShown(k);
-    }, 750);
-    return () => clearInterval(iv);
-  }, [phase, len]);
-
-  const press = (e: number) => {
-    if (phase !== 'input') return;
-    if (seq[pos] !== e) { onSubmit({ level: len - 1 }); return; }
-    if (pos + 1 >= len) {
-      if (len >= seq.length) { onSubmit({ level: len }); return; }
-      setLen(len + 1); setPhase('show');
-    } else setPos(pos + 1);
-  };
-  return (
-    <>
-      <Text style={styles.counter}>{B.level(len)} · {phase === 'show' ? B.watch : B.yourTurn}</Text>
-      <Panel tilt={-1} style={{ alignItems: 'center', minHeight: 110, justifyContent: 'center' }}>
-        <Text style={styles.memo}>{phase === 'show' && shown >= 0 ? EMOJIS[seq[shown]] : phase === 'input' ? `${pos} / ${len}` : '…'}</Text>
-      </Panel>
-      <View style={styles.memoGrid}>
-        {EMOJIS.map((e, k) => (
-          <Pressable key={e} disabled={phase !== 'input'} onPress={() => press(k)} accessibilityRole="button"
-            style={[styles.memoKey, comicShadow(4), phase !== 'input' && { opacity: 0.5 }]}>
-            <Text style={styles.memoKeyText}>{e}</Text>
-          </Pressable>
-        ))}
-      </View>
-    </>
-  );
-}
-
-// 6. Le chrono parfait : visible 3 s, puis caché ; viser 10,00 s
-function Chrono({ onSubmit }: { onSubmit: Submit }) {
-  const B = t().boost;
-  const [running, setRunning] = useState(false);
-  const [ms, setMs] = useState(0);
-  const startAt = useRef(0);
-  useEffect(() => {
-    if (!running) return;
-    const iv = setInterval(() => setMs(Date.now() - startAt.current), 30);
-    return () => clearInterval(iv);
-  }, [running]);
-  const press = () => {
-    if (!running) { startAt.current = Date.now(); setMs(0); setRunning(true); return; }
-    setRunning(false);
-    onSubmit({ ms: Date.now() - startAt.current });
-  };
-  const visible = !running || ms < 3000;
-  return (
-    <>
-      <Panel tilt={-1} style={{ alignItems: 'center' }}>
-        <Text style={styles.chrono}>{visible ? (ms / 1000).toFixed(2).replace('.', ',') : '?,??'}</Text>
-        <Text style={styles.small}>🎯 10,00 s</Text>
-      </Panel>
-      <ComicButton label={running ? B.stop : B.go} size={36} color={running ? colors.red : colors.blue}
-        textColor={colors.yellow} onPress={press} />
-    </>
-  );
-}
-
 const styles = StyleSheet.create({
-  wrap: { padding: 20, gap: 16, paddingBottom: 40 },
+  wrap: { padding: 20, gap: 14, paddingBottom: 40 },
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  pill: { backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 3 },
-  pillText: { fontFamily: fonts.comic, fontSize: 17, letterSpacing: 1 },
-  counter: { fontFamily: fonts.comic, fontSize: 20, letterSpacing: 1.5, textAlign: 'center' },
-  burstText: { fontFamily: fonts.comic, fontSize: 30, color: colors.yellow, textAlign: 'center', letterSpacing: 1,
+  counter: { fontFamily: fonts.comic, fontSize: 20, letterSpacing: 1 },
+  score: { backgroundColor: colors.red, borderWidth: 2, borderColor: colors.ink, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 2 },
+  scoreText: { fontFamily: fonts.comic, fontSize: 16, letterSpacing: 0.5, color: colors.yellow },
+  boostTitle: { fontFamily: fonts.comic, fontSize: 48, letterSpacing: 1, color: colors.red, textAlign: 'center',
     textShadowColor: colors.ink, textShadowOffset: { width: 3, height: 3 }, textShadowRadius: 0 },
-  title: { fontFamily: fonts.comic, fontSize: 26, letterSpacing: 1, color: colors.ink },
-  boostTitle: { fontFamily: fonts.comic, fontSize: 54, letterSpacing: 1, color: colors.red,
-    textShadowColor: colors.ink, textShadowOffset: { width: 3, height: 3 }, textShadowRadius: 0 },
-  boostSub: { fontFamily: fonts.comic, fontSize: 18, letterSpacing: 0.5, color: colors.ink, marginTop: -4 },
-  text: { fontFamily: fonts.bodyBold, fontSize: 16, lineHeight: 22, color: colors.ink },
-  big: { fontFamily: fonts.bodyHeavy, fontSize: 22, lineHeight: 28, color: colors.ink },
-  small: { fontFamily: fonts.bodyHeavy, fontSize: 12, color: colors.ink },
-  input: { borderWidth: 3, borderColor: colors.ink, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10,
-    fontFamily: fonts.bodyBold, fontSize: 18, backgroundColor: colors.white },
-  inline: { flexDirection: 'row', gap: 10, alignItems: 'center' },
-  emoji: { fontSize: 64, textAlign: 'center' },
-  answer: { borderWidth: 3, borderColor: colors.ink, borderRadius: 12, backgroundColor: colors.white, paddingVertical: 12, paddingHorizontal: 10 },
+  timer: { height: 16, borderWidth: 3, borderColor: colors.ink, borderRadius: 999, backgroundColor: colors.white, overflow: 'hidden' },
+  timerFill: { height: '100%', backgroundColor: colors.red, borderRightWidth: 3, borderColor: colors.ink },
+  prompt: { fontFamily: fonts.bodyHeavy, fontSize: 22, lineHeight: 28, color: colors.ink },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  answer: { width: '47%', minHeight: 58, borderWidth: 3, borderColor: colors.ink, borderRadius: 12, backgroundColor: colors.white,
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8 },
   answerText: { fontFamily: fonts.comic, fontSize: 20, letterSpacing: 0.5, textAlign: 'center', color: colors.ink },
-  zone: { height: 320, borderWidth: 4, borderColor: colors.ink, borderRadius: 20, alignItems: 'center', justifyContent: 'center', gap: 12 },
-  memo: { fontSize: 72, fontFamily: fonts.comic },
-  memoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'center' },
-  memoKey: { width: '29%', aspectRatio: 1, borderWidth: 3, borderColor: colors.ink, borderRadius: 16, backgroundColor: colors.white,
-    alignItems: 'center', justifyContent: 'center' },
-  memoKeyText: { fontSize: 44 },
-  chrono: { fontFamily: fonts.comic, fontSize: 80, letterSpacing: 2, color: colors.ink },
-  resultRow: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 2, borderColor: colors.ink, borderRadius: 10, padding: 8 },
-  resultName: { flex: 1, fontFamily: fonts.comic, fontSize: 18, letterSpacing: 0.5 },
-  resultPts: { fontFamily: fonts.comic, fontSize: 22, color: colors.green },
+  small: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.ink },
+  total: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 0.5, color: colors.ink, textAlign: 'center' },
 });

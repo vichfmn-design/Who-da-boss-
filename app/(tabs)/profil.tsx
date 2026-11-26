@@ -3,7 +3,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Bomb, Burst, ComicButton, SpeedLinesBackground } from '../../src/components/comic';
+import { Bomb, Burst, CardBeams, ComicButton, SpeedLinesBackground } from '../../src/components/comic';
 import { pickSelfie } from '../../src/lib/selfie';
 import { uploadSelfie, useSelfieUrl } from '../../src/lib/selfieUrl';
 import { getLang, t } from '../../src/i18n';
@@ -121,6 +121,7 @@ export default function ProfileScreen() {
 
           <Text style={styles.section}>{P.mine}</Text>
           <View style={[styles.mineCard, comicShadow(5)]}>
+            <View style={[StyleSheet.absoluteFill, { borderRadius: 11, overflow: 'hidden' }]} pointerEvents="none"><CardBeams /></View>
             <View style={styles.selfieRing}>
               {selfieUrl
                 ? <Image source={{ uri: selfieUrl }} style={styles.selfie} accessibilityLabel={P.mine} />

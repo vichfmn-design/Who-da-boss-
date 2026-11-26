@@ -90,6 +90,23 @@ const raysStyle = (Platform.OS === 'web'
   ? { position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh' }
   : StyleSheet.absoluteFill) as unknown as StyleProp<ViewStyle>;
 
+/** Faisceaux rouges presque transparents qui se croisent, au fond des cartes blanches. */
+export function CardBeams() {
+  const beams = (cx: number, cy: number, n: number, from: number, to: number, width: number) =>
+    Array.from({ length: n }, (_, i) => {
+      const a = ((from + ((to - from) * i) / (n - 1)) * Math.PI) / 180;
+      const w = (width * Math.PI) / 180;
+      const r = 260;
+      return `M${cx} ${cy} L${cx + r * Math.cos(a - w)} ${cy + r * Math.sin(a - w)} L${cx + r * Math.cos(a + w)} ${cy + r * Math.sin(a + w)} Z`;
+    });
+  return (
+    <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style={StyleSheet.absoluteFill} pointerEvents="none">
+      {beams(88, -10, 9, 95, 185, 2.2).map((d, i) => <Path key={`a${i}`} d={d} fill={colors.red} opacity={0.06} />)}
+      {beams(-12, 115, 7, -80, -5, 1.8).map((d, i) => <Path key={`b${i}`} d={d} fill={colors.red} opacity={0.05} />)}
+    </Svg>
+  );
+}
+
 /** Bulle de dialogue avec petite queue (en bas, à gauche ou en haut). */
 export function SpeechBubble({
   children, color = colors.white, tail = 'bottom', style,
@@ -112,7 +129,12 @@ export function SpeechBubble({
 
 /** Case de BD : cadre noir épais, ombre décalée. */
 export function Panel({ children, style, tilt = 0 }: { children: React.ReactNode; style?: StyleProp<ViewStyle>; tilt?: number }) {
-  return <View style={[styles.panel, comicShadow(6), { transform: [{ rotate: `${tilt}deg` }] }, style]}>{children}</View>;
+  return (
+    <View style={[styles.panel, comicShadow(6), { transform: [{ rotate: `${tilt}deg` }] }, style]}>
+      <View style={[StyleSheet.absoluteFill, { borderRadius: 3, overflow: 'hidden' }]} pointerEvents="none"><CardBeams /></View>
+      {children}
+    </View>
+  );
 }
 
 export function ComicButton({

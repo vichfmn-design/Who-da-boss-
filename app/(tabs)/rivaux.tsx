@@ -32,7 +32,7 @@ export default function Rivals() {
   const [openGroups, setOpenGroups] = useState<string[]>([]);
   const isOpen = (id: string) => openGroups.includes(id);
   const toggleGroup = (id: string) => setOpenGroups((o) => (o.includes(id) ? o.filter((x) => x !== id) : [...o, id]));
-  const [boosts, setBoosts] = useState<MyBoosts>({ tokens: [], challenges: [] });
+  const [boosts, setBoosts] = useState<MyBoosts>({ tokens: [], challenges: [], active_run: null });
   const router = useRouter();
 
   const load = useCallback(async () => {
@@ -62,37 +62,38 @@ export default function Rivals() {
 
   const fail = (e: unknown) => Alert.alert(t().errors.generic, (e as Error).message);
 
-  // Boost du duo / groupe : jetons disponibles et défi en cours
+  // Boost du duo / groupe : disponible quand on en a un ET qu'on est dernier
   const B = t().boost;
-  const tokensFor = (c?: string, g?: string) =>
-    boosts.tokens.find((x) => (c && x.connection_id === c) || (g && x.group_id === g))?.count ?? 0;
-  const openFor = (c?: string, g?: string) =>
-    boosts.challenges.find((x) => x.status === 'open' && ((c && x.connection_id === c) || (g && x.group_id === g)));
-  function launch(c?: string, g?: string) {
-    Alert.alert(B.title, B.launchConfirm, [
-      { text: R.cancel, style: 'cancel' },
-      { text: B.launch, onPress: () => {
-          api.launchBoost(c, g).then((id) => router.push(`/boost/${id}`)).catch(fail);
-        } },
+  const tokenFor = (c?: string, g?: string) =>
+    boosts.tokens.find((x) => (c && x.connection_id === c) || (g && x.group_id === g));
+  async function launch(c?: string, g?: string) {
+    const { data } = await supabase.from('themes').select('slug, name_fr').eq('active', true).order('sort');
+    Alert.alert(B.pickTheme, undefined, [
+      ...((data ?? []) as { slug: string; name_fr: string }[]).map((th) => ({
+        text: th.name_fr,
+        onPress: () => {
+          api.startBoostRun(th.slug, c, g).then((r) => router.push(`/boost/${r.run_id}`)).catch(fail);
+        },
+      })),
+      { text: R.cancel, style: 'cancel' as const },
     ]);
   }
   // Logo « BOOST ! » : explosion jaune bordée de rouge, à la place d'un bouton
   function BoostButton({ c, g }: { c?: string; g?: string }) {
-    const open = openFor(c, g);
-    const n = tokensFor(c, g);
-    if (!open && n === 0) return null;
-    const sub = open ? (open.i_finished ? B.waitOthers : B.toPlay) : B.left(n);
+    const tok = tokenFor(c, g);
+    if (!tok || tok.count === 0) return null;
+    const usable = tok.is_last;
     return (
-      <Pressable accessibilityRole="button" accessibilityLabel={`${B.title} ${sub}`}
-        onPress={() => (open ? router.push(`/boost/${open.id}`) : launch(c, g))}
-        style={({ pressed }) => ({ alignSelf: 'center', marginTop: 6, transform: [{ scale: pressed ? 0.95 : 1 }] })}>
-        <Burst width={250} height={150} fill={colors.yellow} glow="#FFF6B0" stroke={colors.red} outline={4} shadow={7} rotate={-5}>
+      <Pressable accessibilityRole="button" accessibilityLabel={B.title}
+        onPress={() => (boosts.active_run ? router.push(`/boost/${boosts.active_run}`) : usable ? launch(c, g) : Alert.alert(B.title, B.notLast))}
+        style={({ pressed }) => ({ alignSelf: 'center', marginTop: 6, opacity: usable ? 1 : 0.45, transform: [{ scale: pressed ? 0.95 : 1 }] })}>
+        <Burst width={230} height={130} fill={colors.yellow} glow="#FFF6B0" stroke={colors.red} outline={4} shadow={7} rotate={-5}>
           <Text style={styles.boostTitle}>{B.title}</Text>
-          <Text style={styles.boostSub}>{sub}</Text>
         </Burst>
       </Pressable>
     );
   }
+
 
   // Duo : un lien unique à envoyer par message (Messages, WhatsApp…)
   async function inviteDuo() {

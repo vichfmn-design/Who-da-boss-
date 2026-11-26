@@ -5,7 +5,7 @@ import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindo
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Burst, SpeechBubble, SpeedLinesBackground, Star } from '../../src/components/comic';
 import { t } from '../../src/i18n';
-import { api, type BoostChallenge, type MyMatch } from '../../src/lib/api';
+import { api, type MyMatch } from '../../src/lib/api';
 import { useSession } from '../../src/lib/session';
 import { colors, comicShadow, fonts } from '../../src/theme';
 
@@ -14,7 +14,6 @@ export default function Home() {
   const { profile } = useSession();
   const [matches, setMatches] = useState<MyMatch[]>([]);
   const [loading, setLoading] = useState(false);
-  const [boosts, setBoosts] = useState<BoostChallenge[]>([]);
   // L'explosion « WHO DA BOSS ? » remplit l'écran (largeur de téléphone, limitée sur ordinateur)
   const { width, height } = useWindowDimensions();
   const size = Math.min(Math.min(width, 560) - 120, height * 0.56);
@@ -32,7 +31,6 @@ export default function Home() {
   const load = useCallback(async () => {
     setLoading(true);
     try { setMatches(await api.myMatches()); } catch { /* hors ligne : on garde l'affichage */ }
-    api.myBoosts().then((b) => setBoosts(b.challenges)).catch(() => {});
     setLoading(false);
   }, []);
   useFocusEffect(useCallback(() => { load(); }, [load]));
@@ -92,17 +90,6 @@ export default function Home() {
             </SpeechBubble>
           )}
 
-          {boosts.filter((b) => (b.status === 'open' && !b.i_finished) || (b.status === 'closed')).slice(0, 3).map((b) => (
-            <Pressable key={b.id} onPress={() => router.push(`/boost/${b.id}`)}
-              style={[styles.row, comicShadow(4), b.status === 'open' && { backgroundColor: colors.blue }]}>
-              <Text style={[styles.rowTitle, b.status === 'open' && { color: colors.yellow }]}>
-                {t().boost.homeTitle(t().boost.games[b.game], b.label ?? '')}
-              </Text>
-              <Text style={[styles.rowSub, b.status === 'open' && { color: colors.white }]}>
-                {b.status === 'open' ? t().boost.homePlay : `${t().boost.homeDone}${b.winner ? ` · ★ ${b.winner}${b.winner_points ? ` +${b.winner_points}` : ''}` : ''}`}
-              </Text>
-            </Pressable>
-          ))}
 
           {toPlay.slice(1).map((m) => (
             <Pressable key={m.match_id} onPress={() => router.push(`/duel/${m.match_id}`)} style={[styles.row, comicShadow(4)]}>
