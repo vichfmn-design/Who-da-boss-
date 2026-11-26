@@ -2,14 +2,15 @@
 // rythme, signaler / bloquer. Toutes les actions sont des boutons visibles (pas d'appui long caché).
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { AlertButton } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Burst, ComicButton, SpeedLinesBackground } from '../../src/components/comic';
 import { t } from '../../src/i18n';
 import { Alert } from '../../src/lib/alert';
 import { api, type MyBoosts } from '../../src/lib/api';
-import { inviteUrl } from '../../src/lib/links';
+import { extractInviteCode, inviteUrl } from '../../src/lib/links';
+import { pasteText } from '../../src/lib/pwa';
 import { useSession } from '../../src/lib/session';
 import { shareText } from '../../src/lib/share';
 import { supabase } from '../../src/lib/supabase';
@@ -261,6 +262,17 @@ export default function Rivals() {
             );
           })}
 
+          {/* iPhone : les liens s'ouvrent dans Safari ; ici on colle le lien copié pour rejoindre depuis l'app */}
+          {Platform.OS === 'web' && (
+            <Pressable accessibilityRole="button" style={[styles.pasteBtn, comicShadow(3)]} onPress={async () => {
+              const text = await pasteText();
+              if (!text || !/invite\//.test(text)) { Alert.alert(R.pasteTitle, R.pasteNone); return; }
+              router.push(`/invite/${extractInviteCode(text)}`);
+            }}>
+              <Text style={styles.pasteText}>{R.paste}</Text>
+            </Pressable>
+          )}
+
           {/* Nom du groupe au-dessus, bouton en dessous sur toute la largeur (rien de coupé sur iPhone) */}
           <View style={{ gap: 10 }}>
             <TextInput style={[styles.input, { flexGrow: 0, flexShrink: 0, flexBasis: 'auto', height: 50 }]} placeholder={R.groupName} value={groupName} onChangeText={setGroupName}
@@ -292,6 +304,9 @@ const styles = StyleSheet.create({
   arrow: { fontFamily: fonts.bodyHeavy, fontSize: 16, color: colors.yellow, width: 18 },
   more: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 2, paddingHorizontal: 6 },
   inline: { flexDirection: 'row', gap: 10, alignItems: 'center' },
+  pasteBtn: { alignSelf: 'center', backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, borderRadius: 999,
+    paddingHorizontal: 14, paddingVertical: 5, marginTop: 4 },
+  pasteText: { fontFamily: fonts.comic, fontSize: 17, letterSpacing: 1, color: colors.ink },
   input: { flex: 1, borderWidth: 3, borderColor: colors.ink, borderRadius: 12, paddingHorizontal: 12, height: 50,
     fontFamily: fonts.bodyBold, fontSize: 15, backgroundColor: colors.white },
 });

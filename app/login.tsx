@@ -7,6 +7,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Burst, ComicButton, Panel, SpeedLinesBackground } from '../src/components/comic';
 import { t } from '../src/i18n';
 import { Alert } from '../src/lib/alert';
+import { inviteUrl } from '../src/lib/links';
+import { usePrefs } from '../src/lib/prefs';
+import { copyText, isIosBrowser } from '../src/lib/pwa';
 import { supabase } from '../src/lib/supabase';
 import { colors, comicShadow, fonts } from '../src/theme';
 
@@ -21,6 +24,8 @@ export default function Login() {
   const [code, setCode] = useState('');
   const [codeSent, setCodeSent] = useState(false);
   const [busy, setBusy] = useState(false);
+  const { pendingInvite } = usePrefs();
+  const showAppHint = !!pendingInvite && isIosBrowser();
 
   const mail = email.trim().toLowerCase();
   const emailOk = /^\S+@\S+\.\S+$/.test(mail);
@@ -92,9 +97,20 @@ export default function Login() {
   return (
     <SpeedLinesBackground cy={30}>
       <SafeAreaView style={styles.wrap}>
-        <Burst width={300} height={210} fill={colors.red} rotate={-6} style={{ alignSelf: 'center' }}>
-          <Text style={styles.logo}>{'WHO DA\nBOSS ?'}</Text>
+        <Burst width={showAppHint ? 220 : 300} height={showAppHint ? 150 : 210} fill={colors.red} rotate={-6} style={{ alignSelf: 'center' }}>
+          <Text style={[styles.logo, showAppHint && { fontSize: 40, lineHeight: 40 }]}>{'WHO DA\nBOSS ?'}</Text>
         </Burst>
+
+        {showAppHint && (
+          <View style={[styles.appHint, comicShadow(4)]}>
+            <Text style={styles.appHintTitle}>{L.appHintTitle}</Text>
+            <Text style={styles.appHintText}>{L.appHintText}</Text>
+            <ComicButton label={L.appHintCopy} size={20} color={colors.yellow} textColor={colors.ink} onPress={async () => {
+              const ok = await copyText(inviteUrl(pendingInvite!));
+              Alert.alert(L.appHintTitle, ok ? L.appHintCopied : inviteUrl(pendingInvite!));
+            }} />
+          </View>
+        )}
 
         <Panel style={{ gap: 12 }} tilt={-1}>
           {mode === 'reset' ? (
@@ -162,6 +178,9 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   wrap: { flex: 1, padding: 20, justifyContent: 'center', gap: 24 },
+  appHint: { backgroundColor: colors.ink, borderRadius: 12, padding: 12, gap: 6 },
+  appHintTitle: { fontFamily: fonts.comic, fontSize: 20, letterSpacing: 0.5, color: colors.yellow },
+  appHintText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.white },
   logo: { fontFamily: fonts.comic, fontSize: 52, lineHeight: 48, textAlign: 'center', color: colors.yellow,
     textShadowColor: colors.ink, textShadowOffset: { width: 4, height: 4 }, textShadowRadius: 0 },
   title: { fontFamily: fonts.comic, fontSize: 26, letterSpacing: 1 },

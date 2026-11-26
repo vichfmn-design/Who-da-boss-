@@ -10,6 +10,9 @@ const fr = {
   yourTurn: (who: string) => `${who} a déjà joué. À toi !`,
   tabs: { play: 'JOUER', rivals: 'RIVAUX', board: 'CLASSEMENT', profile: 'PROFIL' },
   login: {
+    appHintTitle: 'TU AS L\'APP SUR TON ÉCRAN D\'ACCUEIL ?',
+    appHintText: 'Sur iPhone, les liens s\'ouvrent toujours dans Safari. Copie le lien, ouvre Who da Boss depuis ton écran d\'accueil, connecte-toi, puis touche « COLLER UNE INVITATION » dans Rivaux. Sinon, connecte-toi ici.',
+    appHintCopy: 'COPIER LE LIEN', appHintCopied: 'Lien copié ! Ouvre maintenant Who da Boss depuis ton écran d\'accueil.',
     title: 'CONNEXION', withApple: 'Continuer avec Apple', email: 'Ton e-mail', sendCode: 'RECEVOIR UN CODE',
     code: 'Code reçu par e-mail', verify: 'VALIDER', codeSent: 'Code envoyé, regarde tes e-mails.',
     signinTab: 'SE CONNECTER', signupTab: 'CRÉER UN COMPTE', password: 'Mot de passe', newPassword: 'Nouveau mot de passe',
@@ -40,6 +43,8 @@ const fr = {
     seeBoard: 'VOIR LE CLASSEMENT', points: (n: number) => `${n > 0 ? '+' : ''}${n} pts`, forfeit: 'forfait',
   },
   rivals: {
+    paste: '📋 COLLER UNE INVITATION', pasteTitle: 'COLLER UNE INVITATION',
+    pasteNone: 'Aucun lien d\'invitation copié. Copie d\'abord le lien reçu (Messages, WhatsApp…), puis touche ce bouton.',
     title: 'MES RIVAUX', invite: 'DÉFIER UN AMI', inviteShare: (url: string) => `Je te défie sur Who da Boss ? Clique pour accepter le duel : ${url}`,
     groupShare: (name: string, url: string) => `Rejoins mon groupe « ${name} » sur Who da Boss ? : ${url}`,
     group: 'CRÉER UN GROUPE', groupName: 'Nom du groupe (ex. : La famille)', haveCode: 'Code ou lien reçu', join: 'REJOINDRE',
@@ -249,6 +254,9 @@ const en: Dict = {
   yourTurn: (who) => `${who} has played. Your turn!`,
   tabs: { play: 'PLAY', rivals: 'RIVALS', board: 'RANKING', profile: 'PROFILE' },
   login: {
+    appHintTitle: 'GOT THE APP ON YOUR HOME SCREEN?',
+    appHintText: 'On iPhone, links always open in Safari. Copy the link, open Who da Boss from your home screen, sign in, then tap "PASTE AN INVITE" in Rivals. Or just sign in here.',
+    appHintCopy: 'COPY THE LINK', appHintCopied: 'Link copied! Now open Who da Boss from your home screen.',
     title: 'SIGN IN', withApple: 'Continue with Apple', email: 'Your email', sendCode: 'GET A CODE',
     code: 'Code from your email', verify: 'CONFIRM', codeSent: 'Code sent, check your inbox.',
     signinTab: 'SIGN IN', signupTab: 'CREATE ACCOUNT', password: 'Password', newPassword: 'New password',
@@ -277,6 +285,8 @@ const en: Dict = {
     seeBoard: 'SEE THE RANKING', points: (n) => `${n > 0 ? '+' : ''}${n} pts`, forfeit: 'forfeit',
   },
   rivals: {
+    paste: '📋 PASTE AN INVITE', pasteTitle: 'PASTE AN INVITE',
+    pasteNone: 'No invite link copied. First copy the link you received (Messages, WhatsApp…), then tap this button.',
     title: 'MY RIVALS', invite: 'CHALLENGE A FRIEND', inviteShare: (url) => `I challenge you on Who da Boss? Tap to accept the duel: ${url}`,
     groupShare: (name, url) => `Join my group "${name}" on Who da Boss?: ${url}`,
     group: 'CREATE A GROUP', groupName: 'Group name (e.g. The family)', haveCode: 'Code or link received', join: 'JOIN',

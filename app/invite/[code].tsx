@@ -20,7 +20,7 @@ export default function Invite() {
   const started = useRef(false);
 
   useEffect(() => {
-    if (!code || !session || !profile || !loaded || !rulesSeen || started.current) return;
+    if (!code || !session || !profile || !loaded || started.current) return;
     started.current = true;
     const R = t().rivals;
     api.acceptInvite(extractInviteCode(String(code)))
@@ -30,7 +30,7 @@ export default function Invite() {
       .catch((e: Error) => Alert.alert(t().errors.generic, e.message))
       .finally(() => {
         setPendingInvite(null);
-        router.replace('/rivaux');
+        router.replace(rulesSeen ? '/rivaux' : '/regles');
       });
   }, [code, session, profile, loaded, rulesSeen, router]);
 

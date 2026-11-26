@@ -25,15 +25,16 @@ function Gate() {
     const first = segments[0] as string | undefined;
 
     // Lien d'invitation ouvert avant d'avoir un compte prêt : on le garde pour après.
-    if (first === 'invite' && (!session || !profile || !rulesSeen)) {
+    if (first === 'invite' && (!session || !profile)) {
       const code = pathname.split('/').filter(Boolean).pop();
       if (code && code !== pendingInvite) setPendingInvite(code);
     }
 
     if (!session) { if (first !== 'login') router.replace('/login'); return; }
     if (!profile) { if (first !== 'onboarding') router.replace('/onboarding'); return; }
-    if (!rulesSeen) { if (first !== 'regles') router.replace('/regles'); return; }
-    if (pendingInvite && first !== 'invite') { router.replace(`/invite/${pendingInvite}`); return; }
+    // Invitation d'abord (« Tu as rejoint le groupe ! »), les règles ensuite
+    if (pendingInvite) { if (first !== 'invite') router.replace(`/invite/${pendingInvite}`); return; }
+    if (!rulesSeen) { if (first !== 'regles' && first !== 'invite') router.replace('/regles'); return; }
     if (first === 'login' || first === 'onboarding') router.replace('/');
   }, [ready, loaded, session, profile, rulesSeen, pendingInvite, segments, pathname, router]);
 
