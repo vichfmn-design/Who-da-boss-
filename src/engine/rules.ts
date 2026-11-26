@@ -19,7 +19,7 @@ export const RULES = {
 
   /** Une mine par joueur et par partie (duo comme groupe). */
   minesPerPlayerPerMatch: 1,
-  /** À valider : point bonus quand quelqu'un saute sur ta mine. */
+  /** Point bonus pour chaque joueur qui saute sur ta mine. */
   bonusPerMineTriggered: 1,
   /** Point bonus pour 3 « Sûr » justes dans la même partie. */
   bonusForThreeSure: 1,
@@ -45,12 +45,12 @@ export const RULES = {
 
 /**
  * Multiplicateur des pertes selon le nombre de mines posées par les AUTRES
- * joueurs sur la question. 0 mine = ×1, puis ×2 minimum, puis le nombre de
- * mines (4 mines = ×4). À valider : 2 mines = ×2 pour l'instant.
+ * joueurs sur la question : les mines s'additionnent.
+ * 0 mine = ×1, 1 mine = ×2, 2 mines = ×3, 3 mines = ×4 (le maximum à 4 joueurs).
  */
 export function mineMultiplier(minesFromOthers: number): number {
   if (minesFromOthers <= 0) return 1;
-  return Math.max(2, minesFromOthers);
+  return minesFromOthers + 1;
 }
 
 export type AnswerInput = {

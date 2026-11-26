@@ -1,7 +1,7 @@
 -- Who da Boss ? — règles du jeu côté serveur.
 -- Mêmes règles que src/engine/rules.ts : si tu en changes une, change l'autre.
 --   Réponse normale : +1 / −1        « Sûr ! » : +3 / −3
---   Mine : pertes ×2 (×n si n mines, ×2 au minimum), seulement sur les autres
+--   Mine : pertes ×2, les mines s'additionnent (2 mines ×3, 3 mines ×4), seulement sur les autres
 --   Carte Who da Boss ? : tout ×2       Pas de réponse en 15 s = fausse
 --   Forfait : 0 point          Joker : 1 par semaine, jusqu'à midi le lendemain
 
@@ -15,7 +15,7 @@ $$;
 
 create or replace function public.mine_multiplier(p_mines bigint) returns int
 language sql immutable as $$
-  select case when p_mines <= 0 then 1 else greatest(2, p_mines)::int end;
+  select case when p_mines <= 0 then 1 else (p_mines + 1)::int end;
 $$;
 
 -- ------------------------------------------------------------------
@@ -385,7 +385,7 @@ begin
               where match_id = p_match and not forfeit order by rank limit 1)
   where id = p_match;
 
-  -- Bonus : quelqu'un a sauté sur ta mine (+1 par victime, à valider)
+  -- Bonus : quelqu'un a sauté sur ta mine (+1 par victime)
   for r in
     select mi.user_id as miner
     from answers a

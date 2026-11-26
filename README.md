@@ -16,7 +16,7 @@ Jeu de duels quotidiens entre proches : 5 questions de culture générale délir
 | Pseudo et thèmes préférés (3 minimum) | ✅ |
 | Inviter un rival par lien, rejoindre avec un code | ✅ |
 | Duel du jour : 5 questions, 15 s, SÛR ! (+3 / −3), réponse normale (+1 / −1) | ✅ |
-| Mine : 1 par partie, pertes ×2 (×n avec n mines) | ✅ |
+| Mine : 1 par partie, pertes ×2, les mines s'additionnent (2 mines ×3, 3 mines ×4) | ✅ |
 | Révélation quand tout le monde a joué, BOOM ! / PAF ! | ✅ |
 | Forfait (0 point) et joker (1 par semaine, jusqu'à midi) | ✅ serveur |
 | Rythme par connexion : tous les jours, tous les X jours, 1 fois par semaine | ✅ |
@@ -52,7 +52,7 @@ cp .env.example .env        # puis colle l'URL et la clé « anon » de Supabase
    ```
 4. **Authentication > Providers** :
    - **Email** : active la connexion par code. Dans le modèle d'e-mail « Magic Link », affiche le code avec `{{ .Token }}`. Tu peux brancher Resend dans **SMTP Settings**, comme pour Hellomoïra.
-   - **Apple** : renseigne l'identifiant `fr.hellomoira.whodaboss` (à changer dans `app.json` si tu préfères un autre identifiant).
+   - **Apple** : renseigne l'identifiant de l'app, `com.whodaboss.app`.
 5. Déploie les deux fonctions :
    ```bash
    npx supabase functions deploy delete-account notify-players
@@ -84,10 +84,10 @@ Le scénario SQL fait jouer un vrai duel : Victor pose une mine, Léa saute dess
 - **Toutes les heures**, `refresh_titles()` recalcule les titres. On ne vole un titre qu'en faisant **strictement** mieux que son détenteur.
 - **La révélation** arrive dès que tout le monde a joué, sinon à minuit. Si quelqu'un a utilisé son joker, elle attend jusqu'à midi le lendemain.
 
-## Règles encore à valider
+## Précisions de règles
 
-- **2 mines sur la même question** : ×2 pour l'instant (`mineMultiplier` et `mine_multiplier`).
-- **+1 point bonus** quand quelqu'un saute sur ta mine (`bonusPerMineTriggered`).
+- **Mines** : 1 mine = pertes ×2, 2 mines = ×3, 3 mines = ×4 (le maximum dans un groupe de 4).
+- **+1 point bonus** pour chaque joueur qui saute sur ta mine.
 - **Question sans réponse en 15 s** : elle compte comme fausse (−1).
 
 ## Arborescence

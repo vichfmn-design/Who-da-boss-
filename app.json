@@ -9,7 +9,7 @@
     "newArchEnabled": true,
     "backgroundColor": "#FFE014",
     "ios": {
-      "bundleIdentifier": "fr.hellomoira.whodaboss",
+      "bundleIdentifier": "com.whodaboss.app",
       "supportsTablet": false,
       "usesAppleSignIn": true,
       "infoPlist": {
@@ -17,7 +17,7 @@
       }
     },
     "android": {
-      "package": "fr.hellomoira.whodaboss",
+      "package": "com.whodaboss.app",
       "adaptiveIcon": { "backgroundColor": "#FFE014" }
     },
     "plugins": [

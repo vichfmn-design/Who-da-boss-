@@ -20,18 +20,18 @@ test('pas de réponse dans les 15 s = réponse fausse', () => {
   assert.equal(answerPoints({ choiceIndex: null, correctIndex: 0, sure: false }), -1);
 });
 
-test('mines : ×2 minimum, puis le nombre de mines', () => {
+test('mines : elles s\'additionnent (1 = ×2, 2 = ×3, 3 = ×4)', () => {
   assert.equal(mineMultiplier(0), 1);
   assert.equal(mineMultiplier(1), 2);
-  assert.equal(mineMultiplier(2), 2);
-  assert.equal(mineMultiplier(3), 3);
-  assert.equal(mineMultiplier(4), 4);
+  assert.equal(mineMultiplier(2), 3);
+  assert.equal(mineMultiplier(3), 4);
 });
 
 test('une mine ne touche que les mauvaises réponses', () => {
   assert.equal(answerPoints(right(true), 3), 3);
   assert.equal(answerPoints(wrong(true), 1), -6);
-  assert.equal(answerPoints(wrong(false), 4), -4);
+  assert.equal(answerPoints(wrong(false), 2), -3);
+  assert.equal(answerPoints(wrong(true), 3), -12);
 });
 
 test('carte Who da Boss ? : tout est doublé, pertes comprises', () => {
