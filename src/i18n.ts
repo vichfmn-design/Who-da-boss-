@@ -105,12 +105,12 @@ const fr = {
         'Chaque rival qui saute sur ta mine te rapporte 1 point bonus.',
       ] },
       { title: 'LES CARTES BONUS', burst: '×2', lines: [
+        'Deux façons de gagner 1 point bonus : un rival saute sur ta mine, ou tu réussis 3 « SÛR ! » dans la même partie.',
         '3 points bonus = 1 carte « Who da Boss ? », valable 3 jours.',
         'Avec une carte, tu lances un défi sur le thème de ton choix, contre un rival ou tout ton groupe.',
         'Dans ce défi, tous les points comptent double.',
       ] },
       { title: 'LES AUTRES RÈGLES', burst: '!!!', lines: [
-        'Joker : une fois par semaine, tu peux rattraper un duel oublié jusqu\'à midi le lendemain.',
         'Forfait : si tu ne joues pas à temps, tu marques 0 point et tu finis dernier.',
         'Rythme : tous les jours ou moins souvent, à régler avec chaque rival (une fois par mois).',
         'Les titres (Mr je sais tout !, L\'Infatigable !…) se volent en faisant strictement mieux que leur détenteur.',
@@ -223,12 +223,12 @@ const en: Dict = {
         'Each rival who steps on your mine gives you 1 bonus point.',
       ] },
       { title: 'BONUS CARDS', burst: '×2', lines: [
+        'Two ways to earn 1 bonus point: a rival steps on your mine, or you get 3 right "SURE!" in the same game.',
         '3 bonus points = 1 "Who da Boss?" card, valid for 3 days.',
         'With a card, you launch a challenge on the theme of your choice, against a rival or your whole group.',
         'In that challenge, every point counts double.',
       ] },
       { title: 'OTHER RULES', burst: '!!!', lines: [
-        'Joker: once a week, you can catch up on a missed duel until noon the next day.',
         'Forfeit: if you do not play in time, you score 0 and finish last.',
         'Rhythm: every day or less often, set with each rival (once a month).',
         'Titles (Mr Know-It-All!, The Unstoppable!…) are stolen by doing strictly better than their holder.',

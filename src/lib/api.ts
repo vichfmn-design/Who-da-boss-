@@ -66,7 +66,6 @@ export const api = {
   placeMine: (matchId: string, index: number) => rpc<void>('place_mine', { p_match: matchId, p_index: index }),
   removeMine: (matchId: string) => rpc<void>('remove_mine', { p_match: matchId }),
   finish: (matchId: string) => rpc<boolean>('finish_my_match', { p_match: matchId }),
-  useJoker: (matchId: string) => rpc<void>('use_joker', { p_match: matchId }),
   reveal: (matchId: string) => rpc<Reveal>('get_reveal', { p_match: matchId }),
   createInvite: (groupId?: string) => rpc<string>('create_invite', { p_group: groupId ?? null }),
   acceptInvite: (code: string) => rpc<{ connection_id?: string; group_id?: string; group_name?: string }>('accept_invite', { p_code: code }),
