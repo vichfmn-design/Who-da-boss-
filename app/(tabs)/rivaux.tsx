@@ -222,10 +222,10 @@ export default function Rivals() {
             <View key={r.connectionId} style={[styles.card, styles.duoCard, comicShadow(4)]}>
               <Pressable onPress={() => rivalOptions(r)} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.name}>{r.pseudo.toUpperCase()}</Text>
-                  <Text style={styles.sub}>{R.rhythm(r.rhythm)}</Text>
+                  <Text style={[styles.name, { color: colors.yellow }]}>{r.pseudo.toUpperCase()}</Text>
+                  <Text style={[styles.sub, { color: colors.white }]}>{R.rhythm(r.rhythm)}</Text>
                 </View>
-                <Text style={styles.more}>•••</Text>
+                <Text style={[styles.more, { color: colors.yellow }]}>•••</Text>
               </Pressable>
               <BoostButton c={r.connectionId} />
             </View>
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   card: { backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, borderRadius: 14, padding: 12,
     flexDirection: 'row', alignItems: 'center' },
   groupCard: { backgroundColor: colors.red, flexDirection: 'column', alignItems: 'stretch' },
-  duoCard: { flexDirection: 'column', alignItems: 'stretch' },
+  duoCard: { backgroundColor: colors.red, flexDirection: 'column', alignItems: 'stretch' },
   name: { fontFamily: fonts.comic, fontSize: 24, letterSpacing: 1 },
   sub: { fontFamily: fonts.bodyBold, fontSize: 12 },
   more: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 2, paddingHorizontal: 6 },
