@@ -349,3 +349,9 @@ create policy "supprimer mes réactions" on storage.objects for delete to authen
   using (bucket_id = 'reactions' and (storage.foldername(name))[1] = auth.uid()::text);
 create policy "voir les réactions" on storage.objects for select to authenticated
   using (bucket_id = 'reactions');
+
+-- Accès de l'API (protégé par les règles RLS ci-dessus). Explicite pour ne pas
+-- dépendre du réglage « Grant API access to new tables » du projet.
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant usage, select on all sequences in schema public to authenticated;
