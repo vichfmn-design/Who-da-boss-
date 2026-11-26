@@ -107,7 +107,7 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { padding: 20, paddingBottom: 32, gap: 16 },
+  wrap: { padding: 20, paddingBottom: 110, gap: 16 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   pseudo: { fontFamily: fonts.comic, fontSize: 20, backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink,
     borderRadius: 999, paddingHorizontal: 12, paddingVertical: 2, overflow: 'hidden' },

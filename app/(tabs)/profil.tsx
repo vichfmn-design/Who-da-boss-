@@ -148,7 +148,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { padding: 20, gap: 14, paddingBottom: 32 },
+  wrap: { padding: 20, gap: 14, paddingBottom: 110 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   letter: { fontFamily: fonts.comic, fontSize: 44, color: colors.yellow,
     textShadowColor: colors.ink, textShadowOffset: { width: 3, height: 3 }, textShadowRadius: 0 },

@@ -181,7 +181,7 @@ export default function Board() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { padding: 20, gap: 14, paddingBottom: 32 },
+  wrap: { padding: 20, gap: 14, paddingBottom: 110 },
   tabs: { flexDirection: 'row', gap: 10 },
   tab: { flex: 1, backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, borderRadius: 12, paddingVertical: 6, alignItems: 'center' },
   tabOn: { backgroundColor: colors.red, transform: [{ rotate: '-2deg' }] },

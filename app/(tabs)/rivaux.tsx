@@ -275,7 +275,7 @@ export default function Rivals() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { padding: 20, gap: 14, paddingBottom: 32 },
+  wrap: { padding: 20, gap: 14, paddingBottom: 110 },
   text: { fontFamily: fonts.bodyBold, fontSize: 15 },
   hint: { fontFamily: fonts.bodyBold, fontSize: 13, marginTop: 6 },
   section: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 1, marginTop: 6 },

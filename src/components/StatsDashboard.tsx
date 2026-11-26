@@ -53,6 +53,18 @@ export function StatsDashboard({ stats }: { stats: MyStats | null }) {
   if (stats.best_game !== null) facts.push(F.bestGame(stats.best_game));
   if (stats.best_streak > 1) facts.push(F.streak(stats.best_streak));
   if (stats.bonus_earned > 0) facts.push(F.bonus(stats.bonus_earned));
+  if (stats.answered > 0) facts.push(F.accuracy(stats.correct, stats.answered, pct(stats.correct, stats.answered)));
+  const mostPlayed = [...played].sort((a, b) => b.answered - a.answered)[0];
+  if (mostPlayed) facts.push(F.mostPlayed(mostPlayed.name, mostPlayed.answered));
+  const untouched = stats.themes.filter((th) => th.answered === 0).length;
+  if (untouched > 0) facts.push(F.toDiscover(untouched));
+  if (stats.sure_total === 0) facts.push(F.neverSure);
+  else if (stats.sure_total - stats.sure_correct > 0) facts.push(F.sureWrong(stats.sure_total - stats.sure_correct));
+  if (stats.mines_placed > 0) facts.push(F.minesPlaced(stats.mines_placed));
+  if (stats.boosts_played > 0) facts.push(F.boosts(stats.boosts_played, stats.boosts_won));
+  if (stats.cards_won > 0) facts.push(F.cardsWon(stats.cards_won));
+  if (stats.forfeits > 0) facts.push(F.forfeits(stats.forfeits));
+  if (stats.wins > 0) facts.push(F.wins(stats.wins));
 
   return (
     <>
@@ -64,24 +76,6 @@ export function StatsDashboard({ stats }: { stats: MyStats | null }) {
         <Tile label={P.forfeits} value={String(stats.forfeits)} />
         <Tile label={P.seasonPoints} value={`${stats.season_points > 0 ? '+' : ''}${stats.season_points}`} color={colors.ink} textColor={colors.yellow} />
         <Tile label={P.accuracy} value={`${pct(stats.correct, stats.answered)} %`} color={colors.blue} textColor={colors.white} />
-      </View>
-
-      <Text style={styles.section}>{P.categories}</Text>
-      <View style={[styles.card, comicShadow(5)]}>
-        {stats.themes.map((th) => {
-          const p = pct(th.correct, th.answered);
-          return (
-            <View key={th.slug} style={styles.themeRow}>
-              <View style={styles.themeHead}>
-                <Text style={styles.themeName}>{th.name}</Text>
-                <Text style={styles.small}>{th.answered > 0 ? `${p} % · ${P.answers(th.answered)}` : '—'}</Text>
-              </View>
-              <View style={styles.bar}>
-                <View style={[styles.barFill, { width: `${p}%`, backgroundColor: p >= 60 ? colors.green : p >= 40 ? colors.yellowDeep : colors.red }]} />
-              </View>
-            </View>
-          );
-        })}
       </View>
 
       {facts.length > 0 && (
