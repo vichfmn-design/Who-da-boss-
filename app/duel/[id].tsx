@@ -241,7 +241,7 @@ export default function Duel() {
                 key={i} onPress={() => setChoice(i)} accessibilityRole="radio" accessibilityState={{ selected: on }}
                 style={[styles.answer, comicShadow(on ? 6 : 4), on && styles.answerOn]}
               >
-                <Text style={[styles.answerText, on && { color: colors.yellow }]} numberOfLines={2} adjustsFontSizeToFit>{c}</Text>
+                <Text style={[styles.answerText, on && { color: colors.yellow }]}>{c}</Text>
               </Pressable>
             );
           })}
@@ -299,9 +299,10 @@ const styles = StyleSheet.create({
   surePts: { fontFamily: fonts.comic, fontSize: 12, color: colors.white },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   answer: { width: '47%', minHeight: 58, borderWidth: 3, borderColor: colors.ink, borderRadius: 12, backgroundColor: colors.white,
-    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8 },
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10, paddingVertical: 8 },
   answerOn: { backgroundColor: colors.red, transform: [{ rotate: '-3deg' }, { scale: 1.04 }] },
-  answerText: { fontFamily: fonts.comic, fontSize: 24, letterSpacing: 1, textAlign: 'center', color: colors.ink },
+  answerText: { fontFamily: fonts.comic, fontSize: 22, lineHeight: 28, paddingTop: 2, paddingHorizontal: 3, letterSpacing: 0.5,
+    textAlign: 'center', color: colors.ink },
   mineRow: { flexDirection: 'row', alignItems: 'center' },
   mineTitle: { fontFamily: fonts.comic, fontSize: 18, letterSpacing: 0.5 },
   mineRule: { fontFamily: fonts.bodyHeavy, fontSize: 11 },

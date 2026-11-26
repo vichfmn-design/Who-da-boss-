@@ -85,8 +85,10 @@ export default function BoostRun() {
           </View>
 
           <View style={{ alignItems: 'center' }}>
-            <Burst width={250} height={150} fill={colors.yellow} glow="#FFF6B0" stroke={colors.red} outline={4} shadow={7} rotate={-5}>
-              <Text style={styles.boostTitle}>{flash ? B.plus2 : run.ended ? B.runOver : B.title}</Text>
+            <Burst width={run.ended ? 320 : 260} height={run.ended ? 200 : 155} fill={colors.yellow} glow="#FFF6B0" stroke={colors.red} outline={4} shadow={7} rotate={-5}>
+              <Text style={[styles.boostTitle, run.ended && !flash && { fontSize: 34, lineHeight: 38 }]}>
+                {flash ? B.plus2 : run.ended ? B.runOver.replace(' ', '\n') : B.title}
+              </Text>
             </Burst>
           </View>
 
@@ -106,7 +108,7 @@ export default function BoostRun() {
                   return (
                     <Pressable key={`${q.prompt}-${i}`} disabled={!!run.ended} onPress={() => answer(i)} accessibilityRole="button"
                       style={[styles.answer, comicShadow(4), right && { backgroundColor: colors.green }, wrong && { backgroundColor: colors.red }]}>
-                      <Text style={[styles.answerText, (right || wrong) && { color: colors.white }]} numberOfLines={2}>{c}</Text>
+                      <Text style={[styles.answerText, (right || wrong) && { color: colors.white }]}>{c}</Text>
                     </Pressable>
                   );
                 })}
@@ -142,8 +144,9 @@ const styles = StyleSheet.create({
   prompt: { fontFamily: fonts.bodyHeavy, fontSize: 22, lineHeight: 28, color: colors.ink },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   answer: { width: '47%', minHeight: 58, borderWidth: 3, borderColor: colors.ink, borderRadius: 12, backgroundColor: colors.white,
-    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8 },
-  answerText: { fontFamily: fonts.comic, fontSize: 20, letterSpacing: 0.5, textAlign: 'center', color: colors.ink },
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10, paddingVertical: 8 },
+  answerText: { fontFamily: fonts.comic, fontSize: 20, lineHeight: 26, paddingTop: 2, paddingHorizontal: 3, letterSpacing: 0.5,
+    textAlign: 'center', color: colors.ink },
   small: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.ink },
   total: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 0.5, color: colors.ink, textAlign: 'center' },
 });
