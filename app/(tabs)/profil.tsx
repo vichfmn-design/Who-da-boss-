@@ -11,6 +11,7 @@ import { useSession } from '../../src/lib/session';
 import { supabase } from '../../src/lib/supabase';
 import { api, type MyStats } from '../../src/lib/api';
 import { StatsDashboard } from '../../src/components/StatsDashboard';
+import { QuestionRecap } from '../../src/components/QuestionRecap';
 import { colors, comicShadow, fonts } from '../../src/theme';
 import { Alert } from '../../src/lib/alert';
 
@@ -130,6 +131,8 @@ export default function ProfileScreen() {
           </Pressable>
 
           <StatsDashboard stats={stats} />
+
+          <QuestionRecap refreshKey={stats?.answered} />
 
           <Text style={styles.section}>{P.mine}</Text>
           <View style={[styles.mineCard, comicShadow(5)]}>

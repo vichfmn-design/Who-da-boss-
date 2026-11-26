@@ -204,6 +204,11 @@ const fr = {
       ] },
     ],
   },
+  recap: {
+    title: 'MES QUESTIONS', count: (c: number, n: number) => `${c} / ${n} juste${c > 1 ? 's' : ''}`,
+    noAnswer: 'pas de réponse', answer: (a: string) => `Bonne réponse : ${a}`,
+    hidden: 'Bonne réponse dévoilée quand tout le monde aura joué.',
+  },
   jouer: {
     title: 'À TOI DE JOUER !', back: '← RETOUR', duel: 'DUEL\nDU JOUR', group: 'GROUPE\nDU JOUR', card: 'CARTE\n×2',
     length: '5 QUESTIONS · 2 MIN', none: 'RIEN À JOUER POUR L\'INSTANT !', toRivals: 'DÉFIER UN AMI',
@@ -450,6 +455,11 @@ const en: Dict = {
         'Titles (Mr Know-It-All!, The Unstoppable!…) are stolen by doing strictly better than their holder.',
       ] },
     ],
+  },
+  recap: {
+    title: 'MY QUESTIONS', count: (c, n) => `${c} / ${n} right`,
+    noAnswer: 'no answer', answer: (a) => `Right answer: ${a}`,
+    hidden: 'Right answer revealed once everyone has played.',
   },
   jouer: {
     title: 'YOUR TURN!', back: '← BACK', duel: 'DUEL\nOF THE DAY', group: 'GROUP\nOF THE DAY', card: 'CARD\n×2',
