@@ -1,6 +1,5 @@
 // Tableau de bord du profil : parties, % de victoires et de défaites, catégories, fun facts.
-import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Burst, Star } from './comic';
 import { BURST_A, BURST_B } from '../theme';
 import { getLang, t } from '../i18n';
@@ -24,7 +23,9 @@ function Tile({ label, value, color = colors.white, textColor = colors.ink, size
 
 export function StatsDashboard({ stats }: { stats: MyStats | null }) {
   const P = t().profile;
-  const [gridW, setGridW] = useState(0);
+  // Largeur de la page (colonne de 560 px max sur ordinateur, 20 px de marge de chaque côté)
+  const { width } = useWindowDimensions();
+  const gridW = Math.min(width, 560) - 40;
   if (!stats) return null;
   if (stats.played === 0) {
     return (
@@ -73,7 +74,7 @@ export function StatsDashboard({ stats }: { stats: MyStats | null }) {
   return (
     <>
       <Text style={styles.section}>{P.stats}</Text>
-      <View style={styles.grid} onLayout={(e) => setGridW(e.nativeEvent.layout.width)}>
+      <View style={styles.grid}>
         {gridW > 0 && (() => {
           const size = Math.floor(gridW / 3) - 2;
           return (
