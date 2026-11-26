@@ -85,7 +85,7 @@ const fr = {
     playCard: 'JOUER MA CARTE ×2', cardUntil: (d: string) => `Ta carte est valable jusqu'au ${d}.`,
     cardWho: 'Défier qui ?', cardTheme: 'Sur quel thème ?', cardNoRival: 'Ajoute d\'abord un rival ou un groupe dans Rivaux.',
     stats: 'MES STATS', played: 'Parties', winPct: 'Victoires', lossPct: 'Défaites', forfeits: 'Forfaits',
-    seasonPoints: 'Points cette saison', accuracy: 'Bonnes réponses',
+    seasonPoints: 'Points saison', accuracy: 'Réussite',
     categories: 'MES CATÉGORIES', answers: (n: number) => `${n} réponse${n > 1 ? 's' : ''}`,
     funFacts: 'FUN FACTS', noStats: 'Joue ta première partie pour remplir ton tableau de bord !',
     fact: {
@@ -277,7 +277,7 @@ const en: Dict = {
     playCard: 'PLAY MY ×2 CARD', cardUntil: (d) => `Your card is valid until ${d}.`,
     cardWho: 'Challenge who?', cardTheme: 'Which theme?', cardNoRival: 'First add a rival or a group in Rivals.',
     stats: 'MY STATS', played: 'Games', winPct: 'Wins', lossPct: 'Losses', forfeits: 'Forfeits',
-    seasonPoints: 'Points this season', accuracy: 'Right answers',
+    seasonPoints: 'Season points', accuracy: 'Accuracy',
     categories: 'MY CATEGORIES', answers: (n) => `${n} answer${n > 1 ? 's' : ''}`,
     funFacts: 'FUN FACTS', noStats: 'Play your first game to fill your dashboard!',
     fact: {

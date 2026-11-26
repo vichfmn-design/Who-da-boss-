@@ -1,6 +1,8 @@
 // Tableau de bord du profil : parties, % de victoires et de défaites, catégories, fun facts.
+import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Star } from './comic';
+import { Burst, Star } from './comic';
+import { BURST_A, BURST_B } from '../theme';
 import { getLang, t } from '../i18n';
 import type { MyStats } from '../lib/api';
 import { colors, comicShadow, fonts } from '../theme';
@@ -8,19 +10,21 @@ import { colors, comicShadow, fonts } from '../theme';
 const pct = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 100) : 0);
 const secs = (ms: number) => (ms / 1000).toLocaleString(getLang() === 'en' ? 'en-GB' : 'fr-FR', { maximumFractionDigits: 1 });
 
-function Tile({ label, value, color = colors.white, textColor = colors.ink }: {
-  label: string; value: string; color?: string; textColor?: string;
+// Statistique dans une explosion BD (formes et inclinaisons alternées)
+function Tile({ label, value, color = colors.white, textColor = colors.ink, size, k }: {
+  label: string; value: string; color?: string; textColor?: string; size: number; k: number;
 }) {
   return (
-    <View style={[styles.tile, comicShadow(4), { backgroundColor: color }]}>
-      <Text style={[styles.tileValue, { color: textColor }]} numberOfLines={1} adjustsFontSizeToFit>{value}</Text>
-      <Text style={[styles.tileLabel, { color: textColor }]}>{label}</Text>
-    </View>
+    <Burst width={size} height={size} fill={color} shape={k % 2 ? BURST_B : BURST_A} rotate={k % 2 ? 4 : -4} shadow={5}>
+      <Text style={[styles.tileValue, { color: textColor, fontSize: size * 0.24 }]} numberOfLines={1}>{value}</Text>
+      <Text style={[styles.tileLabel, { color: textColor, fontSize: Math.max(10, size * 0.085), maxWidth: size * 0.62 }]}>{label}</Text>
+    </Burst>
   );
 }
 
 export function StatsDashboard({ stats }: { stats: MyStats | null }) {
   const P = t().profile;
+  const [gridW, setGridW] = useState(0);
   if (!stats) return null;
   if (stats.played === 0) {
     return (
@@ -69,13 +73,20 @@ export function StatsDashboard({ stats }: { stats: MyStats | null }) {
   return (
     <>
       <Text style={styles.section}>{P.stats}</Text>
-      <View style={styles.grid}>
-        <Tile label={P.played} value={String(stats.played)} />
-        <Tile label={P.winPct} value={`${winPct} %`} color={colors.green} textColor={colors.white} />
-        <Tile label={P.lossPct} value={`${lossPct} %`} color={colors.red} textColor={colors.yellow} />
-        <Tile label={P.forfeits} value={String(stats.forfeits)} />
-        <Tile label={P.seasonPoints} value={`${stats.season_points > 0 ? '+' : ''}${stats.season_points}`} color={colors.ink} textColor={colors.yellow} />
-        <Tile label={P.accuracy} value={`${pct(stats.correct, stats.answered)} %`} color={colors.blue} textColor={colors.white} />
+      <View style={styles.grid} onLayout={(e) => setGridW(e.nativeEvent.layout.width)}>
+        {gridW > 0 && (() => {
+          const size = Math.floor(gridW / 3) - 2;
+          return (
+            <>
+              <Tile k={0} size={size} label={P.played} value={String(stats.played)} />
+              <Tile k={1} size={size} label={P.winPct} value={`${winPct} %`} color={colors.green} textColor={colors.white} />
+              <Tile k={2} size={size} label={P.lossPct} value={`${lossPct} %`} color={colors.red} textColor={colors.yellow} />
+              <Tile k={3} size={size} label={P.forfeits} value={String(stats.forfeits)} />
+              <Tile k={4} size={size} label={P.seasonPoints} value={`${stats.season_points > 0 ? '+' : ''}${stats.season_points}`} color={colors.ink} textColor={colors.yellow} />
+              <Tile k={5} size={size} label={P.accuracy} value={`${pct(stats.correct, stats.answered)} %`} color={colors.blue} textColor={colors.white} />
+            </>
+          );
+        })()}
       </View>
 
       {facts.length > 0 && (
@@ -98,11 +109,11 @@ export function StatsDashboard({ stats }: { stats: MyStats | null }) {
 const styles = StyleSheet.create({
   section: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 1 },
   small: { fontFamily: fonts.bodyHeavy, fontSize: 12, color: colors.ink },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 4 },
   tile: { width: '30%', flexGrow: 1, borderWidth: 3, borderColor: colors.ink, borderRadius: 14, paddingVertical: 8, paddingHorizontal: 6,
     alignItems: 'center' },
-  tileValue: { fontFamily: fonts.comic, fontSize: 30, letterSpacing: 1 },
-  tileLabel: { fontFamily: fonts.bodyHeavy, fontSize: 11, textAlign: 'center' },
+  tileValue: { fontFamily: fonts.comic, letterSpacing: 1 },
+  tileLabel: { fontFamily: fonts.bodyHeavy, textAlign: 'center', lineHeight: 13 },
   card: { backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, borderRadius: 14, padding: 12, gap: 10 },
   themeRow: { gap: 4 },
   themeHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
