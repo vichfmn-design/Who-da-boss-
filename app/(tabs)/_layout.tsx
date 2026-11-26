@@ -5,10 +5,42 @@ import { Tabs, useRouter } from 'expo-router';
 import { useEffect, useRef, useState, type ComponentProps } from 'react';
 import { Animated, Easing, Platform, Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Circle, Path, Polygon } from 'react-native-svg';
 import { t } from '../../src/i18n';
 import { colors, fonts } from '../../src/theme';
 
 const HREFS = { index: '/', rivaux: '/rivaux', tableau: '/tableau', profil: '/profil' } as const;
+
+/** Pictogrammes du menu : jouer, rivaux, classement (coupe), profil. */
+function TabIcon({ name, color }: { name: string; color: string }) {
+  const p = { stroke: color, strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' };
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24">
+      {name === 'index' && <Polygon points="7,4 20,12 7,20" {...p} />}
+      {name === 'rivaux' && (
+        <>
+          <Circle cx={9} cy={8} r={4} {...p} />
+          <Path d="M2 21c0-4 3-7 7-7s7 3 7 7" {...p} />
+          <Circle cx={17} cy={9} r={3} {...p} />
+          <Path d="M17.5 14c2.8.3 4.5 2.8 4.5 6" {...p} />
+        </>
+      )}
+      {name === 'tableau' && (
+        <>
+          <Path d="M7 3h10v5a5 5 0 0 1-10 0z" {...p} fill={colors.red} />
+          <Path d="M7 5H4.5a3 3 0 0 0 3 4.5M17 5h2.5a3 3 0 0 1-3 4.5" {...p} />
+          <Path d="M12 13v4M8.5 21h7M9.5 17h5v4h-5z" {...p} />
+        </>
+      )}
+      {name === 'profil' && (
+        <>
+          <Circle cx={12} cy={8} r={4} {...p} />
+          <Path d="M4 21c0-4.5 3.6-8 8-8s8 3.5 8 8" {...p} />
+        </>
+      )}
+    </Svg>
+  );
+}
 const PAD = 6;
 const native = Platform.OS !== 'web';
 
@@ -99,6 +131,7 @@ function ComicTabBar({ state, navigateToTab }: TabBarProps) {
               hitSlop={6}
               style={styles.tab}
             >
+              <TabIcon name={route.name} color={focused ? colors.ink : colors.white} />
               <Text style={[styles.label, { color: focused ? colors.ink : colors.white }]}>{labels[route.name] ?? route.name}</Text>
             </Pressable>
           );
@@ -131,7 +164,7 @@ const styles = StyleSheet.create({
   // Barre flottante au-dessus du contenu (le contenu défile dessous, visible à travers le verre)
   wrap: { position: 'absolute', left: 16, right: 16, zIndex: 10 },
   bar: {
-    height: 64, flexDirection: 'row', padding: PAD,
+    height: 72, flexDirection: 'row', padding: PAD,
     backgroundColor: 'rgba(20, 20, 20, 0.62)', borderRadius: 999,
     borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.35)',
     shadowColor: colors.red, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.9, shadowRadius: 0, elevation: 6,
@@ -144,7 +177,7 @@ const styles = StyleSheet.create({
   ripple: { borderRadius: 999, borderWidth: 2, borderColor: 'rgba(255, 255, 255, 0.95)' },
   drop: { position: 'absolute', width: 7, height: 7, borderRadius: 4, backgroundColor: colors.yellow },
   dropSmall: { width: 5, height: 5, borderRadius: 3 },
-  tab: { flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 999, zIndex: 1 },
+  tab: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 1, borderRadius: 999, zIndex: 1 },
   // Marge à droite : la police BD penchée débordait et coupait la dernière lettre (le T de CLASSEMENT)
-  label: { fontFamily: fonts.comic, fontSize: 15, letterSpacing: 0.3, paddingHorizontal: 4 },
+  label: { fontFamily: fonts.comic, fontSize: 13, letterSpacing: 0.3, paddingHorizontal: 4 },
 });
