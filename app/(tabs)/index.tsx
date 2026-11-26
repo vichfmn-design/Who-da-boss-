@@ -1,6 +1,6 @@
 // Accueil : la grosse explosion « WHO DA BOSS ? » lance le prochain duel à jouer.
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Burst, SpeechBubble, SpeedLinesBackground, Star } from '../../src/components/comic';
@@ -17,7 +17,17 @@ export default function Home() {
   const [boosts, setBoosts] = useState<BoostChallenge[]>([]);
   // L'explosion « WHO DA BOSS ? » remplit l'écran (largeur de téléphone, limitée sur ordinateur)
   const { width, height } = useWindowDimensions();
-  const size = Math.min(Math.min(width, 560) - 30, height * 0.62);
+  const size = Math.min(Math.min(width, 560) - 120, height * 0.56);
+  // 5 étoiles autour de l'explosion : 1 petite, 3 moyennes, 1 grande, placées au hasard
+  const stars = useMemo(() => {
+    const sizes = [16, 26, 26, 26, 40].sort(() => Math.random() - 0.5);
+    const start = Math.random() * 360;
+    return sizes.map((sz, k) => {
+      const a = ((start + k * 72 + (Math.random() * 30 - 15)) * Math.PI) / 180;
+      const k2 = Math.max(Math.abs(Math.cos(a)), Math.abs(Math.sin(a)));
+      return { size: sz, x: Math.cos(a) / k2, y: Math.sin(a) / k2, rot: Math.random() * 40 - 20 };
+    });
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -52,6 +62,15 @@ export default function Home() {
             <Text style={styles.bubbleText}>{t().duelsWaiting(toPlay.length)}</Text>
           </SpeechBubble>
 
+          <View style={{ alignSelf: 'center', width: size + 90, height: size + 90, alignItems: 'center', justifyContent: 'center' }}>
+          {stars.map((st, k) => (
+            <View key={k} pointerEvents="none" style={{ position: 'absolute',
+              left: (size + 90) / 2 + st.x * (size / 2 + 22) - st.size / 2,
+              top: (size + 90) / 2 + st.y * (size / 2 + 22) - st.size / 2,
+              transform: [{ rotate: `${st.rot}deg` }] }}>
+              <Star size={st.size} />
+            </View>
+          ))}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t().tapToPlay}
@@ -63,8 +82,6 @@ export default function Home() {
               <Text style={[styles.tap, { fontSize: Math.max(19, size * 0.058) }]}>{t().tapToPlay}</Text>
             </Burst>
           </Pressable>
-          <View style={styles.stars} pointerEvents="none">
-            <Star size={30} /><Star size={22} /><Star size={26} />
           </View>
 
           {next && (
@@ -113,7 +130,6 @@ const styles = StyleSheet.create({
     textShadowColor: colors.ink, textShadowOffset: { width: 5, height: 5 }, textShadowRadius: 0 },
   tap: { marginTop: 10, fontFamily: fonts.comic, fontSize: 19, letterSpacing: 2, color: colors.white,
     textShadowColor: colors.ink, textShadowOffset: { width: 2, height: 2 }, textShadowRadius: 0 },
-  stars: { flexDirection: 'row', justifyContent: 'space-around', marginTop: -30 },
   row: { backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, borderRadius: 14, padding: 12 },
   rowTitle: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 1 },
   rowSub: { fontFamily: fonts.bodyBold, fontSize: 13 },

@@ -202,7 +202,6 @@ export default function Rivals() {
         <ScrollView contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled">
 
           <ComicButton label={R.invite} onPress={inviteDuo} disabled={busy} size={26} />
-          <Text style={styles.hint}>{R.howTo}</Text>
 
           {rivals.length === 0 && groups.length === 0 && <Text style={styles.text}>{R.none}</Text>}
 
