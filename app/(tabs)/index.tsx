@@ -3,7 +3,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Burst, ComicTitle, SpeechBubble, SpeedLinesBackground, Star } from '../../src/components/comic';
+import { Burst, SpeechBubble, SpeedLinesBackground, Star } from '../../src/components/comic';
 import { t } from '../../src/i18n';
 import { api, type BoostChallenge, type MyMatch } from '../../src/lib/api';
 import { useSession } from '../../src/lib/session';
@@ -37,8 +37,7 @@ export default function Home() {
           refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
         >
           <View style={styles.header}>
-            <ComicTitle size={26}>{t().appName}</ComicTitle>
-            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', marginLeft: 'auto' }}>
               <Pressable onPress={() => router.push('/regles?from=profil')} accessibilityRole="button"
                 accessibilityLabel={t().profile.rules} style={[styles.help, comicShadow(3)]}>
                 <Text style={styles.helpText}>?</Text>

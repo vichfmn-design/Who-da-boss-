@@ -19,7 +19,7 @@ type Rival = { connectionId: string; userId: string; pseudo: string; rhythm: num
 type Member = { userId: string; pseudo: string };
 type Group = { id: string; name: string; rhythm: number; members: Member[]; createdBy: string | null };
 
-const MAX_GROUP = 4;
+const MAX_GROUP = 8;
 
 export default function Rivals() {
   const R = t().rivals;
@@ -108,7 +108,7 @@ export default function Rivals() {
     const inGroup = new Set(g.members.map((m) => m.userId));
     const candidates = rivals.filter((r) => !inGroup.has(r.userId));
     const buttons: AlertButton[] = [
-      ...candidates.slice(0, MAX_GROUP).map((r) => ({
+      ...candidates.slice(0, MAX_GROUP - g.members.length).map((r) => ({
         text: `+ ${r.pseudo}`,
         onPress: () => {
           api.addToGroup(g.id, r.userId)

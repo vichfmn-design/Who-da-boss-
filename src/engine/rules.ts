@@ -35,7 +35,7 @@ export const RULES = {
   /** Le joker permet de rattraper un duel jusqu'à midi le lendemain. */
   jokerDeadlineHour: 12,
 
-  maxGroupSize: 4,
+  maxGroupSize: 8,
   rhythmDays: { min: 1, max: 7 },
 } as const;
 
@@ -46,7 +46,7 @@ export const RULES = {
 /**
  * Multiplicateur des pertes selon le nombre de mines posées par les AUTRES
  * joueurs sur la question : les mines s'additionnent.
- * 0 mine = ×1, 1 mine = ×2, 2 mines = ×3, 3 mines = ×4 (le maximum à 4 joueurs).
+ * 0 mine = ×1, 1 mine = ×2, 2 mines = ×3, 3 mines = ×4… jusqu'à 7 mines = ×8 (groupe de 8 joueurs).
  */
 export function mineMultiplier(minesFromOthers: number): number {
   if (minesFromOthers <= 0) return 1;

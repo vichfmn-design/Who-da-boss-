@@ -15,9 +15,14 @@ export function Burst({
   children?: React.ReactNode; style?: StyleProp<ViewStyle>; rotate?: number;
 }) {
   const pts = toPoints(shape);
+  // Marge autour de la forme : l'ombre décalée et le contour épais ne coupent plus les pointes.
+  const sx = (shadow / width) * 100;
+  const sy = (shadow / height) * 100;
+  const m = 6;
+  const viewBox = `${-m} ${-m} ${100 + 2 * m + sx} ${100 + 2 * m + sy}`;
   return (
     <View style={[{ width, height }, style]}>
-      <Svg width={width} height={height} viewBox="0 0 100 100" preserveAspectRatio="none" style={StyleSheet.absoluteFill}>
+      <Svg width={width} height={height} viewBox={viewBox} preserveAspectRatio="none" style={StyleSheet.absoluteFill}>
         <Polygon points={pts} fill={colors.ink} transform={`translate(${(shadow / width) * 100} ${(shadow / height) * 100})`} />
         <Polygon points={pts} fill={fill} stroke={colors.ink} strokeWidth={(outline / Math.min(width, height)) * 100 * 2} strokeLinejoin="miter" />
       </Svg>
