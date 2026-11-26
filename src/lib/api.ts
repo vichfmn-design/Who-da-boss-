@@ -94,6 +94,7 @@ export type TitleRow = {
   period: string;
   holder: string;
   value: number;
+  display: string | null;
   profiles: { pseudo: string } | null;
 };
 

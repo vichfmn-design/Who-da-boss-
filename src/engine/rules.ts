@@ -237,6 +237,8 @@ export type TitleKey =
   | 'most_minigame_records' // Le Boss des Boss (records aux mini-jeux)
   | 'most_mine_hits'      // La chair à canon
   | 'most_mines_dodged'   // Le ninja
+  | 'fastest_answer'      // Lucky Luke (bonne réponse la plus rapide)
+  | 'longest_correct_streak' // Le génie (bonnes réponses d'affilée)
   | `theme_boss:${string}`; // Boss de [thème]
 
 export type Holder = { userId: string; value: number };

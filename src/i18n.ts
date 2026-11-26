@@ -67,7 +67,8 @@ const fr = {
   titles: {
     most_sure_correct: 'Mr je sais tout !', most_sure_wrong: 'Le pipoteur de service !',
     longest_streak_month: 'L\'Infatigable !', most_minigame_records: 'Le Boss des Boss !',
-    most_mine_hits: 'La chair à canon !', most_mines_dodged: 'Le ninja !', theme_boss: (t: string) => `Boss de ${t}`,
+    most_mine_hits: 'La chair à canon !', most_mines_dodged: 'Le ninja !',
+    fastest_answer: 'Lucky Luke !', longest_correct_streak: 'Le génie !', theme_boss: (t: string) => `Boss de ${t}`,
   },
   titleInfo: {
     most_sure_correct: 'Le plus de « SÛR ! » justes cette saison.',
@@ -76,6 +77,10 @@ const fr = {
     most_minigame_records: 'Celui qui a le plus de meilleurs scores aux mini-jeux.',
     most_mine_hits: 'Celui qui a le plus explosé sur une mine.',
     most_mines_dodged: 'Celui qui a le plus évité de mines.',
+    fastest_answer: 'La bonne réponse la plus rapide.',
+    longest_correct_streak: 'Le plus de bonnes réponses d\'affilée, d\'une partie à l\'autre.',
+    games: 'MINI-JEUX', gamesInfo: 'Un record par mini-jeu : le meilleur score de la saison.',
+    record: (d: string) => `Record : ${d}`, noRecord: 'Pas encore de record.',
     categories: 'CATÉGORIES',
     categoriesInfo: 'Un Boss par thème : le plus de bonnes réponses dans ce thème cette saison.',
     themeInfo: (t: string) => `Le plus de bonnes réponses en ${t} cette saison.`,
@@ -286,7 +291,8 @@ const en: Dict = {
   titles: {
     most_sure_correct: 'Mr Know-It-All!', most_sure_wrong: 'The Resident Bluffer!',
     longest_streak_month: 'The Unstoppable!', most_minigame_records: 'Boss of Bosses!',
-    most_mine_hits: 'Cannon Fodder!', most_mines_dodged: 'The Ninja!', theme_boss: (t) => `Boss of ${t}`,
+    most_mine_hits: 'Cannon Fodder!', most_mines_dodged: 'The Ninja!',
+    fastest_answer: 'Lucky Luke!', longest_correct_streak: 'The Genius!', theme_boss: (t) => `Boss of ${t}`,
   },
   titleInfo: {
     most_sure_correct: 'Most right "SURE!" answers this season.',
@@ -295,6 +301,10 @@ const en: Dict = {
     most_minigame_records: 'The one with the most best scores in the mini-games.',
     most_mine_hits: 'The one who blew up on the most mines.',
     most_mines_dodged: 'The one who dodged the most mines.',
+    fastest_answer: 'The fastest right answer.',
+    longest_correct_streak: 'Most right answers in a row, from one game to the next.',
+    games: 'MINI-GAMES', gamesInfo: 'One record per mini-game: the best score of the season.',
+    record: (d) => `Record: ${d}`, noRecord: 'No record yet.',
     categories: 'CATEGORIES',
     categoriesInfo: 'One Boss per theme: most right answers in that theme this season.',
     themeInfo: (t) => `Most right answers in ${t} this season.`,

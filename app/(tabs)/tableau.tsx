@@ -14,7 +14,8 @@ type Tab = 'duo' | 'group' | 'global';
 type Option = { id: string; label: string };
 type ScoreRow = { userId: string; pseudo: string; points: number; wins: number };
 
-const MAIN_TITLES = ['most_sure_correct', 'most_sure_wrong', 'longest_streak_month', 'most_minigame_records', 'most_mine_hits', 'most_mines_dodged'] as const;
+const MAIN_TITLES = ['most_sure_correct', 'most_sure_wrong', 'longest_streak_month', 'most_minigame_records', 'most_mine_hits', 'most_mines_dodged', 'fastest_answer', 'longest_correct_streak'] as const;
+const GAMES = ['frappe', 'rebus', 'chiffre', 'reflexe', 'memoire', 'chrono'] as const;
 
 export default function Board() {
   const B = t().board;
@@ -28,6 +29,7 @@ export default function Board() {
   const [rank, setRank] = useState<{ rank: number | null; pct: number | null; total: number } | null>(null);
   const [themeNames, setThemeNames] = useState<Record<string, string>>({});
   const [showCats, setShowCats] = useState(false);
+  const [showGames, setShowGames] = useState(false);
 
   useEffect(() => {
     supabase.from('themes').select('slug, name_fr, name_en').eq('active', true).order('sort').then(({ data }) => {
@@ -80,6 +82,14 @@ export default function Board() {
   const holderOf = (key: string) => titles.find((x) => x.title_key === key);
   const themeTitles = titles.filter((x) => x.title_key.startsWith('theme_boss:'));
   const who = (row?: TitleRow) => (!row ? B.nobody : row.holder === me ? B.you : row.profiles?.pseudo ?? '?');
+  // Lucky Luke : on affiche le temps ; Le génie : le nombre de bonnes réponses d'affilée
+  const extra = (key: string, row?: TitleRow) => {
+    if (!row) return '';
+    if (key === 'fastest_answer') return ` · ${(Math.abs(row.value) / 1000).toFixed(1).replace('.', ',')} s`;
+    if (key === 'longest_correct_streak') return ` · ×${row.value}`;
+    return '';
+  };
+  const gameTitles = titles.filter((x) => x.title_key.startsWith('minigame:'));
 
   return (
     <SpeedLinesBackground cy={0}>
@@ -145,6 +155,29 @@ export default function Board() {
                   <View style={{ flex: 1 }}>
                     <Text style={styles.titleName}>{t().titles[key]}</Text>
                     <Text style={styles.titleInfo}>{t().titleInfo[key]}</Text>
+                  </View>
+                  <Text style={[styles.holder, row?.holder === me && styles.holderMe]}>{who(row)}{extra(key, row)}</Text>
+                </View>
+              );
+            })}
+
+            <Pressable onPress={() => setShowGames((v) => !v)} accessibilityRole="button"
+              accessibilityState={{ expanded: showGames }} style={[styles.titleRow, showGames && styles.catOpen]}>
+              <Star size={18} fill={gameTitles.some((x) => x.holder === me) ? colors.red : colors.ink} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.titleName}>{t().titleInfo.games}</Text>
+                <Text style={styles.titleInfo}>{t().titleInfo.gamesInfo}</Text>
+              </View>
+              <Text style={styles.chevron}>{showGames ? '▲' : '▼'}</Text>
+            </Pressable>
+            {showGames && GAMES.map((g) => {
+              const row = gameTitles.find((x) => x.title_key === `minigame:${g}`);
+              return (
+                <View key={g} style={[styles.titleRow, styles.subRow]}>
+                  <Star size={14} fill={row?.holder === me ? colors.red : colors.ink} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.titleName, { fontSize: 16 }]}>{t().boost.games[g]}</Text>
+                    <Text style={styles.titleInfo}>{row?.display ? t().titleInfo.record(row.display) : t().titleInfo.noRecord}</Text>
                   </View>
                   <Text style={[styles.holder, row?.holder === me && styles.holderMe]}>{who(row)}</Text>
                 </View>
