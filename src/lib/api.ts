@@ -120,6 +120,7 @@ export const api = {
   launchBoost: (connectionId?: string, groupId?: string) =>
     rpc<string>('launch_boost', { p_connection: connectionId ?? null, p_group: groupId ?? null }),
   getBoost: (id: string) => rpc<BoostInfo>('get_boost', { p_challenge: id }),
+  matchMinigame: (matchId: string) => rpc<string>('match_minigame', { p_match: matchId }),
   startBoostGame: (id: string) => rpc<{ game: BoostGame; content: BoostContent }>('start_boost_game', { p_challenge: id }),
   submitBoostGame: (id: string, payload: Record<string, unknown>) =>
     rpc<{ display: string; ok: boolean }>('submit_boost_game', { p_challenge: id, p_payload: payload }),

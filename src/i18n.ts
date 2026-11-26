@@ -169,7 +169,7 @@ const fr = {
         'Ça continue tant que tu réponds juste : à la première erreur, la série s\'arrête.',
       ] },
       { title: 'LA CARTE WHO DA BOSS ?', burst: '×2', lines: [
-        'Tu gagnes 1 point bonus quand un rival saute sur ta mine, ou quand tu réussis 3 « SÛR ! » dans une partie.',
+        'Tu gagnes 1 point bonus quand un rival saute sur ta mine, quand tu réussis 3 « SÛR ! » dans une partie, ou quand tu fais le meilleur score au mini-jeu bonus de fin de partie.',
         '3 points bonus = 1 carte « Who da Boss ? », valable 3 jours. Joue-la depuis ton profil.',
         'Tu lances un défi sur le thème de ton choix, contre un rival ou tout ton groupe.',
         'Toi, tu ne peux pas perdre de points, et tes bonnes réponses comptent double.',
@@ -182,6 +182,12 @@ const fr = {
       ] },
     ],
   },
+  mini: {
+    title: 'MINI-JEU', button: '🎮 MINI-JEU BONUS',
+    intro: 'Mini-jeu bonus de ta partie, facultatif : le meilleur score gagne 1 point bonus vers ta carte Who da Boss ?',
+    winner: (p: string) => `${p} a le meilleur score : +1 point bonus !`, winnerMe: 'Meilleur score : +1 point bonus pour toi !',
+  },
+
   boost: {
     title: 'BOOST !',
     games: { frappe: 'FRAPPE ÉCLAIR', rebus: 'RÉBUS EMOJI', chiffre: 'LE JUSTE CHIFFRE', reflexe: 'RÉFLEXE', memoire: 'MÉMOIRE', chrono: 'LE CHRONO PARFAIT' },
@@ -382,7 +388,7 @@ const en: Dict = {
         'It goes on while you answer right: the first mistake ends the streak.',
       ] },
       { title: 'THE WHO DA BOSS? CARD', burst: '×2', lines: [
-        'You earn 1 bonus point when a rival steps on your mine, or when you get 3 right "SURE!" in a game.',
+        'You earn 1 bonus point when a rival steps on your mine, when you get 3 right "SURE!" in a game, or when you top the bonus mini-game at the end of a game.',
         '3 bonus points = 1 "Who da Boss?" card, valid for 3 days. Play it from your profile.',
         'You launch a challenge on the theme of your choice, against a rival or your whole group.',
         'You cannot lose points, and your right answers count double.',
@@ -394,6 +400,11 @@ const en: Dict = {
         'Titles (Mr Know-It-All!, The Unstoppable!…) are stolen by doing strictly better than their holder.',
       ] },
     ],
+  },
+  mini: {
+    title: 'MINI-GAME', button: '🎮 BONUS MINI-GAME',
+    intro: 'Optional bonus mini-game of your game: the best score earns 1 bonus point towards your Who da Boss? card.',
+    winner: (p) => `${p} has the best score: +1 bonus point!`, winnerMe: 'Best score: +1 bonus point for you!',
   },
   boost: {
     title: 'BOOST!',

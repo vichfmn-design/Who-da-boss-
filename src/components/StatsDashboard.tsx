@@ -65,6 +65,14 @@ export function StatsDashboard({ stats }: { stats: MyStats | null }) {
   // Boost : meilleure série et points rapportés
   if ((stats.boost_best_streak ?? 0) > 0) facts.push(F.boostStreak(stats.boost_best_streak ?? 0));
   if ((stats.boost_points ?? 0) > 0) facts.push(F.boostPoints(stats.boost_points ?? 0));
+  // Mini-jeux de fin de partie : ton meilleur score à chacun
+  const bb = stats.boost_bests ?? {};
+  if (bb.frappe?.display) facts.push(F.frappe(bb.frappe.display));
+  if (bb.rebus?.display) facts.push(F.rebus(bb.rebus.display));
+  if (bb.chiffre) facts.push(F.chiffre(Number(bb.chiffre.score).toLocaleString('fr-FR')));
+  if (bb.reflexe?.display) facts.push(F.reflexe(bb.reflexe.display));
+  if (bb.memoire?.display) facts.push(F.memoire(bb.memoire.display));
+  if (bb.chrono?.display) facts.push(F.chrono(bb.chrono.display));
 
   return (
     <>

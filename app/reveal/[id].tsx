@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bomb, Burst, ComicButton, Panel, SpeechBubble, SpeedLinesBackground, Star } from '../../src/components/comic';
 import { t } from '../../src/i18n';
 import { api, type Reveal } from '../../src/lib/api';
+import { Alert } from '../../src/lib/alert';
 import { useSession } from '../../src/lib/session';
 import { BURST_B, colors, comicShadow, fonts } from '../../src/theme';
 
@@ -94,6 +95,10 @@ export default function RevealScreen() {
             );
           })}
 
+          <ComicButton label={t().mini.button} color={colors.blue} textColor={colors.yellow} size={26} onPress={() => {
+            api.matchMinigame(id).then((cid) => router.push(`/minijeu/${cid}`))
+              .catch((e: Error) => Alert.alert(t().errors.generic, e.message));
+          }} />
           <ComicButton label={R.seeBoard} color={colors.ink} onPress={() => router.replace('/tableau')} size={26} />
         </ScrollView>
       </SafeAreaView>

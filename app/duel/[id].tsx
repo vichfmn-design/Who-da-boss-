@@ -187,6 +187,10 @@ export default function Duel() {
             <Text style={[styles.burstText, { fontSize: 34, textAlign: 'center' }]}>{D.waiting}</Text>
           </Burst>
           <Panel><Text style={styles.prompt}>{D.waitingText}</Text></Panel>
+          <ComicButton label={t().mini.button} color={colors.blue} textColor={colors.yellow} size={26} onPress={() => {
+            api.matchMinigame(id).then((cid) => router.push(`/minijeu/${cid}`))
+              .catch((e: Error) => Alert.alert(t().errors.generic, e.message));
+          }} />
           <ComicButton label="OK" onPress={() => router.replace('/')} />
         </SafeAreaView>
       </SpeedLinesBackground>
