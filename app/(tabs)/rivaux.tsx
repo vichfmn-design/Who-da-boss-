@@ -263,7 +263,7 @@ export default function Rivals() {
 
           {/* Nom du groupe au-dessus, bouton en dessous sur toute la largeur (rien de coupé sur iPhone) */}
           <View style={{ gap: 10 }}>
-            <TextInput style={[styles.input, { flex: 0 }]} placeholder={R.groupName} value={groupName} onChangeText={setGroupName}
+            <TextInput style={[styles.input, { flexGrow: 0, flexShrink: 0, flexBasis: 'auto', height: 50 }]} placeholder={R.groupName} value={groupName} onChangeText={setGroupName}
               maxLength={30} accessibilityLabel={R.groupName} />
             <ComicButton label={R.group} onPress={createGroup} disabled={busy || groupName.trim().length < 2} size={22}
               color={colors.blue} textColor={colors.white} />
