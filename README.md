@@ -18,16 +18,17 @@ Jeu de duels quotidiens entre proches : 5 questions de culture générale délir
 | Duel du jour : 5 questions, 15 s, SÛR ! (+3 / −3), réponse normale (+1 / −1) | ✅ |
 | Mine : 1 par partie, pertes ×2, les mines s'additionnent (2 mines ×3, 3 mines ×4) | ✅ |
 | Révélation quand tout le monde a joué, BOOM ! / PAF ! | ✅ |
-| Forfait (0 point) et joker (1 par semaine, jusqu'à midi) | ✅ serveur |
+| Forfait (0 point) | ✅ |
 | Rythme par connexion : tous les jours, tous les X jours, 1 fois par semaine | ✅ |
 | Groupes de 2 à 4 joueurs | ✅ création + invitation |
-| Points bonus → carte Who da Boss ? (3 jours pour la jouer, tout ×2) | ✅ serveur, écran à faire |
+| Points bonus → carte Who da Boss ? (3 jours ; le lanceur double tout, les autres leurs pertes) | ✅ |
+| Boost : question bonus flash (10 s, +3 points et +1 point bonus, 3 par semaine) | ✅ |
 | Titres évolutifs (duo, groupe, mondial) | ✅ |
 | Tableau DUO / GROUPE / GÉNÉRAL (rang mondial) | ✅ |
 | Notifications « X a joué. À toi ! » | ✅ |
 | Signaler / bloquer, suppression du compte (règles Apple) | ✅ |
 | Français / anglais | ✅ |
-| Boost (mini-jeux), paris et gages, réactions GIF, funny stats | ⏳ prochaine étape |
+| Paris et gages, réactions GIF, funny stats | ⏳ prochaine étape |
 
 ## Démarrer
 

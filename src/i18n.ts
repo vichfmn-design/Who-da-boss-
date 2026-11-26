@@ -30,6 +30,11 @@ const fr = {
     mineUsed: (q: number) => `Ta mine est sur la question ${q}`, validate: 'VALIDER !', quit: '‹ QUITTER',
     waiting: 'EN ATTENTE DES AUTRES', waitingText: 'Tu as fini ! La révélation arrive quand tout le monde a joué.',
     timeUp: 'TEMPS ÉCOULÉ !',
+    boost: 'BOOST !', boostTitle: 'QUESTION BONUS FLASH',
+    boostOffer: 'Une question de plus, 10 secondes. Juste : +3 points dans cette partie et +1 point bonus. Faux : rien de perdu.',
+    boostLeft: (n: number) => (n === 1 ? 'Il te reste 1 Boost cette semaine.' : `Il te reste ${n} Boosts cette semaine.`),
+    boostGo: 'BOOST !', boostNo: 'Non merci, terminer', boostWin: 'BOOSTÉ ! +3', boostLose: 'RATÉ…', finishBtn: 'TERMINER',
+    cardMatch: 'DÉFI ×2',
   },
   reveal: {
     boom: 'BOOM !', paf: 'PAF !', won: 'TU ES LE BOSS !', lost: 'PERDU...', mineHit: 'BOUM ! Sur ta mine',
@@ -74,6 +79,8 @@ const fr = {
     language: 'Langue', logout: 'SE DÉCONNECTER', delete: 'Supprimer mon compte',
     deleteConfirm: 'Toutes tes parties, tes titres et tes réactions seront effacés. Continuer ?', cancel: 'Annuler', confirm: 'Supprimer',
     rules: 'LES RÈGLES DU JEU',
+    playCard: 'JOUER MA CARTE ×2', cardUntil: (d: string) => `Ta carte est valable jusqu'au ${d}.`,
+    cardWho: 'Défier qui ?', cardTheme: 'Sur quel thème ?', cardNoRival: 'Ajoute d\'abord un rival ou un groupe dans Rivaux.',
   },
   rules: {
     next: 'SUIVANT', prev: '‹ RETOUR', done: 'J\'AI COMPRIS, ON JOUE !', skip: 'Passer',
@@ -104,11 +111,16 @@ const fr = {
         'Plusieurs mines sur la même question s\'additionnent : ×3, ×4. Ta propre mine ne te touche pas.',
         'Chaque rival qui saute sur ta mine te rapporte 1 point bonus.',
       ] },
-      { title: 'LES CARTES BONUS', burst: '×2', lines: [
-        'Deux façons de gagner 1 point bonus : un rival saute sur ta mine, ou tu réussis 3 « SÛR ! » dans la même partie.',
-        '3 points bonus = 1 carte « Who da Boss ? », valable 3 jours.',
-        'Avec une carte, tu lances un défi sur le thème de ton choix, contre un rival ou tout ton groupe.',
-        'Dans ce défi, tous les points comptent double.',
+      { title: 'LE BOOST', burst: 'BOOST !', lines: [
+        'À la fin de tes 5 questions, lance un Boost : une question bonus flash de 10 secondes.',
+        'Juste : +3 points dans la partie et +1 point bonus. Faux : rien de perdu.',
+        '1 Boost par partie, 3 par semaine.',
+      ] },
+      { title: 'LA CARTE WHO DA BOSS ?', burst: '×2', lines: [
+        'Tu gagnes 1 point bonus quand un rival saute sur ta mine, quand tu réussis 3 « SÛR ! » dans une partie, ou avec un Boost réussi.',
+        '3 points bonus = 1 carte « Who da Boss ? », valable 3 jours. Joue-la depuis ton profil.',
+        'Tu lances un défi sur le thème de ton choix, contre un rival ou tout ton groupe : tous tes points comptent double.',
+        'Pour tes adversaires, seules les pertes comptent double : à eux de ne pas se tromper !',
       ] },
       { title: 'LES AUTRES RÈGLES', burst: '!!!', lines: [
         'Forfait : si tu ne joues pas à temps, tu marques 0 point et tu finis dernier.',
@@ -148,6 +160,11 @@ const en: Dict = {
     mineUsed: (q) => `Your mine is on question ${q}`, validate: 'CONFIRM!', quit: '‹ QUIT',
     waiting: 'WAITING FOR THE OTHERS', waitingText: 'Done! Results come when everyone has played.',
     timeUp: "TIME'S UP!",
+    boost: 'BOOST!', boostTitle: 'FLASH BONUS QUESTION',
+    boostOffer: 'One more question, 10 seconds. Right: +3 points in this game and +1 bonus point. Wrong: nothing lost.',
+    boostLeft: (n) => (n === 1 ? '1 Boost left this week.' : `${n} Boosts left this week.`),
+    boostGo: 'BOOST!', boostNo: 'No thanks, finish', boostWin: 'BOOSTED! +3', boostLose: 'MISSED…', finishBtn: 'FINISH',
+    cardMatch: 'CHALLENGE ×2',
   },
   reveal: {
     boom: 'BOOM!', paf: 'POW!', won: "YOU'RE DA BOSS!", lost: 'LOST...', mineHit: 'BOOM! On your mine',
@@ -192,6 +209,8 @@ const en: Dict = {
     language: 'Language', logout: 'SIGN OUT', delete: 'Delete my account',
     deleteConfirm: 'All your games, titles and reactions will be erased. Continue?', cancel: 'Cancel', confirm: 'Delete',
     rules: 'HOW TO PLAY',
+    playCard: 'PLAY MY ×2 CARD', cardUntil: (d) => `Your card is valid until ${d}.`,
+    cardWho: 'Challenge who?', cardTheme: 'Which theme?', cardNoRival: 'First add a rival or a group in Rivals.',
   },
   rules: {
     next: 'NEXT', prev: '‹ BACK', done: "GOT IT, LET'S PLAY!", skip: 'Skip',
@@ -222,11 +241,16 @@ const en: Dict = {
         'Several mines on one question add up: ×3, ×4. Your own mine never hits you.',
         'Each rival who steps on your mine gives you 1 bonus point.',
       ] },
-      { title: 'BONUS CARDS', burst: '×2', lines: [
-        'Two ways to earn 1 bonus point: a rival steps on your mine, or you get 3 right "SURE!" in the same game.',
-        '3 bonus points = 1 "Who da Boss?" card, valid for 3 days.',
-        'With a card, you launch a challenge on the theme of your choice, against a rival or your whole group.',
-        'In that challenge, every point counts double.',
+      { title: 'THE BOOST', burst: 'BOOST!', lines: [
+        'After your 5 questions, launch a Boost: a 10-second flash bonus question.',
+        'Right: +3 points in the game and +1 bonus point. Wrong: nothing lost.',
+        '1 Boost per game, 3 per week.',
+      ] },
+      { title: 'THE WHO DA BOSS? CARD', burst: '×2', lines: [
+        'You earn 1 bonus point when a rival steps on your mine, when you get 3 right "SURE!" in a game, or with a right Boost.',
+        '3 bonus points = 1 "Who da Boss?" card, valid for 3 days. Play it from your profile.',
+        'You launch a challenge on the theme of your choice, against a rival or your whole group: all your points count double.',
+        'For your opponents, only losses count double: they had better not slip up!',
       ] },
       { title: 'OTHER RULES', burst: '!!!', lines: [
         'Forfeit: if you do not play in time, you score 0 and finish last.',

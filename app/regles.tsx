@@ -8,7 +8,7 @@ import { t } from '../src/i18n';
 import { markRulesSeen } from '../src/lib/prefs';
 import { BURST_B, colors, comicShadow, fonts } from '../src/theme';
 
-const BURST_COLORS = [colors.red, colors.blue, colors.green, colors.red, colors.ink, colors.pink, colors.skyDeep];
+const BURST_COLORS = [colors.red, colors.blue, colors.green, colors.pink, colors.ink, colors.skyDeep, colors.red, colors.blue];
 
 export default function Rules() {
   const R = t().rules;

@@ -66,15 +66,17 @@ export function isCorrect(a: AnswerInput): boolean {
 
 /**
  * Points d'une réponse. Les mines ne touchent que les mauvaises réponses.
- * La carte Who da Boss ? double tout, gains comme pertes.
+ * Carte Who da Boss ? : celui qui lance le défi voit tous ses points doublés,
+ * gains comme pertes ; pour les autres, seules les pertes sont doublées.
  */
 export function answerPoints(
   a: AnswerInput,
   minesFromOthers = 0,
   cardMultiplier = 1,
+  isChallenger = true,
 ): number {
   const table = a.sure ? RULES.sure : RULES.normal;
-  if (isCorrect(a)) return table.correct * cardMultiplier;
+  if (isCorrect(a)) return table.correct * (isChallenger ? cardMultiplier : 1);
   return table.wrong * mineMultiplier(minesFromOthers) * cardMultiplier;
 }
 
@@ -126,9 +128,10 @@ export function validateMines(mines: Mine[], playerIds: string[]): string | null
 export function scoreMatch(
   sheets: PlayerSheet[],
   mines: Mine[],
-  opts: { cardMultiplier?: number } = {},
+  opts: { cardMultiplier?: number; challengerId?: string | null } = {},
 ): MatchResult {
   const mult = opts.cardMultiplier ?? 1;
+  const isChallenger = (userId: string) => !opts.challengerId || opts.challengerId === userId;
   const bonus: BonusEvent[] = [];
 
   const results = sheets.map((sheet): PlayerResult & { totalMs: number } => {
@@ -141,7 +144,7 @@ export function scoreMatch(
     sheet.answers.forEach((a, q) => {
       const minersHere = mines.filter((m) => m.questionIndex === q && m.userId !== sheet.userId);
       const ok = isCorrect(a);
-      base.points += answerPoints(a, minersHere.length, mult);
+      base.points += answerPoints(a, minersHere.length, mult, isChallenger(sheet.userId));
       if (ok) base.correctCount += 1;
       if (a.sure && ok) base.sureCorrect += 1;
       if (a.sure && !ok) base.sureWrong += 1;

@@ -126,3 +126,13 @@ test('fenêtre de jeu, forfait et joker', () => {
   assert.equal(canUseJoker(new Date(2026, 10, 26, 13, 0), closesAt, 0), false);
   assert.equal(matchWindow(new Date(2026, 10, 25), 7).closesAt.getDate(), 2);
 });
+
+test('carte : le lanceur double tout, les autres seulement leurs pertes', () => {
+  const right = { choiceIndex: 0, correctIndex: 0, sure: false };
+  const wrong = { choiceIndex: 1, correctIndex: 0, sure: true };
+  assert.equal(answerPoints(right, 0, 2, true), 2);
+  assert.equal(answerPoints(right, 0, 2, false), 1);
+  assert.equal(answerPoints(wrong, 0, 2, true), -6);
+  assert.equal(answerPoints(wrong, 0, 2, false), -6);
+  assert.equal(answerPoints(wrong, 1, 2, false), -12);
+});

@@ -8,11 +8,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bomb, Burst, ComicButton, Panel, SpeechBubble, SpeedLinesBackground } from '../../src/components/comic';
 import { RULES } from '../../src/engine/rules';
 import { t } from '../../src/i18n';
-import { api, type MatchQuestions } from '../../src/lib/api';
+import { api, type BoostQuestion, type BoostResult, type MatchQuestions } from '../../src/lib/api';
 import { BURST_B, colors, comicShadow, fonts } from '../../src/theme';
 import { Alert } from '../../src/lib/alert';
 
 const SECONDS = RULES.secondsPerQuestion;
+const BOOST_SECONDS = 10;
 
 export default function Duel() {
   const D = t().duel;
@@ -26,14 +27,23 @@ export default function Duel() {
   const [left, setLeft] = useState<number>(SECONDS);
   const [busy, setBusy] = useState(false);
   const [waiting, setWaiting] = useState(false);
+  // Boost : proposé après la 5e question s'il en reste cette semaine
+  const [phase, setPhase] = useState<'questions' | 'boostOffer' | 'boost' | 'boostResult'>('questions');
+  const [boostsLeft, setBoostsLeft] = useState(0);
+  const [boostQ, setBoostQ] = useState<BoostQuestion | null>(null);
+  const [boostRes, setBoostRes] = useState<BoostResult | null>(null);
+  const [boostChoice, setBoostChoice] = useState<number | null>(null);
+  const [boostSecs, setBoostSecs] = useState(BOOST_SECONDS);
   const startedAt = useRef(Date.now());
+  const boostStarted = useRef(Date.now());
+  const boostAnswered = useRef(false);
 
   useEffect(() => {
     api.matchQuestions(id).then((d) => {
       setData(d);
       setMine(d.my_mine);
       const first = [0, 1, 2, 3, 4].find((i) => !d.answered.includes(i));
-      if (first === undefined) finish();
+      if (first === undefined) afterLastQuestion();
       else setIndex(first);
     }).catch((e: Error) => { Alert.alert(t().errors.generic, e.message); router.back(); });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -68,24 +78,77 @@ export default function Duel() {
     try {
       await api.submitAnswer(id, index, timedOut ? null : choice, sure, ms);
       Haptics.impactAsync(sure ? Haptics.ImpactFeedbackStyle.Heavy : Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-      if (index >= 4) { setBusy(false); await finish(); return; }
+      if (index >= 4) { setBusy(false); await afterLastQuestion(); return; }
       setIndex(index + 1);
     } catch (e) {
       Alert.alert(t().errors.generic, (e as Error).message);
     }
     setBusy(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [busy, id, index, choice, sure, finish]);
+
+  async function afterLastQuestion() {
+    const n = await api.boostsLeft().catch(() => 0);
+    if (n > 0) { setBoostsLeft(n); setPhase('boostOffer'); }
+    else await finish();
+  }
+
+  async function startBoost() {
+    setBusy(true);
+    try {
+      const q = await api.startBoost(id);
+      setBoostQ(q);
+      setBoostChoice(null);
+      boostAnswered.current = false;
+      boostStarted.current = Date.now();
+      setBoostSecs(BOOST_SECONDS);
+      setPhase('boost');
+    } catch (e) {
+      Alert.alert(t().errors.generic, (e as Error).message);
+      await finish();
+    }
+    setBusy(false);
+  }
+
+  const answerBoost = useCallback(async (c: number | null) => {
+    if (phase !== 'boost' || boostAnswered.current) return;
+    boostAnswered.current = true;
+    setBoostChoice(c);
+    setBusy(true);
+    try {
+      const res = await api.submitBoost(id, c);
+      setBoostRes(res);
+      Haptics.notificationAsync(res.correct ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Error).catch(() => {});
+      setPhase('boostResult');
+    } catch (e) {
+      Alert.alert(t().errors.generic, (e as Error).message);
+      await finish();
+    }
+    setBusy(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, id]);
+
+  // Chrono du Boost : 10 secondes
+  useEffect(() => {
+    if (phase !== 'boost') return;
+    const timer = setInterval(() => {
+      const remaining = BOOST_SECONDS - Math.floor((Date.now() - boostStarted.current) / 1000);
+      setBoostSecs(Math.max(0, remaining));
+      if (remaining <= 0) { clearInterval(timer); answerBoost(null); }
+    }, 250);
+    return () => clearInterval(timer);
+  }, [phase, answerBoost]);
 
   // Chrono de 15 secondes ; à zéro, la question compte comme fausse
   useEffect(() => {
-    if (!data || waiting) return;
+    if (!data || waiting || phase !== 'questions') return;
     const timer = setInterval(() => {
       const remaining = SECONDS - Math.floor((Date.now() - startedAt.current) / 1000);
       setLeft(Math.max(0, remaining));
       if (remaining <= 0) { clearInterval(timer); submit(true); }
     }, 250);
     return () => clearInterval(timer);
-  }, [data, index, waiting, submit]);
+  }, [data, index, waiting, submit, phase]);
 
   async function toggleMine() {
     try {
@@ -105,6 +168,62 @@ export default function Duel() {
           </Burst>
           <Panel><Text style={styles.prompt}>{D.waitingText}</Text></Panel>
           <ComicButton label="OK" onPress={() => router.replace('/')} />
+        </SafeAreaView>
+      </SpeedLinesBackground>
+    );
+  }
+
+  if (phase !== 'questions') {
+    return (
+      <SpeedLinesBackground cy={25}>
+        <SafeAreaView style={styles.wrap}>
+          <Burst width={250} height={170} fill={colors.blue} shape={BURST_B} rotate={-5} style={{ alignSelf: 'center' }}>
+            <Text style={[styles.burstText, { fontSize: 44 }]}>{phase === 'boostResult' ? (boostRes?.correct ? D.boostWin : D.boostLose) : D.boost}</Text>
+          </Burst>
+
+          {phase === 'boostOffer' && (
+            <>
+              <Panel tilt={-1} style={{ gap: 8 }}>
+                <Text style={styles.mineTitle}>{D.boostTitle}</Text>
+                <Text style={styles.prompt}>{D.boostOffer}</Text>
+                <Text style={styles.rule}>{D.boostLeft(boostsLeft)}</Text>
+              </Panel>
+              <ComicButton label={D.boostGo} size={34} color={colors.blue} textColor={colors.yellow} disabled={busy} onPress={startBoost} />
+              <Pressable onPress={finish} disabled={busy} accessibilityRole="button">
+                <Text style={[styles.rule, { textDecorationLine: 'underline', fontSize: 15 }]}>{D.boostNo}</Text>
+              </Pressable>
+            </>
+          )}
+
+          {phase !== 'boostOffer' && boostQ && (
+            <>
+              {phase === 'boost' && (
+                <View style={[styles.timer, comicShadow(3)]}>
+                  <View style={[styles.timerFill, { width: `${(boostSecs / BOOST_SECONDS) * 100}%`, backgroundColor: colors.blue }]} />
+                </View>
+              )}
+              <Panel tilt={-1}><Text style={styles.prompt}>{boostQ.prompt}</Text></Panel>
+              <View style={styles.grid}>
+                {boostQ.choices.map((c, i) => {
+                  const right = phase === 'boostResult' && boostRes?.correct_index === i;
+                  const wrongPick = phase === 'boostResult' && boostChoice === i && !boostRes?.correct;
+                  return (
+                    <Pressable key={i} disabled={phase !== 'boost' || busy} onPress={() => answerBoost(i)}
+                      accessibilityRole="button"
+                      style={[styles.answer, comicShadow(4), right && { backgroundColor: colors.green }, wrongPick && styles.answerOn]}>
+                      <Text style={[styles.answerText, (right || wrongPick) && { color: colors.white }]} numberOfLines={2} adjustsFontSizeToFit>{c}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              {phase === 'boostResult' && (
+                <>
+                  {!!boostRes?.explanation && <Text style={styles.rule}>{boostRes.explanation}</Text>}
+                  <ComicButton label={D.finishBtn} size={30} disabled={busy} onPress={finish} />
+                </>
+              )}
+            </>
+          )}
         </SafeAreaView>
       </SpeedLinesBackground>
     );
@@ -132,7 +251,7 @@ export default function Duel() {
 
         <Panel tilt={-1} style={{ marginTop: 10, paddingTop: 26 }}>
           <View style={[styles.themeTag, comicShadow(3)]}>
-            <Text style={styles.themeText}>{data.theme.toUpperCase()}{data.card_multiplier === 2 ? ' ×2' : ''}</Text>
+            <Text style={styles.themeText}>{data.theme.toUpperCase()}{data.card_multiplier === 2 ? ` · ${D.cardMatch}` : ''}</Text>
           </View>
           <View style={styles.promptRow}>
             <Text style={[styles.prompt, { flex: 1 }]}>{q.prompt}</Text>

@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Burst, ComicButton, Star, SpeedLinesBackground } from '../../src/components/comic';
-import { setLang, t, type Lang } from '../../src/i18n';
+import { getLang, setLang, t, type Lang } from '../../src/i18n';
 import { useSession } from '../../src/lib/session';
 import { supabase } from '../../src/lib/supabase';
 import { api } from '../../src/lib/api';
@@ -49,6 +49,44 @@ export default function ProfileScreen() {
     ]);
   }
 
+  // Carte Who da Boss ? : choisir l'adversaire (rival ou groupe), puis le thème ; le défi démarre aussitôt.
+  async function playCard() {
+    if (!session) return;
+    const card = await api.myCard();
+    if (!card) { load(); return; }
+    const me = session.user.id;
+    const { data: conns } = await supabase.from('connections')
+      .select('id, a:profiles!connections_user_a_fkey(id, pseudo), b:profiles!connections_user_b_fkey(id, pseudo)');
+    const { data: gs } = await supabase.from('groups').select('id, name');
+    const targets = [
+      ...((conns ?? []) as unknown as { id: string; a: { id: string; pseudo: string }; b: { id: string; pseudo: string } }[])
+        .map((c) => ({ label: (c.a.id === me ? c.b : c.a).pseudo, connectionId: c.id as string | undefined, groupId: undefined as string | undefined })),
+      ...((gs ?? []) as { id: string; name: string }[]).map((g) => ({ label: g.name, connectionId: undefined, groupId: g.id })),
+    ];
+    if (targets.length === 0) return Alert.alert(P.playCard, P.cardNoRival);
+    const until = new Date(card.expires_at).toLocaleDateString(getLang() === 'en' ? 'en-GB' : 'fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    Alert.alert(P.cardWho, P.cardUntil(until), [
+      ...targets.map((tg) => ({ text: tg.label, onPress: () => { chooseTheme(card.id, tg.connectionId, tg.groupId); } })),
+      { text: P.cancel, style: 'cancel' as const },
+    ]);
+  }
+
+  async function chooseTheme(cardId: string, connectionId?: string, groupId?: string) {
+    const { data } = await supabase.from('themes').select('slug, name_fr, name_en').eq('active', true).order('sort');
+    const themes = (data ?? []) as { slug: string; name_fr: string; name_en: string }[];
+    Alert.alert(P.cardTheme, undefined, [
+      ...themes.map((th) => ({
+        text: getLang() === 'en' ? th.name_en : th.name_fr,
+        onPress: () => {
+          api.playCard(cardId, th.slug, connectionId, groupId)
+            .then((matchId) => router.push(`/duel/${matchId}`))
+            .catch((e: Error) => Alert.alert(t().errors.generic, e.message));
+        },
+      })),
+      { text: P.cancel, style: 'cancel' as const },
+    ]);
+  }
+
   const titleName = (key: string) => {
     if (key.startsWith('theme_boss:')) return t().titles.theme_boss(key.split(':')[1]);
     return (t().titles as Record<string, unknown>)[key] as string ?? key;
@@ -68,6 +106,9 @@ export default function ProfileScreen() {
               <Text style={styles.small}>{P.cards(cards)}</Text>
             </View>
           </View>
+          {cards > 0 && (
+            <ComicButton label={P.playCard} color={colors.blue} textColor={colors.yellow} onPress={playCard} size={26} />
+          )}
 
           <Text style={styles.section}>{t().board.titles}</Text>
           <View style={styles.chips}>

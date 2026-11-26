@@ -42,6 +42,9 @@ export type Reveal = {
   }[];
 };
 
+export type BoostQuestion = { prompt: string; choices: string[]; started_at: string };
+export type BoostResult = { correct: boolean; correct_index: number; points: number; explanation: string | null };
+
 export type TitleRow = {
   scope: 'duo' | 'group' | 'global';
   scope_id: string | null;
@@ -67,6 +70,15 @@ export const api = {
   removeMine: (matchId: string) => rpc<void>('remove_mine', { p_match: matchId }),
   finish: (matchId: string) => rpc<boolean>('finish_my_match', { p_match: matchId }),
   reveal: (matchId: string) => rpc<Reveal>('get_reveal', { p_match: matchId }),
+  boostsLeft: () => rpc<number>('boosts_left'),
+  startBoost: (matchId: string) => rpc<BoostQuestion>('start_boost', { p_match: matchId }),
+  submitBoost: (matchId: string, choice: number | null) =>
+    rpc<BoostResult>('submit_boost', { p_match: matchId, p_choice: choice }),
+  myCard: async () => {
+    const { data } = await supabase.from('cards').select('id, expires_at')
+      .is('used_at', null).gt('expires_at', new Date().toISOString()).order('expires_at').limit(1);
+    return ((data ?? []) as { id: string; expires_at: string }[])[0] ?? null;
+  },
   createInvite: (groupId?: string) => rpc<string>('create_invite', { p_group: groupId ?? null }),
   acceptInvite: (code: string) => rpc<{ connection_id?: string; group_id?: string; group_name?: string }>('accept_invite', { p_code: code }),
   createGroup: (name: string) => rpc<string>('create_group', { p_name: name }),

@@ -1,7 +1,7 @@
 // Version web des boîtes de dialogue : React Native Web ignore Alert.alert,
 // on affiche donc une fenêtre maison dans le style BD (même API que Alert.alert).
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import type { AlertButton } from 'react-native';
 import { colors, comicShadow, fonts } from '../theme';
 
@@ -40,6 +40,7 @@ export function DialogHost() {
         <Pressable style={[styles.box, comicShadow(6)]} onPress={() => {}}>
           <Text style={styles.title}>{dialog.title}</Text>
           {!!dialog.message && <Text style={styles.message}>{dialog.message}</Text>}
+          <ScrollView style={{ flexGrow: 0 }} contentContainerStyle={{ gap: 10 }}>
           {dialog.buttons.map((b, i) => (
             <Pressable
               key={`${b.text}-${i}`} onPress={() => choose(b)} accessibilityRole="button"
@@ -47,6 +48,7 @@ export function DialogHost() {
               <Text style={[styles.buttonText, b.style === 'destructive' && { color: colors.white }]}>{b.text}</Text>
             </Pressable>
           ))}
+          </ScrollView>
         </Pressable>
       </Pressable>
     </Modal>
@@ -56,7 +58,7 @@ export function DialogHost() {
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(20,20,20,0.55)', justifyContent: 'center', padding: 24 },
   box: { backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, borderRadius: 16, padding: 18, gap: 10,
-    width: '100%', maxWidth: 420, alignSelf: 'center' },
+    width: '100%', maxWidth: 420, maxHeight: '88%', alignSelf: 'center' },
   title: { fontFamily: fonts.comic, fontSize: 26, letterSpacing: 1, color: colors.ink },
   message: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink, marginBottom: 4 },
   button: { borderWidth: 3, borderColor: colors.ink, borderRadius: 12, paddingVertical: 12, alignItems: 'center',
