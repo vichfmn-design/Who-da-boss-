@@ -150,7 +150,7 @@ const fr = {
       { title: 'LE PRINCIPE', burst: 'DUEL !', lines: [
         'Chaque jour, un duel de 5 questions t\'attend avec chacun de tes rivaux et de tes groupes.',
         'Même thème, mêmes questions pour tout le monde. Tu joues quand tu veux, avant minuit.',
-        'La révélation arrive quand tout le monde a joué : là, on voit qui est le Boss !',
+        'On voit qui est le Boss une fois que tout le monde a joué !',
       ] },
       { title: 'PAS DE PRIME À LA VITESSE', burst: '15 S', lines: [
         'Tu as 15 secondes par question. Sans réponse, elle compte comme fausse.',
