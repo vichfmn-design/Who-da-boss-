@@ -66,8 +66,8 @@ export default function Duel() {
       const revealed = await api.finish(id);
       unlock();
       api.notifyPlayers(id).catch(() => {});
-      if (revealed) router.replace(`/reveal/${id}`);
-      else setWaiting(true);
+      void revealed;
+      router.replace(`/reveal/${id}`);
     } catch (e) {
       Alert.alert(t().errors.generic, (e as Error).message);
     } finally {

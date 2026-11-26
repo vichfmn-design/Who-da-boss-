@@ -73,7 +73,7 @@ export default function Home() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t().tapToPlay}
-            onPress={() => (next ? router.push('/jouer') : router.push('/rivaux'))}
+            onPress={() => (next || matches.length > 0 ? router.push('/jouer') : router.push('/rivaux'))}
             style={({ pressed }) => ({ alignSelf: 'center', transform: [{ scale: pressed ? 0.96 : 1 }] })}
           >
             <Burst width={size} height={size} fill={colors.red} rotate={-6} shadow={9}>

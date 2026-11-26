@@ -41,6 +41,10 @@ const fr = {
   reveal: {
     boom: 'BOOM !', paf: 'PAF !', won: 'TU ES LE BOSS !', lost: 'PERDU...', mineHit: 'BOUM ! Sur ta mine',
     seeBoard: 'VOIR LE CLASSEMENT', points: (n: number) => `${n > 0 ? '+' : ''}${n} pts`, forfeit: 'forfait',
+    waitTitle: 'EN ATTENTE\nDES AUTRES', waitCount: (f: number, n: number) => `${f} joueur${f > 1 ? 's' : ''} sur ${n} ont joué.`,
+    waitInfo: 'Les bonnes réponses, les points et les mines se dévoilent quand tout le monde a joué.',
+    myAnswers: 'TES RÉPONSES', noAnswer: 'Pas de réponse (temps écoulé)', right: 'JUSTE', wrong: 'RATÉ', mineHere: 'Ta mine',
+    home: 'RETOUR À L\'ACCUEIL',
   },
   rivals: {
     paste: '📋 COLLER UNE INVITATION', pasteTitle: 'COLLER UNE INVITATION',
@@ -204,6 +208,7 @@ const fr = {
     title: 'À TOI DE JOUER !', back: '← RETOUR', duel: 'DUEL\nDU JOUR', group: 'GROUPE\nDU JOUR', card: 'CARTE\n×2',
     length: '5 QUESTIONS · 2 MIN', none: 'RIEN À JOUER POUR L\'INSTANT !', toRivals: 'DÉFIER UN AMI',
     theyPlayed: 'Ils ont déjà joué !',
+    played: 'TES PARTIES JOUÉES', waiting: 'EN ATTENTE', results: 'RÉSULTATS !',
   },
   mini: {
     title: 'MINI-JEU', button: '🎮 MINI-JEU BONUS',
@@ -282,6 +287,10 @@ const en: Dict = {
   },
   reveal: {
     boom: 'BOOM!', paf: 'POW!', won: "YOU'RE DA BOSS!", lost: 'LOST...', mineHit: 'BOOM! On your mine',
+    waitTitle: 'WAITING FOR\nTHE OTHERS', waitCount: (f, n) => `${f} of ${n} players have played.`,
+    waitInfo: 'Right answers, points and mines are revealed once everyone has played.',
+    myAnswers: 'YOUR ANSWERS', noAnswer: 'No answer (time ran out)', right: 'RIGHT', wrong: 'WRONG', mineHere: 'Your mine',
+    home: 'BACK HOME',
     seeBoard: 'SEE THE RANKING', points: (n) => `${n > 0 ? '+' : ''}${n} pts`, forfeit: 'forfeit',
   },
   rivals: {
@@ -446,6 +455,7 @@ const en: Dict = {
     title: 'YOUR TURN!', back: '← BACK', duel: 'DUEL\nOF THE DAY', group: 'GROUP\nOF THE DAY', card: 'CARD\n×2',
     length: '5 QUESTIONS · 2 MIN', none: 'NOTHING TO PLAY RIGHT NOW!', toRivals: 'CHALLENGE A FRIEND',
     theyPlayed: 'They already played!',
+    played: 'YOUR PLAYED GAMES', waiting: 'WAITING', results: 'RESULTS!',
   },
   mini: {
     title: 'MINI-GAME', button: '🎮 BONUS MINI-GAME',

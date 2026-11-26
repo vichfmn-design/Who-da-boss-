@@ -6,7 +6,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bomb, Burst, ComicButton, Panel, SpeechBubble, SpeedLinesBackground, Star } from '../../src/components/comic';
 import { t } from '../../src/i18n';
-import { api, type Reveal } from '../../src/lib/api';
+import { api, type MyAnswers, type Reveal } from '../../src/lib/api';
 import { Alert } from '../../src/lib/alert';
 import { MineBoom } from '../../src/components/MineBoom';
 import { useSession } from '../../src/lib/session';
@@ -19,6 +19,7 @@ export default function RevealScreen() {
   const { session } = useSession();
   const [data, setData] = useState<Reveal | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState<MyAnswers | null>(null);
 
   // Les mines sur lesquelles tu as sauté : BOOM ! + selfies, une seule fois par partie
   const [boomStep, setBoomStep] = useState<number | null>(null);
@@ -30,7 +31,10 @@ export default function RevealScreen() {
         setBoomStep(0);
         AsyncStorage.setItem(`wdb.boomSeen.${id}`, '1').catch(() => {});
       }
-    }).catch((e: Error) => setError(e.message));
+    }).catch((e: Error) => {
+      // Partie pas encore révélée : tes réponses en attendant les autres
+      api.myAnswers(id).then(setPending).catch(() => setError(e.message));
+    });
   }, [id]);
 
   if (error) {
@@ -39,6 +43,43 @@ export default function RevealScreen() {
         <SafeAreaView style={styles.wrap}>
           <Panel><Text style={styles.text}>{error}</Text></Panel>
           <ComicButton label="OK" onPress={() => router.back()} />
+        </SafeAreaView>
+      </SpeedLinesBackground>
+    );
+  }
+  const miniGame = () => api.matchMinigame(id).then((cid) => router.push(`/minijeu/${cid}`))
+    .catch((e: Error) => Alert.alert(t().errors.generic, e.message));
+
+  if (pending) {
+    return (
+      <SpeedLinesBackground cy={20}>
+        <SafeAreaView style={{ flex: 1 }}>
+          <ScrollView contentContainerStyle={styles.wrap}>
+            <Burst width={320} height={220} fill={colors.skyDeep} shape={BURST_B} rotate={-4} style={{ alignSelf: 'center' }}>
+              <Text style={[styles.sub, { fontSize: 32, textAlign: 'center' }]}>{R.waitTitle}</Text>
+            </Burst>
+            <Panel tilt={-1} style={{ gap: 6 }}>
+              <Text style={styles.text}>{R.waitCount(pending.players_finished, pending.players_total)}</Text>
+              <Text style={styles.small}>{R.waitInfo}</Text>
+            </Panel>
+            <ComicButton label={t().mini.button} color={colors.blue} textColor={colors.yellow} size={26} onPress={miniGame} />
+            <Text style={styles.qNum}>{R.myAnswers}</Text>
+            {pending.answers.map((a) => (
+              <Panel key={a.index} tilt={a.index % 2 ? 1 : -1} style={{ gap: 6 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text style={styles.qNum}>Q{a.index + 1}{a.mine ? ` · 💣 ${R.mineHere}` : ''}</Text>
+                  <Burst width={74} height={44} fill={a.correct ? colors.green : colors.red} shape={BURST_B} shadow={2} outline={2}>
+                    <Text style={[styles.small, { color: colors.white }]}>{a.correct ? R.right : R.wrong}</Text>
+                  </Burst>
+                </View>
+                <Text style={styles.text}>{a.prompt}</Text>
+                <Text style={[styles.small, { color: a.correct ? colors.green : colors.red }]}>
+                  {a.correct ? '✓' : '✗'} {a.choice ?? R.noAnswer}{a.sure ? ` · ${t().duel.sure}` : ''}
+                </Text>
+              </Panel>
+            ))}
+            <ComicButton label={R.home} color={colors.ink} onPress={() => router.replace('/')} size={24} />
+          </ScrollView>
         </SafeAreaView>
       </SpeedLinesBackground>
     );
@@ -114,10 +155,7 @@ export default function RevealScreen() {
             );
           })}
 
-          <ComicButton label={t().mini.button} color={colors.blue} textColor={colors.yellow} size={26} onPress={() => {
-            api.matchMinigame(id).then((cid) => router.push(`/minijeu/${cid}`))
-              .catch((e: Error) => Alert.alert(t().errors.generic, e.message));
-          }} />
+          <ComicButton label={t().mini.button} color={colors.blue} textColor={colors.yellow} size={26} onPress={miniGame} />
           <ComicButton label={R.seeBoard} color={colors.ink} onPress={() => router.replace('/tableau')} size={26} />
         </ScrollView>
       </SafeAreaView>

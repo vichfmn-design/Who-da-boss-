@@ -45,6 +45,12 @@ export type Reveal = {
   }[];
 };
 
+export type MyAnswers = {
+  match_id: string; status: 'open' | 'closed'; closes_at: string; theme: string;
+  players_total: number; players_finished: number;
+  answers: { index: number; prompt: string; choice: string | null; correct: boolean; sure: boolean; mine: boolean }[];
+};
+
 export type MyStats = {
   played: number; wins: number; losses: number; forfeits: number; season_points: number; best_game: number | null;
   answered: number; correct: number; sure_total: number; sure_correct: number;
@@ -116,6 +122,7 @@ export const api = {
   removeMine: (matchId: string) => rpc<void>('remove_mine', { p_match: matchId }),
   finish: (matchId: string) => rpc<boolean>('finish_my_match', { p_match: matchId }),
   reveal: (matchId: string) => rpc<Reveal>('get_reveal', { p_match: matchId }),
+  myAnswers: (matchId: string) => rpc<MyAnswers>('get_my_answers', { p_match: matchId }),
   myBoosts: () => rpc<MyBoosts>('my_boosts'),
   startBoostRun: (theme: string, connectionId?: string, groupId?: string) =>
     rpc<BoostRunState>('start_boost_run', { p_connection: connectionId ?? null, p_group: groupId ?? null, p_theme: theme }),

@@ -17,11 +17,15 @@ export default function Jouer() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const [matches, setMatches] = useState<MyMatch[] | null>(null);
+  const [played, setPlayed] = useState<MyMatch[]>([]);
   const w = Math.min(Math.min(width, 560) - 70, 330);
   const h = Math.round(w * 0.78);
 
   useFocusEffect(useCallback(() => {
-    api.myMatches().then((m) => setMatches(m.filter((x) => x.status === 'open' && !x.i_finished))).catch(() => setMatches([]));
+    api.myMatches().then((m) => {
+      setMatches(m.filter((x) => x.status === 'open' && !x.i_finished));
+      setPlayed(m.filter((x) => x.i_finished || x.status === 'closed'));
+    }).catch(() => setMatches([]));
   }, []));
 
   return (
@@ -75,6 +79,22 @@ export default function Jouer() {
               </Pressable>
             );
           })}
+
+          {played.length > 0 && (
+            <>
+              <Text style={styles.playedTitle}>{J.played}</Text>
+              {played.map((m) => (
+                <Pressable key={m.match_id} onPress={() => router.push(`/reveal/${m.match_id}`)} accessibilityRole="button"
+                  style={[styles.playedRow, comicShadow(3), { backgroundColor: m.group_id ? GROUP.fill : DUEL.fill }]}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.playedName} numberOfLines={1}>{(m.group_id ? (m.group_name ?? m.opponents) : m.opponents ?? '')?.toUpperCase()}</Text>
+                    <Text style={styles.playedSub}>{m.theme_name}</Text>
+                  </View>
+                  <Text style={styles.playedState}>{m.status === 'closed' ? J.results : J.waiting}</Text>
+                </Pressable>
+              ))}
+            </>
+          )}
         </ScrollView>
       </SafeAreaView>
     </SpeedLinesBackground>
@@ -94,4 +114,12 @@ const styles = StyleSheet.create({
   bubble: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 1, color: colors.ink, textAlign: 'center' },
   waiting: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.red, textAlign: 'center' },
   star: { position: 'absolute', bottom: 6 },
+  playedTitle: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 1, marginTop: 18 },
+  playedRow: { flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 3, borderColor: colors.ink, borderRadius: 12,
+    paddingHorizontal: 12, paddingVertical: 8 },
+  playedName: { fontFamily: fonts.comic, fontSize: 20, letterSpacing: 1, color: colors.white,
+    textShadowColor: colors.ink, textShadowOffset: { width: 1.5, height: 1.5 }, textShadowRadius: 0 },
+  playedSub: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.white },
+  playedState: { fontFamily: fonts.comic, fontSize: 15, letterSpacing: 0.5, color: colors.ink, backgroundColor: colors.yellow,
+    borderWidth: 2, borderColor: colors.ink, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 1, overflow: 'hidden' },
 });
