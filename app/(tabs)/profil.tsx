@@ -3,7 +3,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Bomb, Burst, CardBeams, ComicButton, SpeedLinesBackground } from '../../src/components/comic';
+import { Bomb, Burst, CardBeams, ComicButton, SpeedLinesBackground, Star } from '../../src/components/comic';
 import { pickSelfie } from '../../src/lib/selfie';
 import { uploadSelfie, useSelfieUrl } from '../../src/lib/selfieUrl';
 import { getLang, t } from '../../src/i18n';
@@ -109,13 +109,25 @@ export default function ProfileScreen() {
             </Burst>
             <View style={{ flex: 1 }}>
               <Text style={styles.pseudo}>{profile?.pseudo?.toUpperCase()}</Text>
-              <Text style={styles.small}>{P.bonus(profile?.bonus_balance ?? 0)}</Text>
-              <Text style={styles.small}>{P.cards(cards)}</Text>
             </View>
           </View>
-          {cards > 0 && (
-            <ComicButton label={P.playCard} color={colors.blue} textColor={colors.yellow} onPress={playCard} size={26} />
-          )}
+
+          {/* Carte Who da Boss ? : 3 étoiles = 3 points bonus ; quand on en a une, on touche pour la jouer */}
+          <Pressable disabled={cards === 0} onPress={playCard} accessibilityRole="button" accessibilityLabel={P.cardTitle}
+            style={({ pressed }) => [styles.cardBadge, comicShadow(4), { transform: [{ scale: pressed ? 0.97 : 1 }] }]}>
+            <View style={styles.cardIcon}><Star size={22} fill={colors.red} /></View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cardTitle}>{cards > 1 ? P.cardTitleN(cards) : P.cardTitle}</Text>
+              <Text style={styles.cardSub}>
+                {cards > 0 ? P.cardReady : P.cardMissing(3 - Math.min(2, profile?.bonus_balance ?? 0))}
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 2 }}>
+              {[0, 1, 2].map((k) => (
+                <Star key={k} size={18} fill={cards > 0 || k < (profile?.bonus_balance ?? 0) ? colors.starYellow : colors.grey} />
+              ))}
+            </View>
+          </Pressable>
 
           <StatsDashboard stats={stats} />
 
@@ -149,6 +161,12 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   wrap: { padding: 20, gap: 14, paddingBottom: 110 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  cardBadge: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.ink, borderRadius: 12,
+    borderWidth: 3, borderColor: colors.ink, paddingVertical: 10, paddingHorizontal: 12 },
+  cardIcon: { width: 34, height: 46, borderRadius: 6, backgroundColor: colors.yellow, alignItems: 'center', justifyContent: 'center',
+    transform: [{ rotate: '-8deg' }] },
+  cardTitle: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 0.5, color: colors.yellow },
+  cardSub: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.white },
   letter: { fontFamily: fonts.comic, fontSize: 44, color: colors.yellow,
     textShadowColor: colors.ink, textShadowOffset: { width: 3, height: 3 }, textShadowRadius: 0 },
   pseudo: { fontFamily: fonts.comic, fontSize: 40, color: colors.white, letterSpacing: 1.5,

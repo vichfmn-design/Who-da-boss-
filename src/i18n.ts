@@ -79,7 +79,10 @@ const fr = {
     steal: 'Pour voler un titre, il faut faire strictement mieux que son détenteur.',
   },
   profile: {
-    title: 'PROFIL', bonus: (n: number) => `${n} / 3 points bonus`, cards: (n: number) => `${n} carte(s) Who da Boss ?`,
+    title: 'PROFIL', bonus: (n: number) => `${n} / 3 points bonus`,
+    cardTitle: 'CARTE WHO DA BOSS ?', cardTitleN: (n: number) => `${n} CARTES WHO DA BOSS ?`,
+    cardMissing: (n: number) => `Encore ${n} point${n > 1 ? 's' : ''} bonus pour la débloquer`,
+    cardReady: 'Elle est à toi : touche pour la jouer !', cards: (n: number) => `${n} carte(s) Who da Boss ?`,
     language: 'Langue', logout: 'SE DÉCONNECTER', delete: 'Supprimer mon compte',
     deleteConfirm: 'Toutes tes parties, tes titres et tes réactions seront effacés. Continuer ?', cancel: 'Annuler', confirm: 'Supprimer',
     rules: 'LES RÈGLES DU JEU',
@@ -286,7 +289,10 @@ const en: Dict = {
     steal: 'To steal a title, you must do strictly better than its holder.',
   },
   profile: {
-    title: 'PROFILE', bonus: (n) => `${n} / 3 bonus points`, cards: (n) => `${n} Who da Boss? card(s)`,
+    title: 'PROFILE', bonus: (n) => `${n} / 3 bonus points`,
+    cardTitle: 'WHO DA BOSS? CARD', cardTitleN: (n) => `${n} WHO DA BOSS? CARDS`,
+    cardMissing: (n) => `${n} more bonus point${n > 1 ? 's' : ''} to unlock it`,
+    cardReady: 'It is yours: tap to play it!', cards: (n) => `${n} Who da Boss? card(s)`,
     language: 'Language', logout: 'SIGN OUT', delete: 'Delete my account',
     deleteConfirm: 'All your games, titles and reactions will be erased. Continue?', cancel: 'Cancel', confirm: 'Delete',
     rules: 'HOW TO PLAY',
