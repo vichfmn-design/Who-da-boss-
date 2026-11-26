@@ -60,7 +60,7 @@ const fr = {
     confirm: 'Confirmer', creator: 'créateur',
   },
   board: {
-    title: 'LE CLASSEMENT', duo: 'DUO', group: 'GROUPE', global: 'GÉNÉRAL', titles: 'LES TITRES',
+    title: 'LE CLASSEMENT', duo: 'DUO', group: 'GROUPE', global: 'GÉNÉRAL', titles: 'FUN FACTS',
     worldRank: 'CLASSEMENT MONDIAL', notRanked: 'Classé après 10 parties terminées.',
     holder: 'détenteur', you: 'TOI', nobody: 'personne pour l\'instant',
   },
@@ -279,7 +279,7 @@ const en: Dict = {
     confirm: 'Confirm', creator: 'creator',
   },
   board: {
-    title: 'THE RANKING', duo: 'DUO', group: 'GROUP', global: 'WORLD', titles: 'TITLES',
+    title: 'THE RANKING', duo: 'DUO', group: 'GROUP', global: 'WORLD', titles: 'FUN FACTS',
     worldRank: 'WORLD RANKING', notRanked: 'Ranked after 10 finished games.',
     holder: 'holder', you: 'YOU', nobody: 'nobody yet',
   },

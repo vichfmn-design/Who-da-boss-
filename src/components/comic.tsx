@@ -113,6 +113,31 @@ export function CardBeams({ dir }: { dir?: number }) {
   );
 }
 
+/** Titre déjanté : lettres BD qui dansent (penchées, décalées), rouge et blanc cernés de noir. */
+const WACKY_TILT = [-9, 6, -4, 8, -7, 3, -10, 7, -3, 9, -6, 4];
+const WACKY_LIFT = [0, -4, 2, -2, 3, -5, 1, -3, 4, -1, 2, -4];
+export function WackyTitle({ text, size = 44 }: { text: string; size?: number }) {
+  let k = 0;
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-end', alignSelf: 'center', paddingVertical: 6 }}
+      accessibilityRole="header" accessibilityLabel={text}>
+      {text.split('').map((ch, i) => {
+        if (ch === ' ') return <View key={i} style={{ width: size * 0.35 }} />;
+        const n = k++;
+        return (
+          <Text key={i} style={{
+            fontFamily: fonts.boom, fontSize: size * (n % 3 === 1 ? 1.12 : 1), lineHeight: size * 1.25,
+            color: n % 2 === 0 ? colors.red : colors.white, marginHorizontal: 0.5,
+            textShadowColor: colors.ink, textShadowOffset: { width: 3, height: 3 }, textShadowRadius: 0,
+            transform: [{ rotate: `${WACKY_TILT[n % WACKY_TILT.length]}deg` }, { translateY: WACKY_LIFT[n % WACKY_LIFT.length] }],
+            ...(Platform.OS === 'web' ? ({ WebkitTextStroke: `1.5px ${colors.ink}` } as object) : {}),
+          }}>{ch}</Text>
+        );
+      })}
+    </View>
+  );
+}
+
 /** Bulle de dialogue avec petite queue (en bas, à gauche ou en haut). */
 export function SpeechBubble({
   children, color = colors.white, tail = 'bottom', style,

@@ -3,7 +3,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CardBeams, SpeedLinesBackground, Star } from '../../src/components/comic';
+import { CardBeams, SpeedLinesBackground, Star, WackyTitle } from '../../src/components/comic';
 import { getLang, t } from '../../src/i18n';
 import { api, type TitleRow } from '../../src/lib/api';
 import { useSession } from '../../src/lib/session';
@@ -134,7 +134,7 @@ export default function Board() {
             )
           )}
 
-          <Text style={styles.cardTitle}>{B.titles}</Text>
+          <WackyTitle text={B.titles} size={42} />
           <View style={[styles.titles, comicShadow(5)]}>
             <CardBeams dir={3} />
             {MAIN_TITLES.map((key) => {
