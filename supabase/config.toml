@@ -1,0 +1,10 @@
+# Projet Supabase « Whodaboss » (réf. lgbqnnzngldnstgnhnpj)
+project_id = "whodaboss"
+
+# Les fonctions vérifient elles-mêmes la connexion (auth.getUser()),
+# donc pas de vérification « legacy » du JWT à l'entrée.
+[functions.delete-account]
+verify_jwt = false
+
+[functions.notify-players]
+verify_jwt = false
