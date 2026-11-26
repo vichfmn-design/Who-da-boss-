@@ -16,7 +16,7 @@ function TabIcon({ name, color }: { name: string; color: string }) {
   const p = { stroke: color, strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' };
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24">
-      {name === 'index' && <Polygon points="7,4 20,12 7,20" {...p} />}
+      {name === 'index' && <Polygon points="7,4 20,12 7,20" {...p} fill={colors.green} />}
       {name === 'rivaux' && (
         <>
           <Circle cx={9} cy={8} r={4} {...p} />
