@@ -9,7 +9,7 @@ import { ComicButton, SpeedLinesBackground } from '../../src/components/comic';
 import { t } from '../../src/i18n';
 import { Alert } from '../../src/lib/alert';
 import { api, type MyBoosts } from '../../src/lib/api';
-import { extractInviteCode, inviteUrl } from '../../src/lib/links';
+import { inviteUrl } from '../../src/lib/links';
 import { useSession } from '../../src/lib/session';
 import { shareText } from '../../src/lib/share';
 import { supabase } from '../../src/lib/supabase';
@@ -27,7 +27,6 @@ export default function Rivals() {
   const me = session?.user.id;
   const [rivals, setRivals] = useState<Rival[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
-  const [code, setCode] = useState('');
   const [groupName, setGroupName] = useState('');
   const [busy, setBusy] = useState(false);
   const [boosts, setBoosts] = useState<MyBoosts>({ tokens: [], challenges: [] });
@@ -137,16 +136,6 @@ export default function Rivals() {
     setBusy(false);
   }
 
-  async function join() {
-    setBusy(true);
-    try {
-      const res = await api.acceptInvite(extractInviteCode(code));
-      setCode('');
-      await load();
-      Alert.alert(res.group_id ? R.joinedGroup : R.joinedDuo, res.group_name ?? undefined);
-    } catch (e) { fail(e); }
-    setBusy(false);
-  }
 
   function changeRhythm(r: { connectionId?: string; groupId?: string }) {
     Alert.alert(R.rhythmTitle, R.rhythmInfo, [
@@ -261,12 +250,6 @@ export default function Rivals() {
               color={colors.blue} textColor={colors.white} style={{ paddingHorizontal: 10 }} />
           </View>
 
-          <View style={styles.inline}>
-            <TextInput style={styles.input} placeholder={R.haveCode} value={code} onChangeText={setCode}
-              autoCapitalize="none" autoCorrect={false} accessibilityLabel={R.haveCode} />
-            <ComicButton label={R.join} onPress={join} disabled={busy || extractInviteCode(code).length < 6} size={20}
-              style={{ paddingHorizontal: 14 }} />
-          </View>
         </ScrollView>
       </SafeAreaView>
     </SpeedLinesBackground>

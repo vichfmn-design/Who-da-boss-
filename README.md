@@ -14,7 +14,7 @@ Jeu de duels quotidiens entre proches : 5 questions de culture générale délir
 | --- | --- |
 | Connexion Apple + code par e-mail | ✅ |
 | Pseudo et thèmes préférés (3 minimum) | ✅ |
-| Inviter un rival par lien, rejoindre avec un code | ✅ |
+| Inviter un rival ou un ami dans un groupe par lien partagé (Messages, WhatsApp…) | ✅ |
 | Duel du jour : 5 questions, 15 s, SÛR ! (+3 / −3), réponse normale (+1 / −1) | ✅ |
 | Mine : 1 par partie, pertes ×2, les mines s'additionnent (2 mines ×3, 3 mines ×4) | ✅ |
 | Révélation quand tout le monde a joué, BOOM ! / PAF ! | ✅ |
