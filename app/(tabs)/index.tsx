@@ -1,7 +1,7 @@
 // Accueil : la grosse explosion « WHO DA BOSS ? » lance le prochain duel à jouer.
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Burst, SpeechBubble, SpeedLinesBackground, Star } from '../../src/components/comic';
 import { t } from '../../src/i18n';
@@ -15,6 +15,9 @@ export default function Home() {
   const [matches, setMatches] = useState<MyMatch[]>([]);
   const [loading, setLoading] = useState(false);
   const [boosts, setBoosts] = useState<BoostChallenge[]>([]);
+  // L'explosion « WHO DA BOSS ? » remplit l'écran (largeur de téléphone, limitée sur ordinateur)
+  const { width, height } = useWindowDimensions();
+  const size = Math.min(Math.min(width, 560) - 30, height * 0.62);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -25,7 +28,6 @@ export default function Home() {
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   const toPlay = matches.filter((m) => m.status === 'open' && !m.i_finished);
-  const done = matches.filter((m) => m.status === 'closed');
   const next = toPlay[0];
   const othersPlayed = next && next.players_finished > 0;
 
@@ -56,9 +58,9 @@ export default function Home() {
             onPress={() => (next ? router.push(`/duel/${next.match_id}`) : router.push('/rivaux'))}
             style={({ pressed }) => ({ alignSelf: 'center', transform: [{ scale: pressed ? 0.96 : 1 }] })}
           >
-            <Burst width={330} height={330} fill={colors.red} rotate={-6} shadow={9}>
-              <Text style={styles.logo}>{'WHO DA\nBOSS ?'}</Text>
-              <Text style={styles.tap}>{t().tapToPlay}</Text>
+            <Burst width={size} height={size} fill={colors.red} rotate={-6} shadow={9}>
+              <Text style={[styles.logo, { fontSize: size * 0.2, lineHeight: size * 0.185 }]}>{'WHO DA\nBOSS ?'}</Text>
+              <Text style={[styles.tap, { fontSize: Math.max(19, size * 0.058) }]}>{t().tapToPlay}</Text>
             </Burst>
           </Pressable>
           <View style={styles.stars} pointerEvents="none">
@@ -92,14 +94,6 @@ export default function Home() {
             </Pressable>
           ))}
 
-          {done.slice(0, 5).map((m) => (
-            <Pressable key={m.match_id} onPress={() => router.push(`/reveal/${m.match_id}`)} style={[styles.row, comicShadow(4)]}>
-              <Text style={styles.rowTitle}>{m.opponents}</Text>
-              <Text style={styles.rowSub}>
-                {m.theme_name} · {m.my_rank === 1 ? '★ ' : ''}{t().reveal.points(m.my_points ?? 0)}
-              </Text>
-            </Pressable>
-          ))}
         </ScrollView>
       </SafeAreaView>
     </SpeedLinesBackground>
@@ -107,8 +101,8 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { padding: 20, paddingBottom: 110, gap: 16 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  wrap: { flexGrow: 1, justifyContent: 'center', padding: 20, paddingBottom: 110, gap: 16 },
+  header: { position: 'absolute', top: 12, right: 20, flexDirection: 'row', alignItems: 'center', zIndex: 2 },
   pseudo: { fontFamily: fonts.comic, fontSize: 20, backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink,
     borderRadius: 999, paddingHorizontal: 12, paddingVertical: 2, overflow: 'hidden' },
   bubbleText: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 1 },
