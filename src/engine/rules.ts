@@ -234,7 +234,9 @@ export type TitleKey =
   | 'most_sure_correct'   // La personne la plus sûre !
   | 'most_sure_wrong'     // La personne qui s'y croit trop !
   | 'longest_streak_month' // L'Infatigable (remis à zéro chaque mois)
-  | 'most_cards_won'      // Le Boss des Boss
+  | 'most_minigame_records' // Le Boss des Boss (records aux mini-jeux)
+  | 'most_mine_hits'      // La chair à canon
+  | 'most_mines_dodged'   // Le ninja
   | `theme_boss:${string}`; // Boss de [thème]
 
 export type Holder = { userId: string; value: number };
