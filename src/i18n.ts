@@ -5,7 +5,7 @@ import { getLocales } from 'expo-localization';
 const fr = {
   appName: 'WHO DA BOSS ?',
   tapToPlay: 'TOUCHE POUR JOUER',
-  duelsWaiting: (n: number) => (n === 0 ? 'AUCUN DUEL EN ATTENTE' : n === 1 ? '1 DUEL T\'ATTEND !' : `${n} DUELS T'ATTENDENT !`),
+  duelsWaiting: (n: number) => (n === 0 ? 'AUCUNE PARTIE EN ATTENTE' : n === 1 ? '1 PARTIE T\'ATTEND !' : `${n} PARTIES T'ATTENDENT !`),
   waitingFor: (who: string) => `${who} doit encore jouer`,
   yourTurn: (who: string) => `${who} a déjà joué. À toi !`,
   tabs: { play: 'JOUER', rivals: 'RIVAUX', board: 'CLASSEMENT', profile: 'PROFIL' },
@@ -187,6 +187,11 @@ const fr = {
       ] },
     ],
   },
+  jouer: {
+    title: 'À TOI DE JOUER !', back: '← RETOUR', duel: 'DUEL\nDU JOUR', group: 'GROUPE\nDU JOUR', card: 'CARTE\n×2',
+    length: '5 QUESTIONS · 2 MIN', none: 'RIEN À JOUER POUR L\'INSTANT !', toRivals: 'DÉFIER UN AMI',
+    theyPlayed: 'Ils ont déjà joué !',
+  },
   mini: {
     title: 'MINI-JEU', button: '🎮 MINI-JEU BONUS',
     intro: 'Mini-jeu bonus de ta partie, facultatif : le meilleur score gagne 1 point bonus vers ta carte Who da Boss ?',
@@ -231,7 +236,7 @@ type Dict = typeof fr;
 const en: Dict = {
   appName: 'WHO DA BOSS?',
   tapToPlay: 'TAP TO PLAY',
-  duelsWaiting: (n) => (n === 0 ? 'NO DUEL WAITING' : n === 1 ? '1 DUEL IS WAITING!' : `${n} DUELS ARE WAITING!`),
+  duelsWaiting: (n) => (n === 0 ? 'NO GAME WAITING' : n === 1 ? '1 GAME IS WAITING!' : `${n} GAMES ARE WAITING!`),
   waitingFor: (who) => `${who} still has to play`,
   yourTurn: (who) => `${who} has played. Your turn!`,
   tabs: { play: 'PLAY', rivals: 'RIVALS', board: 'RANKING', profile: 'PROFILE' },
@@ -410,6 +415,11 @@ const en: Dict = {
         'Titles (Mr Know-It-All!, The Unstoppable!…) are stolen by doing strictly better than their holder.',
       ] },
     ],
+  },
+  jouer: {
+    title: 'YOUR TURN!', back: '← BACK', duel: 'DUEL\nOF THE DAY', group: 'GROUP\nOF THE DAY', card: 'CARD\n×2',
+    length: '5 QUESTIONS · 2 MIN', none: 'NOTHING TO PLAY RIGHT NOW!', toRivals: 'CHALLENGE A FRIEND',
+    theyPlayed: 'They already played!',
   },
   mini: {
     title: 'MINI-GAME', button: '🎮 BONUS MINI-GAME',

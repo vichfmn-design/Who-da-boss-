@@ -18,6 +18,7 @@ export type MyMatch = {
   players_finished: number;
   my_points: number | null;
   my_rank: number | null;
+  group_name: string | null;
 };
 
 export type MatchQuestions = {

@@ -39,7 +39,6 @@ export default function Home() {
 
   const toPlay = matches.filter((m) => m.status === 'open' && !m.i_finished);
   const next = toPlay[0];
-  const othersPlayed = next && next.players_finished > 0;
 
   return (
     <SpeedLinesBackground cy={42}>
@@ -74,7 +73,7 @@ export default function Home() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t().tapToPlay}
-            onPress={() => (next ? router.push(`/duel/${next.match_id}`) : router.push('/rivaux'))}
+            onPress={() => (next ? router.push('/jouer') : router.push('/rivaux'))}
             style={({ pressed }) => ({ alignSelf: 'center', transform: [{ scale: pressed ? 0.96 : 1 }] })}
           >
             <Burst width={size} height={size} fill={colors.red} rotate={-6} shadow={9}>
@@ -84,21 +83,6 @@ export default function Home() {
           </Pressable>
           </View>
 
-          {next && (
-            <SpeechBubble color={colors.blue} tail="top" style={{ alignSelf: 'flex-start', marginLeft: 20 }}>
-              <Text style={[styles.bubbleText, { color: colors.white, fontFamily: fonts.bodyHeavy, fontSize: 15 }]}>
-                {othersPlayed ? t().yourTurn(next.opponents ?? '') : `${next.opponents ?? ''} · ${next.theme_name}`}
-              </Text>
-            </SpeechBubble>
-          )}
-
-
-          {toPlay.slice(1).map((m) => (
-            <Pressable key={m.match_id} onPress={() => router.push(`/duel/${m.match_id}`)} style={[styles.row, comicShadow(4)]}>
-              <Text style={styles.rowTitle}>{m.opponents}</Text>
-              <Text style={styles.rowSub}>{m.theme_name}{m.card_multiplier === 2 ? ' · ×2' : ''}</Text>
-            </Pressable>
-          ))}
 
         </ScrollView>
       </SafeAreaView>
