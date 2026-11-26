@@ -3,7 +3,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ComicTitle, SpeedLinesBackground, Star } from '../../src/components/comic';
+import { SpeedLinesBackground, Star } from '../../src/components/comic';
 import { getLang, t } from '../../src/i18n';
 import { api, type TitleRow } from '../../src/lib/api';
 import { useSession } from '../../src/lib/session';
@@ -85,7 +85,6 @@ export default function Board() {
     <SpeedLinesBackground cy={0}>
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <ScrollView contentContainerStyle={styles.wrap}>
-          <ComicTitle size={40}>{B.title}</ComicTitle>
 
           <View style={styles.tabs}>
             {(['duo', 'group', 'global'] as Tab[]).map((k) => (

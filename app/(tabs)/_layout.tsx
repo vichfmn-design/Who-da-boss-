@@ -99,7 +99,7 @@ function ComicTabBar({ state, navigateToTab }: TabBarProps) {
               hitSlop={6}
               style={styles.tab}
             >
-              <Text numberOfLines={1} style={[styles.label, { color: focused ? colors.ink : colors.white }]}>{labels[route.name] ?? route.name}</Text>
+              <Text style={[styles.label, { color: focused ? colors.ink : colors.white }]}>{labels[route.name] ?? route.name}</Text>
             </Pressable>
           );
         })}
@@ -145,5 +145,6 @@ const styles = StyleSheet.create({
   drop: { position: 'absolute', width: 7, height: 7, borderRadius: 4, backgroundColor: colors.yellow },
   dropSmall: { width: 5, height: 5, borderRadius: 3 },
   tab: { flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 999, zIndex: 1 },
-  label: { fontFamily: fonts.comic, fontSize: 15, letterSpacing: 0.5 },
+  // Marge à droite : la police BD penchée débordait et coupait la dernière lettre (le T de CLASSEMENT)
+  label: { fontFamily: fonts.comic, fontSize: 15, letterSpacing: 0.3, paddingHorizontal: 4 },
 });
