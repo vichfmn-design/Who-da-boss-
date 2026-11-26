@@ -5,7 +5,7 @@ import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { AlertButton } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ComicButton, ComicTitle, SpeedLinesBackground } from '../../src/components/comic';
+import { ComicButton, SpeedLinesBackground } from '../../src/components/comic';
 import { t } from '../../src/i18n';
 import { Alert } from '../../src/lib/alert';
 import { api, type MyBoosts } from '../../src/lib/api';
@@ -211,7 +211,6 @@ export default function Rivals() {
     <SpeedLinesBackground cy={0}>
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <ScrollView contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled">
-          <ComicTitle size={40}>{R.title}</ComicTitle>
 
           <ComicButton label={R.invite} onPress={inviteDuo} disabled={busy} size={26} />
           <Text style={styles.hint}>{R.howTo}</Text>
