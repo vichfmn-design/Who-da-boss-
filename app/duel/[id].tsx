@@ -11,6 +11,8 @@ import { t } from '../../src/i18n';
 import { api, type MatchQuestions } from '../../src/lib/api';
 import { BURST_B, colors, comicShadow, fonts } from '../../src/theme';
 import { Alert } from '../../src/lib/alert';
+import { MineBoom, type Miner } from '../../src/components/MineBoom';
+import { addBoomSeen } from '../../src/lib/boomSeen';
 
 const SECONDS = RULES.secondsPerQuestion;
 
@@ -27,6 +29,9 @@ export default function Duel() {
   const [busy, setBusy] = useState(false);
   const [waiting, setWaiting] = useState(false);
   const startedAt = useRef(Date.now());
+  // Mines sur lesquelles tu as sauté pendant la partie : BOOM ! affiché d'un coup à la fin
+  const hits = useRef<{ index: number; miners: Miner[] }[]>([]);
+  const [boomQueue, setBoomQueue] = useState<{ index: number; miners: Miner[] }[] | null>(null);
   // Une fois lancée, la partie ne se quitte pas : pas de bouton retour, retour bloqué jusqu'à la fin
   // (sur le web, quitter la page demande aussi confirmation)
   const [locked, setLocked] = useState(true);
@@ -67,7 +72,10 @@ export default function Duel() {
       unlock();
       api.notifyPlayers(id).catch(() => {});
       void revealed;
-      router.replace(`/reveal/${id}`);
+      if (hits.current.length > 0) {
+        addBoomSeen(id, hits.current.map((h) => h.index));
+        setBoomQueue([...hits.current]);
+      } else router.replace(`/reveal/${id}`);
     } catch (e) {
       Alert.alert(t().errors.generic, (e as Error).message);
     } finally {
@@ -80,7 +88,8 @@ export default function Duel() {
     setBusy(true);
     const ms = Date.now() - startedAt.current;
     try {
-      await api.submitAnswer(id, index, timedOut ? null : choice, sure, ms);
+      const res = await api.submitAnswer(id, index, timedOut ? null : choice, sure, ms);
+      if (res?.mine_hit) hits.current.push({ index, miners: res.miners ?? [] });
       Haptics.impactAsync(sure ? Haptics.ImpactFeedbackStyle.Heavy : Haptics.ImpactFeedbackStyle.Light).catch(() => {});
       if (index >= 4) { setBusy(false); await finish(); return; }
       setIndex(index + 1);
@@ -110,6 +119,14 @@ export default function Duel() {
   }
 
   if (!data) return <SpeedLinesBackground><ActivityIndicator style={{ flex: 1 }} color={colors.ink} /></SpeedLinesBackground>;
+
+  if (boomQueue && boomQueue.length > 0) {
+    const b = boomQueue[0];
+    return <MineBoom question={b.index} miners={b.miners} onDone={() => {
+      if (boomQueue.length > 1) setBoomQueue(boomQueue.slice(1));
+      else router.replace(`/reveal/${id}`);
+    }} />;
+  }
 
   if (waiting) {
     return (

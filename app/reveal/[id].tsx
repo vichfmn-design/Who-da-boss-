@@ -1,6 +1,5 @@
 // La révélation : BOOM ! si tu gagnes, PAF ! sinon, puis le détail question par question.
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,6 +8,7 @@ import { t } from '../../src/i18n';
 import { api, type MyAnswers, type Reveal } from '../../src/lib/api';
 import { Alert } from '../../src/lib/alert';
 import { MineBoom } from '../../src/components/MineBoom';
+import { addBoomSeen, getBoomSeen } from '../../src/lib/boomSeen';
 import { useSession } from '../../src/lib/session';
 import { BURST_B, colors, comicShadow, fonts } from '../../src/theme';
 
@@ -23,13 +23,17 @@ export default function RevealScreen() {
 
   // Les mines sur lesquelles tu as sauté : BOOM ! + selfies, une seule fois par partie
   const [boomStep, setBoomStep] = useState<number | null>(null);
+  const [newBooms, setNewBooms] = useState<NonNullable<Reveal['my_booms']>>([]);
   useEffect(() => {
     api.reveal(id).then(async (r) => {
       setData(r);
-      const seen = await AsyncStorage.getItem(`wdb.boomSeen.${id}`).catch(() => '1');
-      if ((r.my_booms?.length ?? 0) > 0 && seen !== '1') {
+      // Seulement les explosions pas encore montrées (celles de fin de partie le sont déjà)
+      const seen = await getBoomSeen(id);
+      const fresh = (r.my_booms ?? []).filter((b) => !seen.includes(b.index));
+      if (fresh.length > 0) {
+        setNewBooms(fresh);
         setBoomStep(0);
-        AsyncStorage.setItem(`wdb.boomSeen.${id}`, '1').catch(() => {});
+        addBoomSeen(id, fresh.map((b) => b.index));
       }
     }).catch((e: Error) => {
       // Partie pas encore révélée : tes réponses en attendant les autres
@@ -85,7 +89,7 @@ export default function RevealScreen() {
     );
   }
   if (!data) return <SpeedLinesBackground><ActivityIndicator style={{ flex: 1 }} color={colors.ink} /></SpeedLinesBackground>;
-  const booms = data.my_booms ?? [];
+  const booms = newBooms;
   if (boomStep !== null && boomStep < booms.length) {
     const b = booms[boomStep];
     return <MineBoom question={b.index} miners={b.miners ?? []}
@@ -129,28 +133,36 @@ export default function RevealScreen() {
             </SpeechBubble>
           )}
 
-          {/* Détail des questions */}
+          {/* Détail des questions : le même récap pour tous les joueurs (réponse de chacun, bonne réponse, explication) */}
+          <Text style={styles.qNum}>{R.recap}</Text>
           {data.questions.map((q) => {
             const mine = me?.answers?.find((a) => a.index === q.index);
             return (
-              <Panel key={q.index} style={{ gap: 6 }}>
+              <Panel key={q.index} tilt={q.index % 2 ? 1 : -1} style={{ gap: 6 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Text style={styles.qNum}>Q{q.index + 1}</Text>
                   <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
                     {q.mines > 0 && <><Bomb size={20} /><Text style={styles.small}>×{q.mines}</Text></>}
                     {mine && (
-                      <Burst width={62} height={44} fill={mine.correct ? colors.green : colors.red} shape={BURST_B} shadow={2} outline={2}>
-                        <Text style={[styles.small, { color: colors.white }]}>{R.points(mine.points)}</Text>
+                      <Burst width={84} height={46} fill={mine.correct ? colors.green : colors.red} shape={BURST_B} shadow={2} outline={2}>
+                        <Text style={[styles.small, { color: colors.white }]}>{mine.correct ? R.right : R.wrong} {R.points(mine.points)}</Text>
                       </Burst>
                     )}
                   </View>
                 </View>
                 <Text style={styles.text}>{q.prompt}</Text>
-                <Text style={[styles.small, { color: colors.green }]}>✓ {q.choices[q.correct_index]}</Text>
+                <Text style={[styles.small, { color: colors.green }]}>{R.answerIs(q.choices[q.correct_index])}</Text>
+                {data.players.map((p) => {
+                  const a = p.answers?.find((x) => x.index === q.index);
+                  const isMe = p.user_id === session?.user.id;
+                  return (
+                    <Text key={p.user_id} style={[styles.small, { color: a?.correct ? colors.green : colors.red }]}>
+                      {a?.correct ? '✓' : '✗'} {isMe ? R.you : p.pseudo} : {a && a.choice !== null ? q.choices[a.choice] : R.noAnswer}
+                      {a?.sure ? ` · ${t().duel.sure}` : ''}{p.mine === q.index ? ' · 💣' : ''}
+                    </Text>
+                  );
+                })}
                 {!!q.explanation && <Text style={[styles.small, { fontFamily: fonts.body }]}>{q.explanation}</Text>}
-                {mine && !mine.correct && mine.choice !== null && (
-                  <Text style={[styles.small, { color: colors.red }]}>✗ {q.choices[mine.choice]}{mine.sure ? ` · ${t().duel.sure}` : ''}</Text>
-                )}
               </Panel>
             );
           })}
