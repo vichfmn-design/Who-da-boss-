@@ -58,8 +58,10 @@ export default function BoostScreen() {
             <Text style={styles.counter}>{B.title}</Text>
           </View>
 
-          <Burst width={270} height={150} fill={colors.blue} shape={BURST_B} rotate={-4} style={{ alignSelf: 'center' }}>
-            <Text style={styles.burstText}>{B.games[game]}</Text>
+          <Burst width={300} height={180} fill={colors.yellow} glow="#FFF6B0" stroke={colors.red} outline={4} shadow={7}
+            rotate={-5} style={{ alignSelf: 'center' }}>
+            <Text style={styles.boostTitle}>{B.title}</Text>
+            <Text style={styles.boostSub}>{B.short[game]}</Text>
           </Burst>
 
           {playing ? (
@@ -324,6 +326,9 @@ const styles = StyleSheet.create({
   burstText: { fontFamily: fonts.comic, fontSize: 30, color: colors.yellow, textAlign: 'center', letterSpacing: 1,
     textShadowColor: colors.ink, textShadowOffset: { width: 3, height: 3 }, textShadowRadius: 0 },
   title: { fontFamily: fonts.comic, fontSize: 26, letterSpacing: 1, color: colors.ink },
+  boostTitle: { fontFamily: fonts.comic, fontSize: 54, letterSpacing: 1, color: colors.red,
+    textShadowColor: colors.ink, textShadowOffset: { width: 3, height: 3 }, textShadowRadius: 0 },
+  boostSub: { fontFamily: fonts.comic, fontSize: 18, letterSpacing: 0.5, color: colors.ink, marginTop: -4 },
   text: { fontFamily: fonts.bodyBold, fontSize: 16, lineHeight: 22, color: colors.ink },
   big: { fontFamily: fonts.bodyHeavy, fontSize: 22, lineHeight: 28, color: colors.ink },
   small: { fontFamily: fonts.bodyHeavy, fontSize: 12, color: colors.ink },

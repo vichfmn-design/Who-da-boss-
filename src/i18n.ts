@@ -166,6 +166,7 @@ const fr = {
   boost: {
     title: 'BOOST !',
     games: { frappe: 'FRAPPE ÉCLAIR', rebus: 'RÉBUS EMOJI', chiffre: 'LE JUSTE CHIFFRE', reflexe: 'RÉFLEXE', memoire: 'MÉMOIRE', chrono: 'LE CHRONO PARFAIT' },
+    short: { frappe: 'TAPE LA PHRASE', rebus: 'DEVINE LES RÉBUS', chiffre: 'TROUVE LE BON CHIFFRE', reflexe: 'TOUCHE AU BOUM', memoire: 'RETIENS LA SUITE', chrono: 'STOP À 10,00 S' },
     howto: {
       frappe: 'Recopie la phrase le plus vite possible, sans faute.',
       rebus: 'Devine les 5 rébus le plus vite possible : d\'abord le nombre de bonnes réponses, puis le temps.',
@@ -356,6 +357,7 @@ const en: Dict = {
   boost: {
     title: 'BOOST!',
     games: { frappe: 'SPEED TYPING', rebus: 'EMOJI REBUS', chiffre: 'RIGHT NUMBER', reflexe: 'REFLEX', memoire: 'MEMORY', chrono: 'PERFECT TIMER' },
+    short: { frappe: 'TYPE THE SENTENCE', rebus: 'GUESS THE REBUS', chiffre: 'FIND THE NUMBER', reflexe: 'TAP ON BOOM', memoire: 'REMEMBER THE ORDER', chrono: 'STOP AT 10.00 S' },
     howto: {
       frappe: 'Type the sentence as fast as you can, with no mistake.',
       rebus: 'Guess the 5 puzzles as fast as you can: right answers first, then time.',
