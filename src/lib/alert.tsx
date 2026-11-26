@@ -1,4 +1,4 @@
-// Version web des boîtes de dialogue : React Native Web ignore Alert.alert,
+// Boîtes de dialogue (web et version par défaut) : React Native Web ignore Alert.alert,
 // on affiche donc une fenêtre maison dans le style BD (même API que Alert.alert).
 import { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text } from 'react-native';

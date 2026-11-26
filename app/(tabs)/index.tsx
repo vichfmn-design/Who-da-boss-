@@ -35,7 +35,7 @@ export default function Home() {
           refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
         >
           <View style={styles.header}>
-            <ComicTitle>{t().appName}</ComicTitle>
+            <ComicTitle size={26}>{t().appName}</ComicTitle>
             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
               <Pressable onPress={() => router.push('/regles?from=profil')} accessibilityRole="button"
                 accessibilityLabel={t().profile.rules} style={[styles.help, comicShadow(3)]}>
