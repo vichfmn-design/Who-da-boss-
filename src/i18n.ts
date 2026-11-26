@@ -41,7 +41,7 @@ const fr = {
   reveal: {
     boom: 'BOOM !', paf: 'PAF !', won: 'TU ES LE BOSS !', lost: 'PERDU...', mineHit: 'BOUM ! Sur ta mine',
     seeBoard: 'VOIR LE CLASSEMENT', points: (n: number) => `${n > 0 ? '+' : ''}${n} pts`, forfeit: 'forfait',
-    waitTitle: 'EN ATTENTE\nDES AUTRES', waitCount: (f: number, n: number) => `${f} joueur${f > 1 ? 's' : ''} sur ${n} ont joué.`,
+    waitTitle: 'EN ATTENTE\nDES AUTRES', waitCount: (f: number, n: number) => `${f} joueur${f > 1 ? 's' : ''} sur ${n} ${f > 1 ? 'ont' : 'a'} joué.`,
     waitInfo: 'Les bonnes réponses, les points et les mines se dévoilent quand tout le monde a joué.',
     recap: 'LE RÉCAP', you: 'Toi', answerIs: (a: string) => `Bonne réponse : ${a}`,
     myAnswers: 'TES RÉPONSES', noAnswer: 'Pas de réponse (temps écoulé)', right: 'JUSTE', wrong: 'RATÉ', mineHere: 'Ta mine',
