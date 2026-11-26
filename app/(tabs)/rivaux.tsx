@@ -1,30 +1,35 @@
-// Rivaux : connexions en duo, groupes, invitations, rythme, signaler / bloquer.
-import * as Linking from 'expo-linking';
-import { useFocusEffect, useRouter } from 'expo-router';
+// Rivaux : défier un ami en duo, créer un groupe, ajouter des amis (rival existant ou lien par message),
+// rythme, signaler / bloquer. Toutes les actions sont des boutons visibles (pas d'appui long caché).
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import type { AlertButton } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ComicButton, ComicTitle, SpeedLinesBackground } from '../../src/components/comic';
 import { t } from '../../src/i18n';
+import { Alert } from '../../src/lib/alert';
 import { api } from '../../src/lib/api';
+import { extractInviteCode, inviteUrl } from '../../src/lib/links';
 import { useSession } from '../../src/lib/session';
+import { shareText } from '../../src/lib/share';
 import { supabase } from '../../src/lib/supabase';
 import { colors, comicShadow, fonts } from '../../src/theme';
-import { Alert } from '../../src/lib/alert';
-import { shareText } from '../../src/lib/share';
 
 type Rival = { connectionId: string; userId: string; pseudo: string; rhythm: number };
-type Group = { id: string; name: string; rhythm: number; members: string[] };
+type Member = { userId: string; pseudo: string };
+type Group = { id: string; name: string; rhythm: number; members: Member[] };
+
+const MAX_GROUP = 4;
 
 export default function Rivals() {
   const R = t().rivals;
-  const router = useRouter();
   const { session } = useSession();
   const me = session?.user.id;
   const [rivals, setRivals] = useState<Rival[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [code, setCode] = useState('');
   const [groupName, setGroupName] = useState('');
+  const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
     if (!me) return;
@@ -38,99 +43,161 @@ export default function Rivals() {
       return { connectionId: c.id, userId: other.id, pseudo: other.pseudo, rhythm: c.rhythm_days };
     }));
 
-    const { data: gs } = await supabase.from('groups').select('id, name, rhythm_days, group_members(profiles(pseudo))');
+    const { data: gs } = await supabase
+      .from('groups').select('id, name, rhythm_days, group_members(user_id, profiles(pseudo))').order('created_at');
     setGroups(((gs ?? []) as unknown as {
-      id: string; name: string; rhythm_days: number; group_members: { profiles: { pseudo: string } | null }[];
+      id: string; name: string; rhythm_days: number;
+      group_members: { user_id: string; profiles: { pseudo: string } | null }[];
     }[]).map((g) => ({
       id: g.id, name: g.name, rhythm: g.rhythm_days,
-      members: g.group_members.map((m) => m.profiles?.pseudo ?? '?'),
+      members: g.group_members.map((m) => ({ userId: m.user_id, pseudo: m.profiles?.pseudo ?? '?' })),
     })));
   }, [me]);
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  async function invite(groupId?: string) {
+  const fail = (e: unknown) => Alert.alert(t().errors.generic, (e as Error).message);
+
+  // Duo : un lien unique à envoyer par message (Messages, WhatsApp…)
+  async function inviteDuo() {
+    setBusy(true);
     try {
-      const c = await api.createInvite(groupId);
-      const url = Linking.createURL(`/invite/${c}`);
-      await shareText(R.inviteShare(url));
-    } catch (e) { Alert.alert(t().errors.generic, (e as Error).message); }
+      const c = await api.createInvite();
+      await shareText(R.inviteShare(inviteUrl(c)));
+    } catch (e) { fail(e); }
+    setBusy(false);
   }
 
-  async function join() {
-    try { await api.acceptInvite(code); setCode(''); load(); }
-    catch (e) { Alert.alert(t().errors.generic, (e as Error).message); }
+  async function sendGroupLink(g: Group) {
+    try {
+      const c = await api.createInvite(g.id);
+      await shareText(R.groupShare(g.name, inviteUrl(c)));
+    } catch (e) { fail(e); }
+  }
+
+  // Ajouter au groupe : un rival existant en un geste, ou un lien pour quelqu'un de nouveau
+  function addToGroup(g: Group) {
+    const inGroup = new Set(g.members.map((m) => m.userId));
+    const candidates = rivals.filter((r) => !inGroup.has(r.userId));
+    const buttons: AlertButton[] = [
+      ...candidates.slice(0, MAX_GROUP).map((r) => ({
+        text: `+ ${r.pseudo}`,
+        onPress: () => {
+          api.addToGroup(g.id, r.userId)
+            .then(() => { Alert.alert(R.added(r.pseudo)); load(); })
+            .catch(fail);
+        },
+      })),
+      { text: R.sendLink, onPress: () => { sendGroupLink(g); } },
+      { text: R.cancel, style: 'cancel' },
+    ];
+    Alert.alert(R.addTitle(g.name), R.addHow, buttons);
   }
 
   async function createGroup() {
-    try { const id = await api.createGroup(groupName.trim()); setGroupName(''); await load(); invite(id); }
-    catch (e) { Alert.alert(t().errors.generic, (e as Error).message); }
+    setBusy(true);
+    try {
+      const id = await api.createGroup(groupName.trim());
+      const created: Group = { id, name: groupName.trim(), rhythm: 1, members: me ? [{ userId: me, pseudo: '' }] : [] };
+      setGroupName('');
+      await load();
+      Alert.alert(R.groupCreated, undefined, [
+        { text: R.addFriend, onPress: () => addToGroup(created) },
+        { text: 'OK', style: 'cancel' },
+      ]);
+    } catch (e) { fail(e); }
+    setBusy(false);
   }
 
-  function changeRhythm(r: { connectionId?: string; groupId?: string; current: number }) {
-    const options = [1, 2, 3, 7];
-    Alert.alert('Rythme', undefined, [
-      ...options.map((d) => ({
+  async function join() {
+    setBusy(true);
+    try {
+      const res = await api.acceptInvite(extractInviteCode(code));
+      setCode('');
+      await load();
+      Alert.alert(res.group_id ? R.joinedGroup : R.joinedDuo, res.group_name ?? undefined);
+    } catch (e) { fail(e); }
+    setBusy(false);
+  }
+
+  function changeRhythm(r: { connectionId?: string; groupId?: string }) {
+    Alert.alert(R.rhythmTitle, R.rhythmInfo, [
+      ...[1, 2, 3, 7].map((d) => ({
         text: R.rhythm(d),
-        onPress: () => api.setRhythm(d, r.connectionId, r.groupId).then(load)
-          .catch((e: Error) => Alert.alert(t().errors.generic, e.message)),
+        onPress: () => { api.setRhythm(d, r.connectionId, r.groupId).then(load).catch(fail); },
       })),
-      { text: t().profile.cancel, style: 'cancel' as const },
+      { text: R.cancel, style: 'cancel' as const },
     ]);
   }
 
   // Règle Apple 1.2 : signaler et bloquer un joueur
-  function moderate(r: Rival) {
-    Alert.alert(r.pseudo, undefined, [
-      { text: R.report, onPress: () => supabase.from('reports').insert({ reporter: me, reported_user: r.userId }).then(() => {}) },
+  function rivalOptions(r: Rival) {
+    Alert.alert(r.pseudo, R.rhythm(r.rhythm), [
+      { text: R.changeRhythm, onPress: () => changeRhythm({ connectionId: r.connectionId }) },
+      { text: R.report, onPress: () => { supabase.from('reports').insert({ reporter: me, reported_user: r.userId }).then(() => {}); } },
       { text: R.block, style: 'destructive', onPress: async () => {
           await supabase.from('blocks').insert({ blocker: me, blocked: r.userId });
           await supabase.from('connections').delete().eq('id', r.connectionId);
           load();
         } },
-      { text: t().profile.cancel, style: 'cancel' },
+      { text: R.cancel, style: 'cancel' },
     ]);
   }
 
   return (
     <SpeedLinesBackground cy={0}>
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
-        <ScrollView contentContainerStyle={styles.wrap}>
+        <ScrollView contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled">
           <ComicTitle size={40}>{R.title}</ComicTitle>
+
+          <ComicButton label={R.invite} onPress={inviteDuo} disabled={busy} size={26} />
+          <Text style={styles.hint}>{R.howTo}</Text>
 
           {rivals.length === 0 && groups.length === 0 && <Text style={styles.text}>{R.none}</Text>}
 
+          {rivals.length > 0 && <Text style={styles.section}>{R.duos}</Text>}
           {rivals.map((r) => (
-            <Pressable key={r.connectionId} onLongPress={() => moderate(r)} onPress={() => changeRhythm({ connectionId: r.connectionId, current: r.rhythm })}
-              style={[styles.card, comicShadow(4)]} accessibilityHint={`${R.report} / ${R.block}`}>
-              <Text style={styles.name}>{r.pseudo.toUpperCase()}</Text>
-              <Text style={styles.sub}>{R.rhythm(r.rhythm)}</Text>
+            <Pressable key={r.connectionId} onPress={() => rivalOptions(r)} accessibilityRole="button"
+              style={[styles.card, comicShadow(4)]}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.name}>{r.pseudo.toUpperCase()}</Text>
+                <Text style={styles.sub}>{R.rhythm(r.rhythm)}</Text>
+              </View>
+              <Text style={styles.more}>•••</Text>
             </Pressable>
           ))}
 
-          {groups.map((g) => (
-            <Pressable key={g.id} onPress={() => changeRhythm({ groupId: g.id, current: g.rhythm })}
-              onLongPress={() => invite(g.id)} style={[styles.card, styles.groupCard, comicShadow(4)]}>
-              <Text style={[styles.name, { color: colors.yellow }]}>{g.name.toUpperCase()} · {g.members.length}/4</Text>
-              <Text style={[styles.sub, { color: colors.white }]}>{g.members.join(', ')} · {R.rhythm(g.rhythm)}</Text>
-            </Pressable>
-          ))}
-
-          <ComicButton label={R.invite} onPress={() => invite()} size={26} />
-
-          <View style={styles.inline}>
-            <TextInput style={styles.input} placeholder={R.haveCode} value={code} onChangeText={setCode}
-              autoCapitalize="none" accessibilityLabel={R.haveCode} />
-            <ComicButton label={R.join} onPress={join} disabled={code.trim().length < 6} size={20} style={{ paddingHorizontal: 14 }} />
-          </View>
+          <Text style={styles.section}>{R.groups}</Text>
+          {groups.map((g) => {
+            const full = g.members.length >= MAX_GROUP;
+            return (
+              <View key={g.id} style={[styles.card, styles.groupCard, comicShadow(4)]}>
+                <Pressable onPress={() => changeRhythm({ groupId: g.id })} accessibilityRole="button" style={{ gap: 2 }}>
+                  <Text style={[styles.name, { color: colors.yellow }]}>{g.name.toUpperCase()}</Text>
+                  <Text style={[styles.sub, { color: colors.white }]}>
+                    {g.members.map((m) => (m.userId === me ? t().board.you : m.pseudo)).join(', ')}
+                  </Text>
+                  <Text style={[styles.sub, { color: colors.white }]}>{R.members(g.members.length)} · {R.rhythm(g.rhythm)}</Text>
+                  {g.members.length < 2 && <Text style={[styles.sub, { color: colors.yellow }]}>{R.waitingMembers}</Text>}
+                </Pressable>
+                <ComicButton label={full ? R.full : R.addFriend} disabled={full} onPress={() => addToGroup(g)}
+                  color={colors.yellow} textColor={colors.ink} size={20} style={{ marginTop: 6 }} />
+              </View>
+            );
+          })}
 
           <View style={styles.inline}>
             <TextInput style={styles.input} placeholder={R.groupName} value={groupName} onChangeText={setGroupName}
               maxLength={30} accessibilityLabel={R.groupName} />
-            <ComicButton label={R.group} onPress={createGroup} disabled={groupName.trim().length < 2} size={18}
+            <ComicButton label={R.group} onPress={createGroup} disabled={busy || groupName.trim().length < 2} size={18}
               color={colors.blue} textColor={colors.white} style={{ paddingHorizontal: 10 }} />
           </View>
 
-          <Pressable onPress={() => router.push('/')}><Text style={styles.text}>‹ {t().tabs.play}</Text></Pressable>
+          <View style={styles.inline}>
+            <TextInput style={styles.input} placeholder={R.haveCode} value={code} onChangeText={setCode}
+              autoCapitalize="none" autoCorrect={false} accessibilityLabel={R.haveCode} />
+            <ComicButton label={R.join} onPress={join} disabled={busy || extractInviteCode(code).length < 6} size={20}
+              style={{ paddingHorizontal: 14 }} />
+          </View>
         </ScrollView>
       </SafeAreaView>
     </SpeedLinesBackground>
@@ -138,12 +205,16 @@ export default function Rivals() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { padding: 20, gap: 14, paddingBottom: 120 },
+  wrap: { padding: 20, gap: 14, paddingBottom: 32 },
   text: { fontFamily: fonts.bodyBold, fontSize: 15 },
-  card: { backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, borderRadius: 14, padding: 12 },
-  groupCard: { backgroundColor: colors.red },
+  hint: { fontFamily: fonts.bodyBold, fontSize: 13, marginTop: -4 },
+  section: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 1, marginTop: 6 },
+  card: { backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, borderRadius: 14, padding: 12,
+    flexDirection: 'row', alignItems: 'center' },
+  groupCard: { backgroundColor: colors.red, flexDirection: 'column', alignItems: 'stretch' },
   name: { fontFamily: fonts.comic, fontSize: 24, letterSpacing: 1 },
   sub: { fontFamily: fonts.bodyBold, fontSize: 12 },
+  more: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 2, paddingHorizontal: 6 },
   inline: { flexDirection: 'row', gap: 10, alignItems: 'center' },
   input: { flex: 1, borderWidth: 3, borderColor: colors.ink, borderRadius: 12, paddingHorizontal: 12, height: 50,
     fontFamily: fonts.bodyBold, fontSize: 15, backgroundColor: colors.white },

@@ -36,7 +36,13 @@ export default function Home() {
         >
           <View style={styles.header}>
             <ComicTitle>{t().appName}</ComicTitle>
-            <Text style={styles.pseudo}>{profile?.pseudo}</Text>
+            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+              <Pressable onPress={() => router.push('/regles?from=profil')} accessibilityRole="button"
+                accessibilityLabel={t().profile.rules} style={[styles.help, comicShadow(3)]}>
+                <Text style={styles.helpText}>?</Text>
+              </Pressable>
+              <Text style={styles.pseudo}>{profile?.pseudo}</Text>
+            </View>
           </View>
 
           <SpeechBubble style={{ alignSelf: 'center', transform: [{ rotate: '-3deg' }] }}>
@@ -88,11 +94,14 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { padding: 20, paddingBottom: 120, gap: 16 },
+  wrap: { padding: 20, paddingBottom: 32, gap: 16 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   pseudo: { fontFamily: fonts.comic, fontSize: 20, backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink,
     borderRadius: 999, paddingHorizontal: 12, paddingVertical: 2, overflow: 'hidden' },
   bubbleText: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 1 },
+  help: { width: 34, height: 34, borderRadius: 17, borderWidth: 3, borderColor: colors.ink, backgroundColor: colors.red,
+    alignItems: 'center', justifyContent: 'center' },
+  helpText: { fontFamily: fonts.comic, fontSize: 22, color: colors.yellow },
   logo: { fontFamily: fonts.comic, fontSize: 66, lineHeight: 60, textAlign: 'center', color: colors.yellow,
     textShadowColor: colors.ink, textShadowOffset: { width: 5, height: 5 }, textShadowRadius: 0 },
   tap: { marginTop: 10, fontFamily: fonts.comic, fontSize: 19, letterSpacing: 2, color: colors.white,

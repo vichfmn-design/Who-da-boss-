@@ -2,35 +2,46 @@ import { Bangers_400Regular } from '@expo-google-fonts/bangers';
 import { DMSans_500Medium, DMSans_700Bold, DMSans_800ExtraBold } from '@expo-google-fonts/dm-sans';
 import { LuckiestGuy_400Regular } from '@expo-google-fonts/luckiest-guy';
 import { useFonts } from 'expo-font';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, usePathname, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { DialogHost } from '../src/lib/alert';
+import { setPendingInvite, usePrefs } from '../src/lib/prefs';
 import { SessionProvider, useSession } from '../src/lib/session';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function Gate() {
   const { ready, session, profile } = useSession();
+  const { loaded, rulesSeen, pendingInvite } = usePrefs();
   const segments = useSegments();
+  const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || !loaded) return;
     const first = segments[0] as string | undefined;
-    const inAuth = first === 'login';
-    const inOnboarding = first === 'onboarding';
-    if (!session && !inAuth) router.replace('/login');
-    else if (session && !profile && !inOnboarding) router.replace('/onboarding');
-    else if (session && profile && (inAuth || inOnboarding)) router.replace('/');
-  }, [ready, session, profile, segments, router]);
+
+    // Lien d'invitation ouvert avant d'avoir un compte prêt : on le garde pour après.
+    if (first === 'invite' && (!session || !profile || !rulesSeen)) {
+      const code = pathname.split('/').filter(Boolean).pop();
+      if (code && code !== pendingInvite) setPendingInvite(code);
+    }
+
+    if (!session) { if (first !== 'login') router.replace('/login'); return; }
+    if (!profile) { if (first !== 'onboarding') router.replace('/onboarding'); return; }
+    if (!rulesSeen) { if (first !== 'regles') router.replace('/regles'); return; }
+    if (pendingInvite && first !== 'invite') { router.replace(`/invite/${pendingInvite}`); return; }
+    if (first === 'login' || first === 'onboarding') router.replace('/');
+  }, [ready, loaded, session, profile, rulesSeen, pendingInvite, segments, pathname, router]);
 
   return (
     <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="login" />
       <Stack.Screen name="onboarding" />
+      <Stack.Screen name="regles" />
       <Stack.Screen name="duel/[id]" options={{ gestureEnabled: false }} />
       <Stack.Screen name="reveal/[id]" />
       <Stack.Screen name="invite/[code]" />

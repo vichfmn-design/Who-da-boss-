@@ -86,6 +86,7 @@ export default function RevealScreen() {
                 </View>
                 <Text style={styles.text}>{q.prompt}</Text>
                 <Text style={[styles.small, { color: colors.green }]}>✓ {q.choices[q.correct_index]}</Text>
+                {!!q.explanation && <Text style={[styles.small, { fontFamily: fonts.body }]}>{q.explanation}</Text>}
                 {mine && !mine.correct && mine.choice !== null && (
                   <Text style={[styles.small, { color: colors.red }]}>✗ {q.choices[mine.choice]}{mine.sure ? ` · ${t().duel.sure}` : ''}</Text>
                 )}

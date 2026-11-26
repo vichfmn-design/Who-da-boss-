@@ -27,9 +27,10 @@ export default function Board() {
   const [titles, setTitles] = useState<TitleRow[]>([]);
   const [rank, setRank] = useState<{ rank: number | null; pct: number | null; total: number } | null>(null);
   const [themeNames, setThemeNames] = useState<Record<string, string>>({});
+  const [showCats, setShowCats] = useState(false);
 
   useEffect(() => {
-    supabase.from('themes').select('slug, name_fr, name_en').then(({ data }) => {
+    supabase.from('themes').select('slug, name_fr, name_en').eq('active', true).order('sort').then(({ data }) => {
       const map: Record<string, string> = {};
       for (const th of (data ?? []) as { slug: string; name_fr: string; name_en: string }[]) {
         map[th.slug] = getLang() === 'en' ? th.name_en : th.name_fr;
@@ -139,23 +140,37 @@ export default function Board() {
               return (
                 <View key={key} style={styles.titleRow}>
                   <Star size={18} fill={row?.holder === me ? colors.red : colors.ink} />
-                  <Text style={styles.titleName}>{t().titles[key]}</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.titleName}>{t().titles[key]}</Text>
+                    <Text style={styles.titleInfo}>{t().titleInfo[key]}</Text>
+                  </View>
                   <Text style={[styles.holder, row?.holder === me && styles.holderMe]}>{who(row)}</Text>
                 </View>
               );
             })}
-            <View style={{ padding: 10, gap: 4 }}>
-              {Object.entries(themeNames).map(([slug, name]) => {
-                const row = themeTitles.find((x) => x.title_key === `theme_boss:${slug}`);
-                return (
-                  <View key={slug} style={styles.themeRow}>
-                    <Text style={styles.small}>{t().titles.theme_boss(name)}</Text>
-                    <Text style={[styles.small, row?.holder === me && { color: colors.red }]}>{who(row)}</Text>
-                  </View>
-                );
-              })}
-            </View>
+
+            <Pressable onPress={() => setShowCats((v) => !v)} accessibilityRole="button"
+              accessibilityState={{ expanded: showCats }} style={styles.catHeader}>
+              <Text style={[styles.titleName, { color: colors.yellow }]}>{t().titleInfo.categories}</Text>
+              <View style={{ flex: 1 }} />
+              <Text style={styles.chevron}>{showCats ? '▲' : '▼'}</Text>
+            </Pressable>
+            {showCats && (
+              <View style={{ padding: 10, gap: 4 }}>
+                <Text style={styles.titleInfo}>{t().titleInfo.categoriesInfo}</Text>
+                {Object.entries(themeNames).map(([slug, name]) => {
+                  const row = themeTitles.find((x) => x.title_key === `theme_boss:${slug}`);
+                  return (
+                    <View key={slug} style={styles.themeRow}>
+                      <Text style={styles.small}>{t().titles.theme_boss(name)}</Text>
+                      <Text style={[styles.small, row?.holder === me && { color: colors.red }]}>{who(row)}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
           </View>
+          <Text style={styles.titleInfo}>{t().titleInfo.steal}</Text>
         </ScrollView>
       </SafeAreaView>
     </SpeedLinesBackground>
@@ -163,7 +178,7 @@ export default function Board() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { padding: 20, gap: 14, paddingBottom: 120 },
+  wrap: { padding: 20, gap: 14, paddingBottom: 32 },
   tabs: { flexDirection: 'row', gap: 10 },
   tab: { flex: 1, backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, borderRadius: 12, paddingVertical: 6, alignItems: 'center' },
   tabOn: { backgroundColor: colors.red, transform: [{ rotate: '-2deg' }] },
@@ -180,7 +195,10 @@ const styles = StyleSheet.create({
   cardTitle: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 1 },
   titles: { backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, borderRadius: 14, overflow: 'hidden' },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 10, paddingVertical: 7, borderBottomWidth: 2, borderColor: colors.ink },
-  titleName: { flex: 1, fontFamily: fonts.comic, fontSize: 17, letterSpacing: 0.5 },
+  titleName: { fontFamily: fonts.comic, fontSize: 18, letterSpacing: 0.5 },
+  titleInfo: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.grey },
+  catHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.ink, paddingHorizontal: 12, paddingVertical: 9 },
+  chevron: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.yellow },
   holder: { fontFamily: fonts.comic, fontSize: 15, borderWidth: 2, borderColor: colors.ink, borderRadius: 999, paddingHorizontal: 8, overflow: 'hidden' },
   holderMe: { backgroundColor: colors.red, color: colors.yellow },
   themeRow: { flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: 1, borderColor: '#D0D0D0', paddingBottom: 2 },

@@ -35,7 +35,7 @@ export type Reveal = {
   match_id: string;
   winner: string | null;
   card_multiplier: number;
-  questions: { index: number; prompt: string; choices: string[]; correct_index: number; mines: number }[];
+  questions: { index: number; prompt: string; choices: string[]; correct_index: number; mines: number; explanation?: string | null }[];
   players: {
     user_id: string; pseudo: string; points: number; rank: number; forfeit: boolean; mine: number | null;
     answers: { index: number; choice: number | null; sure: boolean; correct: boolean; points: number }[] | null;
@@ -69,8 +69,9 @@ export const api = {
   useJoker: (matchId: string) => rpc<void>('use_joker', { p_match: matchId }),
   reveal: (matchId: string) => rpc<Reveal>('get_reveal', { p_match: matchId }),
   createInvite: (groupId?: string) => rpc<string>('create_invite', { p_group: groupId ?? null }),
-  acceptInvite: (code: string) => rpc<{ connection_id?: string; group_id?: string }>('accept_invite', { p_code: code }),
+  acceptInvite: (code: string) => rpc<{ connection_id?: string; group_id?: string; group_name?: string }>('accept_invite', { p_code: code }),
   createGroup: (name: string) => rpc<string>('create_group', { p_name: name }),
+  addToGroup: (groupId: string, userId: string) => rpc<string>('add_to_group', { p_group: groupId, p_user: userId }),
   setRhythm: (days: number, connectionId?: string, groupId?: string) =>
     rpc<void>('set_rhythm', { p_days: days, p_connection: connectionId ?? null, p_group: groupId ?? null }),
   playCard: (cardId: string, theme: string, connectionId?: string, groupId?: string) =>

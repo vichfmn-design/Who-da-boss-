@@ -1,5 +1,5 @@
 // Profil : titres détenus, points bonus et cartes, langue, déconnexion, suppression du compte.
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,6 +16,7 @@ type HeldTitle = { title_key: string; scope: string; value: number };
 export default function ProfileScreen() {
   const P = t().profile;
   const { profile, session, refreshProfile } = useSession();
+  const router = useRouter();
   const [held, setHeld] = useState<HeldTitle[]>([]);
   const [cards, setCards] = useState(0);
 
@@ -89,6 +90,7 @@ export default function ProfileScreen() {
             ))}
           </View>
 
+          <ComicButton label={P.rules} color={colors.yellow} textColor={colors.ink} onPress={() => router.push('/regles?from=profil')} size={24} />
           <ComicButton label={P.logout} color={colors.ink} onPress={() => supabase.auth.signOut()} size={24} />
           <Pressable onPress={confirmDelete} accessibilityRole="button">
             <Text style={styles.delete}>{P.delete}</Text>
@@ -100,7 +102,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { padding: 20, gap: 14, paddingBottom: 120 },
+  wrap: { padding: 20, gap: 14, paddingBottom: 32 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   letter: { fontFamily: fonts.comic, fontSize: 44, color: colors.yellow,
     textShadowColor: colors.ink, textShadowOffset: { width: 3, height: 3 }, textShadowRadius: 0 },
