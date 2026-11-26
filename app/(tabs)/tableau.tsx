@@ -118,7 +118,7 @@ export default function Board() {
           ) : (
             scores.length > 0 && (
               <View style={[styles.scores, comicShadow(6)]}>
-                <CardBeams />
+                <CardBeams dir={1} />
                 {scores.map((s, i) => {
                   const mine = s.userId === me;
                   return (
@@ -136,7 +136,7 @@ export default function Board() {
 
           <Text style={styles.cardTitle}>{B.titles}</Text>
           <View style={[styles.titles, comicShadow(5)]}>
-            <CardBeams />
+            <CardBeams dir={3} />
             {MAIN_TITLES.map((key) => {
               const row = holderOf(key);
               return (

@@ -86,7 +86,7 @@ export function StatsDashboard({ stats }: { stats: MyStats | null }) {
         <>
           <Text style={styles.section}>{P.funFacts}</Text>
           <View style={[styles.card, comicShadow(5), { gap: 8 }]}>
-            <View style={[StyleSheet.absoluteFill, { borderRadius: 11, overflow: 'hidden' }]} pointerEvents="none"><CardBeams /></View>
+            <View style={[StyleSheet.absoluteFill, { borderRadius: 11, overflow: 'hidden' }]} pointerEvents="none"><CardBeams dir={0} /></View>
             {facts.map((f) => (
               <View key={f} style={styles.fact}>
                 <View style={{ marginTop: 2 }}><Star size={16} fill={colors.red} /></View>

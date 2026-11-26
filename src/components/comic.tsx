@@ -90,19 +90,25 @@ const raysStyle = (Platform.OS === 'web'
   ? { position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh' }
   : StyleSheet.absoluteFill) as unknown as StyleProp<ViewStyle>;
 
-/** Faisceaux rouges presque transparents qui se croisent, au fond des cartes blanches. */
-export function CardBeams() {
-  const beams = (cx: number, cy: number, n: number, from: number, to: number, width: number) =>
-    Array.from({ length: n }, (_, i) => {
-      const a = ((from + ((to - from) * i) / (n - 1)) * Math.PI) / 180;
-      const w = (width * Math.PI) / 180;
-      const r = 260;
-      return `M${cx} ${cy} L${cx + r * Math.cos(a - w)} ${cy + r * Math.sin(a - w)} L${cx + r * Math.cos(a + w)} ${cy + r * Math.sin(a + w)} Z`;
-    });
+/** Faisceaux rouges presque transparents au fond des cartes blanches : un seul éventail par carte,
+ *  partant d'un coin ou d'un bord (au hasard, donc le sens change d'une carte à l'autre). */
+const BEAM_ORIGINS: [number, number, number, number][] = [
+  // x, y, angle de début, angle de fin (degrés)
+  [105, -8, 100, 175], [-5, -8, 5, 80], [-5, 108, -80, -5], [105, 108, 185, 260], [50, -15, 25, 155],
+];
+export function CardBeams({ dir }: { dir?: number }) {
+  const [cx, cy, from, to] = React.useMemo(
+    () => BEAM_ORIGINS[(dir ?? Math.floor(Math.random() * BEAM_ORIGINS.length)) % BEAM_ORIGINS.length], [dir]);
+  const n = 8;
+  const w = (2.4 * Math.PI) / 180;
+  const r = 260;
+  const paths = Array.from({ length: n }, (_, i) => {
+    const a = ((from + ((to - from) * i) / (n - 1)) * Math.PI) / 180;
+    return `M${cx} ${cy} L${cx + r * Math.cos(a - w)} ${cy + r * Math.sin(a - w)} L${cx + r * Math.cos(a + w)} ${cy + r * Math.sin(a + w)} Z`;
+  });
   return (
     <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style={StyleSheet.absoluteFill} pointerEvents="none">
-      {beams(88, -10, 9, 95, 185, 2.2).map((d, i) => <Path key={`a${i}`} d={d} fill={colors.red} opacity={0.06} />)}
-      {beams(-12, 115, 7, -80, -5, 1.8).map((d, i) => <Path key={`b${i}`} d={d} fill={colors.red} opacity={0.05} />)}
+      {paths.map((d, i) => <Path key={i} d={d} fill={colors.red} opacity={0.06} />)}
     </Svg>
   );
 }

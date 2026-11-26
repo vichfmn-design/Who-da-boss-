@@ -121,7 +121,7 @@ export default function ProfileScreen() {
 
           <Text style={styles.section}>{P.mine}</Text>
           <View style={[styles.mineCard, comicShadow(5)]}>
-            <View style={[StyleSheet.absoluteFill, { borderRadius: 11, overflow: 'hidden' }]} pointerEvents="none"><CardBeams /></View>
+            <View style={[StyleSheet.absoluteFill, { borderRadius: 11, overflow: 'hidden' }]} pointerEvents="none"><CardBeams dir={2} /></View>
             <View style={styles.selfieRing}>
               {selfieUrl
                 ? <Image source={{ uri: selfieUrl }} style={styles.selfie} accessibilityLabel={P.mine} />
