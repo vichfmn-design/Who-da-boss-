@@ -1,6 +1,6 @@
 // Briques visuelles BD : explosion, étoile, bombe, bulle, panneau, bouton, fond à lignes de vitesse.
 import React from 'react';
-import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, { Circle, Path, Polygon, Rect } from 'react-native-svg';
 import { BURST_A, STAR, colors, comicShadow, fonts } from '../theme';
 
@@ -63,13 +63,19 @@ export function SpeedLinesBackground({ cx = 50, cy = 45, children, style }: {
   });
   return (
     <View style={[{ flex: 1, backgroundColor: colors.yellow }, style]}>
-      <Svg viewBox="0 0 100 100" preserveAspectRatio="none" style={StyleSheet.absoluteFill}>
+      <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style={raysStyle}>
         {rays.map((d, i) => <Path key={i} d={d} fill={colors.white} opacity={0.3} />)}
       </Svg>
       {children}
     </View>
   );
 }
+
+// Les rayons couvrent tout l'écran : sur le web, toute la fenêtre (même si l'app garde
+// une largeur de téléphone au centre), sur mobile, tout l'écran de la page.
+const raysStyle = (Platform.OS === 'web'
+  ? { position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh' }
+  : StyleSheet.absoluteFill) as unknown as StyleProp<ViewStyle>;
 
 /** Bulle de dialogue avec petite queue (en bas, à gauche ou en haut). */
 export function SpeechBubble({
