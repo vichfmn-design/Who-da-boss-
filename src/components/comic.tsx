@@ -1,7 +1,7 @@
 // Briques visuelles BD : explosion, étoile, bombe, bulle, panneau, bouton, fond à lignes de vitesse.
 import React from 'react';
 import { Platform, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
-import Svg, { Circle, Path, Polygon, Rect } from 'react-native-svg';
+import Svg, { Circle, Defs, Path, Polygon, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { BURST_A, STAR, colors, comicShadow, fonts } from '../theme';
 
 type Shape = readonly (readonly [number, number])[];
@@ -9,11 +9,16 @@ const toPoints = (shape: Shape) => shape.map(([x, y]) => `${x},${y}`).join(' ');
 
 /** Explosion BD : ombre noire décalée, contour noir épais, remplissage coloré, contenu centré. */
 export function Burst({
-  width, height, fill, shape = BURST_A, shadow = 6, outline = 3, children, style, rotate = 0,
+  width, height, fill, shape = BURST_A, shadow = 6, outline = 3, children, style, rotate = 0, stroke = colors.ink, glow,
 }: {
   width: number; height: number; fill: string; shape?: Shape; shadow?: number; outline?: number;
   children?: React.ReactNode; style?: StyleProp<ViewStyle>; rotate?: number;
+  /** Couleur du contour (noir par défaut). */
+  stroke?: string;
+  /** Halo clair au centre (dégradé radial vers la couleur de remplissage). */
+  glow?: string;
 }) {
+  const gradId = React.useId().replace(/:/g, '');
   const pts = toPoints(shape);
   // Marge autour de la forme : l'ombre décalée et le contour épais ne coupent plus les pointes.
   const sx = (shadow / width) * 100;
@@ -24,7 +29,15 @@ export function Burst({
     <View style={[{ width, height }, style]}>
       <Svg width={width} height={height} viewBox={viewBox} preserveAspectRatio="none" style={StyleSheet.absoluteFill}>
         <Polygon points={pts} fill={colors.ink} transform={`translate(${(shadow / width) * 100} ${(shadow / height) * 100})`} />
-        <Polygon points={pts} fill={fill} stroke={colors.ink} strokeWidth={(outline / Math.min(width, height)) * 100 * 2} strokeLinejoin="miter" />
+        {glow && (
+          <Defs>
+            <RadialGradient id={gradId} cx="50%" cy="50%" r="50%">
+              <Stop offset="0" stopColor={glow} />
+              <Stop offset="1" stopColor={fill} />
+            </RadialGradient>
+          </Defs>
+        )}
+        <Polygon points={pts} fill={glow ? `url(#${gradId})` : fill} stroke={stroke} strokeWidth={(outline / Math.min(width, height)) * 100 * 2} strokeLinejoin="miter" />
       </Svg>
       <View style={[StyleSheet.absoluteFill, styles.center, { transform: [{ rotate: `${rotate}deg` }] }]}>{children}</View>
     </View>

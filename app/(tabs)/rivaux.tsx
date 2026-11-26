@@ -5,7 +5,7 @@ import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { AlertButton } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ComicButton, SpeedLinesBackground } from '../../src/components/comic';
+import { Burst, ComicButton, SpeedLinesBackground } from '../../src/components/comic';
 import { t } from '../../src/i18n';
 import { Alert } from '../../src/lib/alert';
 import { api, type MyBoosts } from '../../src/lib/api';
@@ -76,16 +76,22 @@ export default function Rivals() {
         } },
     ]);
   }
+  // Logo « BOOST ! » : explosion jaune bordée de rouge, à la place d'un bouton
   function BoostButton({ c, g }: { c?: string; g?: string }) {
     const open = openFor(c, g);
-    if (open) {
-      return <ComicButton label={open.i_finished ? B.pending : B.play} size={18} color={colors.blue} textColor={colors.yellow}
-        onPress={() => router.push(`/boost/${open.id}`)} style={{ marginTop: 8 }} />;
-    }
     const n = tokensFor(c, g);
-    if (n === 0) return null;
-    return <ComicButton label={`${B.have(n)} · ${B.launch}`} size={18} color={colors.blue} textColor={colors.yellow}
-      onPress={() => launch(c, g)} style={{ marginTop: 8 }} />;
+    if (!open && n === 0) return null;
+    const sub = open ? (open.i_finished ? B.waitOthers : B.toPlay) : B.left(n);
+    return (
+      <Pressable accessibilityRole="button" accessibilityLabel={`${B.title} ${sub}`}
+        onPress={() => (open ? router.push(`/boost/${open.id}`) : launch(c, g))}
+        style={({ pressed }) => ({ alignSelf: 'center', marginTop: 6, transform: [{ scale: pressed ? 0.95 : 1 }] })}>
+        <Burst width={250} height={150} fill={colors.yellow} glow="#FFF6B0" stroke={colors.red} outline={4} shadow={7} rotate={-5}>
+          <Text style={styles.boostTitle}>{B.title}</Text>
+          <Text style={styles.boostSub}>{sub}</Text>
+        </Burst>
+      </Pressable>
+    );
   }
 
   // Duo : un lien unique à envoyer par message (Messages, WhatsApp…)
@@ -278,6 +284,9 @@ const styles = StyleSheet.create({
   duoCard: { backgroundColor: colors.red, flexDirection: 'column', alignItems: 'stretch' },
   name: { fontFamily: fonts.comic, fontSize: 24, letterSpacing: 1 },
   sub: { fontFamily: fonts.bodyBold, fontSize: 12 },
+  boostTitle: { fontFamily: fonts.comic, fontSize: 44, letterSpacing: 1, color: colors.red,
+    textShadowColor: colors.ink, textShadowOffset: { width: 3, height: 3 }, textShadowRadius: 0 },
+  boostSub: { fontFamily: fonts.comic, fontSize: 13, letterSpacing: 0.5, color: colors.ink, marginTop: -4 },
   arrow: { fontFamily: fonts.bodyHeavy, fontSize: 16, color: colors.yellow, width: 18 },
   more: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 2, paddingHorizontal: 6 },
   inline: { flexDirection: 'row', gap: 10, alignItems: 'center' },
