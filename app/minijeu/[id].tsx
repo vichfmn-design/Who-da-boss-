@@ -251,16 +251,19 @@ function Memoire({ content, onSubmit }: { content: BoostContent; onSubmit: Submi
   const [shown, setShown] = useState(-1);
   const [pos, setPos] = useState(0);
 
+  // Chaque emoji s'affiche 550 ms puis disparaît 250 ms : un emoji répété clignote, on peut le compter
   useEffect(() => {
     if (phase !== 'show') return;
-    let k = -1;
+    let k = 0;
+    let tm: ReturnType<typeof setTimeout>;
     setShown(-1);
-    const iv = setInterval(() => {
-      k += 1;
-      if (k >= len) { clearInterval(iv); setShown(-1); setPhase('input'); setPos(0); return; }
+    const step = () => {
+      if (k >= len) { setShown(-1); setPhase('input'); setPos(0); return; }
       setShown(k);
-    }, 750);
-    return () => clearInterval(iv);
+      tm = setTimeout(() => { setShown(-1); k += 1; tm = setTimeout(step, 250); }, 550);
+    };
+    tm = setTimeout(step, 400);
+    return () => clearTimeout(tm);
   }, [phase, len]);
 
   const press = (e: number) => {
@@ -275,7 +278,7 @@ function Memoire({ content, onSubmit }: { content: BoostContent; onSubmit: Submi
     <>
       <Text style={styles.counter}>{B.level(len)} · {phase === 'show' ? B.watch : B.yourTurn}</Text>
       <Panel tilt={-1} style={{ alignItems: 'center', minHeight: 110, justifyContent: 'center' }}>
-        <Text style={styles.memo}>{phase === 'show' && shown >= 0 ? EMOJIS[seq[shown]] : phase === 'input' ? `${pos} / ${len}` : '…'}</Text>
+        <Text style={styles.memo}>{phase === 'show' ? (shown >= 0 ? EMOJIS[seq[shown]] : ' ') : `${pos} / ${len}`}</Text>
       </Panel>
       <View style={styles.memoGrid}>
         {EMOJIS.map((e, k) => (
