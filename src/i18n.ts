@@ -133,7 +133,8 @@ const fr = {
       { title: 'LES MINES', burst: 'BOUM !', lines: [
         'Tu as une mine par partie. Pose-la sur la question que tu trouves la plus piégeuse.',
         'Si un rival se trompe sur ta mine, il perd deux fois plus (−2, ou −6 avec « SÛR ! »).',
-        'Plusieurs mines sur la même question s\'additionnent : ×3, ×4. Ta propre mine ne te touche pas.',
+        'Poser une mine ne te coûte jamais rien, même si ton rival répond juste. Ta propre mine ne te touche pas.',
+        'Plusieurs mines sur la même question s\'additionnent : ×3, ×4.',
         'Chaque rival qui saute sur ta mine te rapporte 1 point bonus.',
       ] },
       { title: 'LA CARTE WHO DA BOSS ?', burst: '×2', lines: [
@@ -284,7 +285,8 @@ const en: Dict = {
       { title: 'MINES', burst: 'BOOM!', lines: [
         'You get one mine per game. Put it on the question you find trickiest.',
         'If a rival gets your mined question wrong, they lose twice as much (−2, or −6 with "SURE!").',
-        'Several mines on one question add up: ×3, ×4. Your own mine never hits you.',
+        'Placing a mine never costs you anything, even if your rival answers right. Your own mine never hits you.',
+        'Several mines on one question add up: ×3, ×4.',
         'Each rival who steps on your mine gives you 1 bonus point.',
       ] },
       { title: 'THE WHO DA BOSS? CARD', burst: '×2', lines: [
