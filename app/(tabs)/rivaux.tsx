@@ -29,6 +29,9 @@ export default function Rivals() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [groupName, setGroupName] = useState('');
   const [busy, setBusy] = useState(false);
+  const [openGroups, setOpenGroups] = useState<string[]>([]);
+  const isOpen = (id: string) => openGroups.includes(id);
+  const toggleGroup = (id: string) => setOpenGroups((o) => (o.includes(id) ? o.filter((x) => x !== id) : [...o, id]));
   const [boosts, setBoosts] = useState<MyBoosts>({ tokens: [], challenges: [] });
   const router = useRouter();
 
@@ -224,20 +227,29 @@ export default function Rivals() {
             const full = g.members.length >= MAX_GROUP;
             return (
               <View key={g.id} style={[styles.card, styles.groupCard, comicShadow(4)]}>
-                <Pressable onPress={() => groupOptions(g)} accessibilityRole="button" style={{ gap: 2 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={[styles.name, { color: colors.yellow, flex: 1 }]}>{g.name.toUpperCase()}</Text>
+                {/* Replié : nom du groupe, flèche pour ouvrir, ••• pour les options */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Pressable onPress={() => toggleGroup(g.id)} accessibilityRole="button" accessibilityState={{ expanded: isOpen(g.id) }}
+                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Text style={[styles.arrow]}>{isOpen(g.id) ? '▼' : '▶'}</Text>
+                    <Text style={[styles.name, { color: colors.yellow, flex: 1 }]} numberOfLines={1}>{g.name.toUpperCase()}</Text>
+                  </Pressable>
+                  <Pressable onPress={() => groupOptions(g)} accessibilityRole="button" accessibilityLabel={R.options} hitSlop={8}>
                     <Text style={[styles.more, { color: colors.yellow }]}>•••</Text>
+                  </Pressable>
+                </View>
+                {isOpen(g.id) && (
+                  <View style={{ gap: 2, marginTop: 4 }}>
+                    <Text style={[styles.sub, { color: colors.white }]}>
+                      {g.members.map((m) => `${m.userId === me ? t().board.you : m.pseudo}${m.userId === g.createdBy ? ` (${R.creator})` : ''}`).join(', ')}
+                    </Text>
+                    <Text style={[styles.sub, { color: colors.white }]}>{R.members(g.members.length)} · {R.rhythm(g.rhythm)}</Text>
+                    {g.members.length < 2 && <Text style={[styles.sub, { color: colors.yellow }]}>{R.waitingMembers}</Text>}
+                    <ComicButton label={full ? R.full : R.addFriend} disabled={full} onPress={() => addToGroup(g)}
+                      color={colors.yellow} textColor={colors.ink} size={20} style={{ marginTop: 6 }} />
+                    <BoostButton g={g.id} />
                   </View>
-                  <Text style={[styles.sub, { color: colors.white }]}>
-                    {g.members.map((m) => `${m.userId === me ? t().board.you : m.pseudo}${m.userId === g.createdBy ? ` (${R.creator})` : ''}`).join(', ')}
-                  </Text>
-                  <Text style={[styles.sub, { color: colors.white }]}>{R.members(g.members.length)} · {R.rhythm(g.rhythm)}</Text>
-                  {g.members.length < 2 && <Text style={[styles.sub, { color: colors.yellow }]}>{R.waitingMembers}</Text>}
-                </Pressable>
-                <ComicButton label={full ? R.full : R.addFriend} disabled={full} onPress={() => addToGroup(g)}
-                  color={colors.yellow} textColor={colors.ink} size={20} style={{ marginTop: 6 }} />
-                <BoostButton g={g.id} />
+                )}
               </View>
             );
           })}
@@ -266,6 +278,7 @@ const styles = StyleSheet.create({
   duoCard: { backgroundColor: colors.red, flexDirection: 'column', alignItems: 'stretch' },
   name: { fontFamily: fonts.comic, fontSize: 24, letterSpacing: 1 },
   sub: { fontFamily: fonts.bodyBold, fontSize: 12 },
+  arrow: { fontFamily: fonts.bodyHeavy, fontSize: 16, color: colors.yellow, width: 18 },
   more: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 2, paddingHorizontal: 6 },
   inline: { flexDirection: 'row', gap: 10, alignItems: 'center' },
   input: { flex: 1, borderWidth: 3, borderColor: colors.ink, borderRadius: 12, paddingHorizontal: 12, height: 50,
