@@ -1,5 +1,6 @@
 // La révélation : BOOM ! si tu gagnes, PAF ! sinon, puis le détail question par question.
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,6 +8,7 @@ import { Bomb, Burst, ComicButton, Panel, SpeechBubble, SpeedLinesBackground, St
 import { t } from '../../src/i18n';
 import { api, type Reveal } from '../../src/lib/api';
 import { Alert } from '../../src/lib/alert';
+import { MineBoom } from '../../src/components/MineBoom';
 import { useSession } from '../../src/lib/session';
 import { BURST_B, colors, comicShadow, fonts } from '../../src/theme';
 
@@ -18,7 +20,18 @@ export default function RevealScreen() {
   const [data, setData] = useState<Reveal | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => { api.reveal(id).then(setData).catch((e: Error) => setError(e.message)); }, [id]);
+  // Les mines sur lesquelles tu as sauté : BOOM ! + selfies, une seule fois par partie
+  const [boomStep, setBoomStep] = useState<number | null>(null);
+  useEffect(() => {
+    api.reveal(id).then(async (r) => {
+      setData(r);
+      const seen = await AsyncStorage.getItem(`wdb.boomSeen.${id}`).catch(() => '1');
+      if ((r.my_booms?.length ?? 0) > 0 && seen !== '1') {
+        setBoomStep(0);
+        AsyncStorage.setItem(`wdb.boomSeen.${id}`, '1').catch(() => {});
+      }
+    }).catch((e: Error) => setError(e.message));
+  }, [id]);
 
   if (error) {
     return (
@@ -31,6 +44,12 @@ export default function RevealScreen() {
     );
   }
   if (!data) return <SpeedLinesBackground><ActivityIndicator style={{ flex: 1 }} color={colors.ink} /></SpeedLinesBackground>;
+  const booms = data.my_booms ?? [];
+  if (boomStep !== null && boomStep < booms.length) {
+    const b = booms[boomStep];
+    return <MineBoom question={b.index} miners={b.miners ?? []}
+      onDone={() => setBoomStep(boomStep + 1 < booms.length ? boomStep + 1 : null)} />;
+  }
 
   const me = data.players.find((p) => p.user_id === session?.user.id);
   const iWon = data.winner === session?.user.id;

@@ -261,11 +261,12 @@ export default function Rivals() {
             );
           })}
 
-          <View style={styles.inline}>
-            <TextInput style={styles.input} placeholder={R.groupName} value={groupName} onChangeText={setGroupName}
+          {/* Nom du groupe au-dessus, bouton en dessous sur toute la largeur (rien de coupé sur iPhone) */}
+          <View style={{ gap: 10 }}>
+            <TextInput style={[styles.input, { flex: 0 }]} placeholder={R.groupName} value={groupName} onChangeText={setGroupName}
               maxLength={30} accessibilityLabel={R.groupName} />
-            <ComicButton label={R.group} onPress={createGroup} disabled={busy || groupName.trim().length < 2} size={18}
-              color={colors.blue} textColor={colors.white} style={{ paddingHorizontal: 10 }} />
+            <ComicButton label={R.group} onPress={createGroup} disabled={busy || groupName.trim().length < 2} size={22}
+              color={colors.blue} textColor={colors.white} />
           </View>
 
         </ScrollView>

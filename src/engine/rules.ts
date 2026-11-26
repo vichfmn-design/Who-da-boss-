@@ -234,7 +234,8 @@ export type TitleKey =
   | 'most_sure_correct'   // La personne la plus sûre !
   | 'most_sure_wrong'     // La personne qui s'y croit trop !
   | 'longest_streak_month' // L'Infatigable (remis à zéro chaque mois)
-  | 'most_minigame_records' // Le Boss des Boss (records aux mini-jeux)
+  | 'most_titles'         // Le Boss des Boss (le plus de titres)
+  | 'most_minigame_records' // Doigts de fée (records aux mini-jeux)
   | 'most_mine_hits'      // La chair à canon
   | 'most_mines_dodged'   // Le ninja
   | 'fastest_answer'      // Lucky Luke (bonne réponse la plus rapide)

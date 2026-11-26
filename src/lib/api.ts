@@ -29,6 +29,7 @@ export type MatchQuestions = {
   theme: string;
   questions: { index: number; prompt: string; choices: string[] }[];
   answered: number[];
+  resumed?: boolean;
   my_mine: number | null;
 };
 
@@ -36,6 +37,7 @@ export type Reveal = {
   match_id: string;
   winner: string | null;
   card_multiplier: number;
+  my_booms?: { index: number; miners: { pseudo: string; selfie: string | null }[] | null }[];
   questions: { index: number; prompt: string; choices: string[]; correct_index: number; mines: number; explanation?: string | null }[];
   players: {
     user_id: string; pseudo: string; points: number; rank: number; forfeit: boolean; mine: number | null;

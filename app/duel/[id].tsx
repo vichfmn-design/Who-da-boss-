@@ -1,12 +1,10 @@
 // Le duel : 5 questions, 15 secondes chacune, bouton SÛR ! après la question,
 // mine à gauche avec sa bulle d'explication, VALIDER !
 import * as Haptics from 'expo-haptics';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSelfieUrl } from '../../src/lib/selfieUrl';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Circle } from 'react-native-svg';
 import { Bomb, Burst, ComicButton, Panel, SpeechBubble, SpeedLinesBackground } from '../../src/components/comic';
 import { RULES } from '../../src/engine/rules';
 import { t } from '../../src/i18n';
@@ -15,35 +13,6 @@ import { BURST_B, colors, comicShadow, fonts } from '../../src/theme';
 import { Alert } from '../../src/lib/alert';
 
 const SECONDS = RULES.secondsPerQuestion;
-
-/** Le selfie de celui qui a posé la mine, sous le BOOM (bombe si pas de selfie). */
-function MinerSelfie({ pseudo, path }: { pseudo: string; path: string | null }) {
-  const url = useSelfieUrl(path);
-  return (
-    <View style={{ alignItems: 'center', gap: 6 }}>
-      <View style={[{ width: 120, height: 120, borderRadius: 60, borderWidth: 5, borderColor: colors.ink, backgroundColor: colors.white,
-        overflow: 'hidden', alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '-4deg' }] }, comicShadow(5)]}>
-        {url ? <Image source={{ uri: url }} style={{ width: '100%', height: '100%' }} accessibilityLabel={pseudo} /> : <Bomb size={64} />}
-      </View>
-      <View style={{ backgroundColor: colors.ink, paddingHorizontal: 10, paddingVertical: 2, borderRadius: 999 }}>
-        <Text style={{ fontFamily: fonts.comic, fontSize: 18, letterSpacing: 0.5, color: colors.yellow }}>{t().duel.trapBy(pseudo)}</Text>
-      </View>
-    </View>
-  );
-}
-
-/** Petit nuage BD (blanc, contour noir) autour de l'explosion de mine. */
-function Cloud({ style }: { style?: object }) {
-  const bumps = [[30, 52, 24], [62, 36, 30], [96, 50, 24], [64, 60, 22]] as const;
-  return (
-    <View style={style} pointerEvents="none">
-      <Svg width={130} height={86} viewBox="0 0 130 86">
-        {bumps.map(([cx, cy, r], i) => <Circle key={`o${i}`} cx={cx} cy={cy} r={r + 3.5} fill={colors.ink} />)}
-        {bumps.map(([cx, cy, r], i) => <Circle key={`i${i}`} cx={cx} cy={cy} r={r} fill={colors.white} />)}
-      </Svg>
-    </View>
-  );
-}
 
 export default function Duel() {
   const D = t().duel;
@@ -57,20 +26,29 @@ export default function Duel() {
   const [left, setLeft] = useState<number>(SECONDS);
   const [busy, setBusy] = useState(false);
   const [waiting, setWaiting] = useState(false);
-  // « BOOM ! Une mine vient d'exploser ! » : mauvaise réponse sur une question minée par un rival
-  const [boom, setBoom] = useState<number | null>(null);
-  const [miners, setMiners] = useState<{ pseudo: string; selfie: string | null }[]>([]);
-  const afterBoom = useRef<(() => void) | null>(null);
   const startedAt = useRef(Date.now());
+  // Une fois lancée, la partie ne se quitte pas : pas de bouton retour, retour bloqué jusqu'à la fin
+  // (sur le web, quitter la page demande aussi confirmation)
+  const [locked, setLocked] = useState(true);
+  const disablePrevention = usePreventRemove(locked);
+  const unlock = useCallback(() => { setLocked(false); disablePrevention(); }, [disablePrevention]);
 
   useEffect(() => {
     api.matchQuestions(id).then((d) => {
       setData(d);
       setMine(d.my_mine);
       const first = [0, 1, 2, 3, 4].find((i) => !d.answered.includes(i));
-      if (first === undefined) finish();
-      else setIndex(first);
-    }).catch((e: Error) => { Alert.alert(t().errors.generic, e.message); router.back(); });
+      if (first === undefined) { finish(); return; }
+      if (d.resumed) {
+        // Partie quittée en cours : la question qui était affichée compte comme ratée
+        api.submitAnswer(id, first, null, false, SECONDS * 1000).catch(() => {}).finally(() => {
+          const nextQ = [0, 1, 2, 3, 4].find((i) => i > first && !d.answered.includes(i));
+          if (nextQ === undefined) finish(); else setIndex(nextQ);
+        });
+        return;
+      }
+      setIndex(first);
+    }).catch((e: Error) => { unlock(); Alert.alert(t().errors.generic, e.message); router.back(); });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -86,6 +64,7 @@ export default function Duel() {
     setBusy(true);
     try {
       const revealed = await api.finish(id);
+      unlock();
       api.notifyPlayers(id).catch(() => {});
       if (revealed) router.replace(`/reveal/${id}`);
       else setWaiting(true);
@@ -94,24 +73,15 @@ export default function Duel() {
     } finally {
       setBusy(false);
     }
-  }, [id, router]);
+  }, [id, router, unlock]);
 
   const submit = useCallback(async (timedOut = false) => {
     if (busy) return;
     setBusy(true);
     const ms = Date.now() - startedAt.current;
     try {
-      const res = await api.submitAnswer(id, index, timedOut ? null : choice, sure, ms);
+      await api.submitAnswer(id, index, timedOut ? null : choice, sure, ms);
       Haptics.impactAsync(sure ? Haptics.ImpactFeedbackStyle.Heavy : Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-      const next = () => { if (index >= 4) finish(); else setIndex(index + 1); };
-      if (res?.mine_hit) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
-        afterBoom.current = next;
-        setMiners(res.miners ?? []);
-        setBoom(res.mines);
-        setBusy(false);
-        return;
-      }
       if (index >= 4) { setBusy(false); await finish(); return; }
       setIndex(index + 1);
     } catch (e) {
@@ -120,29 +90,17 @@ export default function Duel() {
     setBusy(false);
   }, [busy, id, index, choice, sure, finish]);
 
-  // L'explosion reste 2,5 s (ou jusqu'au toucher), puis question suivante
-  const continueAfterBoom = useCallback(() => {
-    const go = afterBoom.current;
-    afterBoom.current = null;
-    setBoom(null);
-    go?.();
-  }, []);
-  useEffect(() => {
-    if (boom === null) return;
-    const tm = setTimeout(continueAfterBoom, 2500);
-    return () => clearTimeout(tm);
-  }, [boom, continueAfterBoom]);
 
   // Chrono de 15 secondes ; à zéro, la question compte comme fausse
   useEffect(() => {
-    if (!data || waiting || boom !== null) return;
+    if (!data || waiting) return;
     const timer = setInterval(() => {
       const remaining = SECONDS - Math.floor((Date.now() - startedAt.current) / 1000);
       setLeft(Math.max(0, remaining));
       if (remaining <= 0) { clearInterval(timer); submit(true); }
     }, 250);
     return () => clearInterval(timer);
-  }, [data, index, waiting, submit, boom]);
+  }, [data, index, waiting, submit]);
 
   async function toggleMine() {
     try {
@@ -152,32 +110,6 @@ export default function Duel() {
   }
 
   if (!data) return <SpeedLinesBackground><ActivityIndicator style={{ flex: 1 }} color={colors.ink} /></SpeedLinesBackground>;
-
-  if (boom !== null) {
-    return (
-      <Pressable style={{ flex: 1 }} onPress={continueAfterBoom} accessibilityRole="button" accessibilityLabel={D.mineBoomSub}>
-        <SpeedLinesBackground>
-          <SafeAreaView style={[styles.wrap, { justifyContent: 'center', alignItems: 'center' }]}>
-            <View style={{ width: 340, height: 330, alignItems: 'center', justifyContent: 'center' }}>
-              <Burst width={330} height={320} fill={colors.red} glow={colors.redLight} shadow={9} outline={4}>
-                <Text style={styles.boomText}>{D.mineBoom}</Text>
-                <View style={[styles.boomLabel, comicShadow(4)]}>
-                  <Text style={styles.boomLabelText}>{D.mineBoomSub}</Text>
-                </View>
-              </Burst>
-              <Cloud style={{ position: 'absolute', top: -6, left: -14 }} />
-              <Cloud style={{ position: 'absolute', top: 0, right: -14 }} />
-            </View>
-            <View style={{ flexDirection: 'row', gap: 14, justifyContent: 'center', flexWrap: 'wrap', marginTop: -24 }}>
-              {miners.map((m) => <MinerSelfie key={m.pseudo} pseudo={m.pseudo} path={m.selfie} />)}
-            </View>
-            <Panel tilt={1}><Text style={styles.rule}>{D.mineBoomLoss(boom)}</Text></Panel>
-            <Text style={styles.rule}>{D.tapToContinue}</Text>
-          </SafeAreaView>
-        </SpeedLinesBackground>
-      </Pressable>
-    );
-  }
 
   if (waiting) {
     return (
@@ -203,11 +135,9 @@ export default function Duel() {
 
   return (
     <SpeedLinesBackground cy={30}>
-      <SafeAreaView style={styles.wrap}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.top}>
-          <Pressable onPress={() => router.back()} style={[styles.pill, comicShadow(3)]} accessibilityRole="button">
-            <Text style={styles.pillText}>{D.quit}</Text>
-          </Pressable>
           <Text style={styles.counter}>{D.question(index + 1)}</Text>
           <Burst width={56} height={56} fill={colors.red} shape={BURST_B} shadow={0} outline={2}>
             <Text style={[styles.burstText, { fontSize: 22 }]}>{left} S</Text>
@@ -274,8 +204,9 @@ export default function Duel() {
         </View>
 
         <Text style={styles.rule}>{D.normalRule}</Text>
+        </ScrollView>
 
-        <View style={{ marginTop: 'auto' }}>
+        <View style={styles.footer}>
           <ComicButton label={D.validate} size={34} disabled={choice === null || busy} onPress={() => submit(false)} />
         </View>
       </SafeAreaView>
@@ -285,6 +216,8 @@ export default function Duel() {
 
 const styles = StyleSheet.create({
   wrap: { flex: 1, padding: 20, gap: 14 },
+  scroll: { padding: 20, gap: 14, paddingBottom: 12 },
+  footer: { paddingHorizontal: 20, paddingTop: 6, paddingBottom: 14 },
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   pill: { backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 3 },
   pillText: { fontFamily: fonts.comic, fontSize: 17, letterSpacing: 1 },
@@ -311,9 +244,4 @@ const styles = StyleSheet.create({
   mineTitle: { fontFamily: fonts.comic, fontSize: 18, letterSpacing: 0.5 },
   mineRule: { fontFamily: fonts.bodyHeavy, fontSize: 11 },
   rule: { fontFamily: fonts.bodyBold, fontSize: 12, textAlign: 'center' },
-  boomText: { fontFamily: fonts.boom, fontSize: 76, color: colors.yellow, transform: [{ rotate: '-6deg' }],
-    textShadowColor: colors.ink, textShadowOffset: { width: 4, height: 5 }, textShadowRadius: 0 },
-  boomLabel: { backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, paddingHorizontal: 10, paddingVertical: 4,
-    transform: [{ rotate: '-4deg' }], marginTop: 6 },
-  boomLabelText: { fontFamily: fonts.comic, fontSize: 18, letterSpacing: 0.5, color: colors.red },
 });

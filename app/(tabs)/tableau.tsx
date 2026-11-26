@@ -14,7 +14,7 @@ type Tab = 'duo' | 'group' | 'global';
 type Option = { id: string; label: string };
 type ScoreRow = { userId: string; pseudo: string; points: number; wins: number };
 
-const MAIN_TITLES = ['most_sure_correct', 'most_sure_wrong', 'longest_streak_month', 'most_minigame_records', 'most_mine_hits', 'most_mines_dodged', 'fastest_answer', 'longest_correct_streak'] as const;
+const MAIN_TITLES = ['most_titles', 'most_sure_correct', 'most_sure_wrong', 'longest_streak_month', 'most_minigame_records', 'most_mine_hits', 'most_mines_dodged', 'fastest_answer', 'longest_correct_streak'] as const;
 const GAMES = ['frappe', 'rebus', 'chiffre', 'reflexe', 'memoire', 'chrono'] as const;
 
 export default function Board() {

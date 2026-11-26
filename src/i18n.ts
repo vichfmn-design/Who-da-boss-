@@ -32,6 +32,7 @@ const fr = {
     timeUp: 'TEMPS ÉCOULÉ !',
     cardMatch: 'DÉFI ×2', mineBoom: 'BOOM !', mineBoomSub: 'UNE MINE VIENT D\'EXPLOSER !',
     trapBy: (p: string) => `Piège de ${p} !`,
+    mineBoomWhere: (q: number) => `Question ${q} : tu as sauté sur une mine !`,
     mineBoomLoss: (n: number) => `Tes pertes sur cette question sont multipliées par ${n + 1}.`, tapToContinue: 'Touche pour continuer',
   },
   reveal: {
@@ -66,7 +67,7 @@ const fr = {
   },
   titles: {
     most_sure_correct: 'Mr je sais tout !', most_sure_wrong: 'Le pipoteur de service !',
-    longest_streak_month: 'L\'Infatigable !', most_minigame_records: 'Le Boss des Boss !',
+    longest_streak_month: 'L\'Infatigable !', most_titles: 'Le Boss des Boss !', most_minigame_records: 'Doigts de fée !',
     most_mine_hits: 'La chair à canon !', most_mines_dodged: 'Le ninja !',
     fastest_answer: 'Lucky Luke !', longest_correct_streak: 'Le génie !', theme_boss: (t: string) => `Boss de ${t}`,
   },
@@ -74,6 +75,7 @@ const fr = {
     most_sure_correct: 'Le plus de « SÛR ! » justes cette saison.',
     most_sure_wrong: 'Le plus de « SÛR ! » ratés cette saison.',
     longest_streak_month: 'La plus longue série de victoires du mois.',
+    most_titles: 'Celui qui a le plus de titres.',
     most_minigame_records: 'Celui qui a le plus de meilleurs scores aux mini-jeux.',
     most_mine_hits: 'Celui qui a le plus explosé sur une mine.',
     most_mines_dodged: 'Celui qui a le plus évité de mines.',
@@ -173,6 +175,12 @@ const fr = {
         'Tu choisis la catégorie : 9 secondes par question, +2 points par bonne réponse.',
         'Ça continue tant que tu réponds juste : à la première erreur, la série s\'arrête.',
       ] },
+      { title: 'LES MINI-JEUX', burst: 'MINI-\nJEU !', lines: [
+        'Après tes 5 questions, un mini-jeu bonus t\'attend (facultatif) : le même pour tous les joueurs de la partie.',
+        'Il y en a 6 : Frappe éclair (taper une phrase), Rébus emoji, Le juste chiffre, Réflexe, Mémoire et Le chrono parfait (10 secondes pile).',
+        'Le meilleur score de la partie gagne 1 point bonus vers la carte Who da Boss ?.',
+        'Chaque record compte pour le titre « Doigts de fée ! ».',
+      ] },
       { title: 'LA CARTE WHO DA BOSS ?', burst: '×2', lines: [
         'Tu gagnes 1 point bonus quand un rival saute sur ta mine, quand tu réussis 3 « SÛR ! » dans une partie, ou quand tu fais le meilleur score au mini-jeu bonus de fin de partie.',
         '3 points bonus = 1 carte « Who da Boss ? », valable 3 jours. Joue-la depuis ton profil.',
@@ -261,6 +269,7 @@ const en: Dict = {
     timeUp: "TIME'S UP!",
     cardMatch: 'CHALLENGE ×2', mineBoom: 'BOOM!', mineBoomSub: 'A MINE JUST EXPLODED!',
     trapBy: (p) => `${p}'s trap!`,
+    mineBoomWhere: (q) => `Question ${q}: you stepped on a mine!`,
     mineBoomLoss: (n) => `Your losses on this question are multiplied by ${n + 1}.`, tapToContinue: 'Tap to continue',
   },
   reveal: {
@@ -295,7 +304,7 @@ const en: Dict = {
   },
   titles: {
     most_sure_correct: 'Mr Know-It-All!', most_sure_wrong: 'The Resident Bluffer!',
-    longest_streak_month: 'The Unstoppable!', most_minigame_records: 'Boss of Bosses!',
+    longest_streak_month: 'The Unstoppable!', most_titles: 'Boss of Bosses!', most_minigame_records: 'Fairy Fingers!',
     most_mine_hits: 'Cannon Fodder!', most_mines_dodged: 'The Ninja!',
     fastest_answer: 'Lucky Luke!', longest_correct_streak: 'The Genius!', theme_boss: (t) => `Boss of ${t}`,
   },
@@ -303,6 +312,7 @@ const en: Dict = {
     most_sure_correct: 'Most right "SURE!" answers this season.',
     most_sure_wrong: 'Most wrong "SURE!" answers this season.',
     longest_streak_month: 'Longest winning streak this month.',
+    most_titles: 'The one who holds the most titles.',
     most_minigame_records: 'The one with the most best scores in the mini-games.',
     most_mine_hits: 'The one who blew up on the most mines.',
     most_mines_dodged: 'The one who dodged the most mines.',
@@ -401,6 +411,12 @@ const en: Dict = {
         'Launch it from Rivals whenever you like, as long as you are still last.',
         'Pick the category: 9 seconds per question, +2 points per right answer.',
         'It goes on while you answer right: the first mistake ends the streak.',
+      ] },
+      { title: 'THE MINI-GAMES', burst: 'MINI-\nGAME!', lines: [
+        'After your 5 questions, an optional bonus mini-game awaits: the same one for every player of the game.',
+        'There are 6: Speed typing, Emoji rebus, The right number, Reflex, Memory and The perfect stopwatch (exactly 10 seconds).',
+        'The best score of the game earns 1 bonus point towards the Who da Boss? card.',
+        'Every record counts for the "Fairy Fingers!" title.',
       ] },
       { title: 'THE WHO DA BOSS? CARD', burst: '×2', lines: [
         'You earn 1 bonus point when a rival steps on your mine, when you get 3 right "SURE!" in a game, or when you top the bonus mini-game at the end of a game.',
