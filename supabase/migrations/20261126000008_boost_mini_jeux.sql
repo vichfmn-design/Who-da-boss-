@@ -16,3 +16,6 @@
 -- finalize_match v3 : carte (le lanceur double ses gains et ne perd rien),
 --             plus d'ancienne « question flash », appel à check_last_place.
 -- L'ancienne table boosts (question flash, jamais utilisée) est supprimée.
+
+-- submit_answer renvoie maintenant {mine_hit, mines} (migration « submit_answer_mine_hit ») :
+-- mine_hit = mauvaise réponse sur une question où un autre joueur a déjà posé sa mine.

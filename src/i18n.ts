@@ -30,7 +30,8 @@ const fr = {
     mineUsed: (q: number) => `Ta mine est sur la question ${q}`, validate: 'VALIDER !', quit: '‹ QUITTER',
     waiting: 'EN ATTENTE DES AUTRES', waitingText: 'Tu as fini ! La révélation arrive quand tout le monde a joué.',
     timeUp: 'TEMPS ÉCOULÉ !',
-    cardMatch: 'DÉFI ×2',
+    cardMatch: 'DÉFI ×2', mineBoom: 'BOOM !', mineBoomSub: 'UNE MINE VIENT D\'EXPLOSER !',
+    mineBoomLoss: (n: number) => `Tes pertes sur cette question sont multipliées par ${n + 1}.`, tapToContinue: 'Touche pour continuer',
   },
   reveal: {
     boom: 'BOOM !', paf: 'PAF !', won: 'TU ES LE BOSS !', lost: 'PERDU...', mineHit: 'BOUM ! Sur ta mine',
@@ -221,7 +222,8 @@ const en: Dict = {
     mineUsed: (q) => `Your mine is on question ${q}`, validate: 'CONFIRM!', quit: '‹ QUIT',
     waiting: 'WAITING FOR THE OTHERS', waitingText: 'Done! Results come when everyone has played.',
     timeUp: "TIME'S UP!",
-    cardMatch: 'CHALLENGE ×2',
+    cardMatch: 'CHALLENGE ×2', mineBoom: 'BOOM!', mineBoomSub: 'A MINE JUST EXPLODED!',
+    mineBoomLoss: (n) => `Your losses on this question are multiplied by ${n + 1}.`, tapToContinue: 'Tap to continue',
   },
   reveal: {
     boom: 'BOOM!', paf: 'POW!', won: "YOU'RE DA BOSS!", lost: 'LOST...', mineHit: 'BOOM! On your mine',

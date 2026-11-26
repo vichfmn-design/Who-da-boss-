@@ -5,6 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Circle } from 'react-native-svg';
 import { Bomb, Burst, ComicButton, Panel, SpeechBubble, SpeedLinesBackground } from '../../src/components/comic';
 import { RULES } from '../../src/engine/rules';
 import { t } from '../../src/i18n';
@@ -13,6 +14,19 @@ import { BURST_B, colors, comicShadow, fonts } from '../../src/theme';
 import { Alert } from '../../src/lib/alert';
 
 const SECONDS = RULES.secondsPerQuestion;
+
+/** Petit nuage BD (blanc, contour noir) autour de l'explosion de mine. */
+function Cloud({ style }: { style?: object }) {
+  const bumps = [[30, 52, 24], [62, 36, 30], [96, 50, 24], [64, 60, 22]] as const;
+  return (
+    <View style={style} pointerEvents="none">
+      <Svg width={130} height={86} viewBox="0 0 130 86">
+        {bumps.map(([cx, cy, r], i) => <Circle key={`o${i}`} cx={cx} cy={cy} r={r + 3.5} fill={colors.ink} />)}
+        {bumps.map(([cx, cy, r], i) => <Circle key={`i${i}`} cx={cx} cy={cy} r={r} fill={colors.white} />)}
+      </Svg>
+    </View>
+  );
+}
 
 export default function Duel() {
   const D = t().duel;
@@ -26,6 +40,9 @@ export default function Duel() {
   const [left, setLeft] = useState<number>(SECONDS);
   const [busy, setBusy] = useState(false);
   const [waiting, setWaiting] = useState(false);
+  // « BOOM ! Une mine vient d'exploser ! » : mauvaise réponse sur une question minée par un rival
+  const [boom, setBoom] = useState<number | null>(null);
+  const afterBoom = useRef<(() => void) | null>(null);
   const startedAt = useRef(Date.now());
 
   useEffect(() => {
@@ -66,8 +83,16 @@ export default function Duel() {
     setBusy(true);
     const ms = Date.now() - startedAt.current;
     try {
-      await api.submitAnswer(id, index, timedOut ? null : choice, sure, ms);
+      const res = await api.submitAnswer(id, index, timedOut ? null : choice, sure, ms);
       Haptics.impactAsync(sure ? Haptics.ImpactFeedbackStyle.Heavy : Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+      const next = () => { if (index >= 4) finish(); else setIndex(index + 1); };
+      if (res?.mine_hit) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+        afterBoom.current = next;
+        setBoom(res.mines);
+        setBusy(false);
+        return;
+      }
       if (index >= 4) { setBusy(false); await finish(); return; }
       setIndex(index + 1);
     } catch (e) {
@@ -76,16 +101,29 @@ export default function Duel() {
     setBusy(false);
   }, [busy, id, index, choice, sure, finish]);
 
+  // L'explosion reste 2,5 s (ou jusqu'au toucher), puis question suivante
+  const continueAfterBoom = useCallback(() => {
+    const go = afterBoom.current;
+    afterBoom.current = null;
+    setBoom(null);
+    go?.();
+  }, []);
+  useEffect(() => {
+    if (boom === null) return;
+    const tm = setTimeout(continueAfterBoom, 2500);
+    return () => clearTimeout(tm);
+  }, [boom, continueAfterBoom]);
+
   // Chrono de 15 secondes ; à zéro, la question compte comme fausse
   useEffect(() => {
-    if (!data || waiting) return;
+    if (!data || waiting || boom !== null) return;
     const timer = setInterval(() => {
       const remaining = SECONDS - Math.floor((Date.now() - startedAt.current) / 1000);
       setLeft(Math.max(0, remaining));
       if (remaining <= 0) { clearInterval(timer); submit(true); }
     }, 250);
     return () => clearInterval(timer);
-  }, [data, index, waiting, submit]);
+  }, [data, index, waiting, submit, boom]);
 
   async function toggleMine() {
     try {
@@ -95,6 +133,29 @@ export default function Duel() {
   }
 
   if (!data) return <SpeedLinesBackground><ActivityIndicator style={{ flex: 1 }} color={colors.ink} /></SpeedLinesBackground>;
+
+  if (boom !== null) {
+    return (
+      <Pressable style={{ flex: 1 }} onPress={continueAfterBoom} accessibilityRole="button" accessibilityLabel={D.mineBoomSub}>
+        <SpeedLinesBackground>
+          <SafeAreaView style={[styles.wrap, { justifyContent: 'center', alignItems: 'center' }]}>
+            <View style={{ width: 340, height: 330, alignItems: 'center', justifyContent: 'center' }}>
+              <Burst width={330} height={320} fill={colors.red} glow={colors.redLight} shadow={9} outline={4}>
+                <Text style={styles.boomText}>{D.mineBoom}</Text>
+                <View style={[styles.boomLabel, comicShadow(4)]}>
+                  <Text style={styles.boomLabelText}>{D.mineBoomSub}</Text>
+                </View>
+              </Burst>
+              <Cloud style={{ position: 'absolute', top: -6, left: -14 }} />
+              <Cloud style={{ position: 'absolute', top: 0, right: -14 }} />
+            </View>
+            <Panel tilt={1}><Text style={styles.rule}>{D.mineBoomLoss(boom)}</Text></Panel>
+            <Text style={styles.rule}>{D.tapToContinue}</Text>
+          </SafeAreaView>
+        </SpeedLinesBackground>
+      </Pressable>
+    );
+  }
 
   if (waiting) {
     return (
@@ -223,4 +284,9 @@ const styles = StyleSheet.create({
   mineTitle: { fontFamily: fonts.comic, fontSize: 18, letterSpacing: 0.5 },
   mineRule: { fontFamily: fonts.bodyHeavy, fontSize: 11 },
   rule: { fontFamily: fonts.bodyBold, fontSize: 12, textAlign: 'center' },
+  boomText: { fontFamily: fonts.boom, fontSize: 76, color: colors.yellow, transform: [{ rotate: '-6deg' }],
+    textShadowColor: colors.ink, textShadowOffset: { width: 4, height: 5 }, textShadowRadius: 0 },
+  boomLabel: { backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, paddingHorizontal: 10, paddingVertical: 4,
+    transform: [{ rotate: '-4deg' }], marginTop: 6 },
+  boomLabelText: { fontFamily: fonts.comic, fontSize: 18, letterSpacing: 0.5, color: colors.red },
 });
