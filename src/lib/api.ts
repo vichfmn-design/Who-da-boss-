@@ -49,6 +49,7 @@ export type MyStats = {
   mines_placed: number; mines_triggered: number; mines_hit: number;
   boosts_played: number; boosts_won: number; bonus_earned: number; cards_won: number; best_streak: number;
   themes: { slug: string; name: string; answered: number; correct: number }[];
+  boost_bests?: Partial<Record<BoostGame, { score: number; display: string | null }>>;
   favorite_rival: { pseudo: string; games: number } | null;
   nemesis: { pseudo: string; they_won: number } | null;
   victim: { pseudo: string; i_won: number } | null;

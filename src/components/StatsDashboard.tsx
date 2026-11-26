@@ -61,6 +61,14 @@ export function StatsDashboard({ stats }: { stats: MyStats | null }) {
   if (stats.cards_won > 0) facts.push(F.cardsWon(stats.cards_won));
   if (stats.forfeits > 0) facts.push(F.forfeits(stats.forfeits));
   if (stats.wins > 0) facts.push(F.wins(stats.wins));
+  // Un fun fact par mini-jeu du Boost déjà joué : ton meilleur score
+  const bb = stats.boost_bests ?? {};
+  if (bb.frappe?.display) facts.push(F.frappe(bb.frappe.display));
+  if (bb.rebus?.display) facts.push(F.rebus(bb.rebus.display));
+  if (bb.chiffre) facts.push(F.chiffre(Number(bb.chiffre.score).toLocaleString('fr-FR')));
+  if (bb.reflexe?.display) facts.push(F.reflexe(bb.reflexe.display));
+  if (bb.memoire?.display) facts.push(F.memoire(bb.memoire.display));
+  if (bb.chrono?.display) facts.push(F.chrono(bb.chrono.display));
 
   return (
     <>
