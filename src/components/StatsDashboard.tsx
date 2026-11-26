@@ -82,9 +82,6 @@ export function StatsDashboard({ stats }: { stats: MyStats | null }) {
               <Tile k={0} size={size} label={P.played} value={String(stats.played)} />
               <Tile k={1} size={size} label={P.winPct} value={`${winPct} %`} color={colors.green} textColor={colors.white} />
               <Tile k={2} size={size} label={P.lossPct} value={`${lossPct} %`} color={colors.red} textColor={colors.yellow} />
-              <Tile k={3} size={size} label={P.forfeits} value={String(stats.forfeits)} />
-              <Tile k={4} size={size} label={P.seasonPoints} value={`${stats.season_points > 0 ? '+' : ''}${stats.season_points}`} color={colors.ink} textColor={colors.yellow} />
-              <Tile k={5} size={size} label={P.accuracy} value={`${pct(stats.correct, stats.answered)} %`} color={colors.blue} textColor={colors.white} />
             </>
           );
         })()}
