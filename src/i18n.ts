@@ -177,7 +177,7 @@ const fr = {
       { title: 'LE BOOST', burst: 'BOOST !', lines: [
         'Tu passes dernier d\'un duo ou d\'un groupe ? Tu reçois un Boost.',
         'Tu le lances quand tu veux depuis Rivaux, tant que tu es encore dernier.',
-        'Tu choisis la catégorie : 9 secondes par question, +2 points par bonne réponse.',
+        'Tu choisis ta catégorie, tu auras 9 secondes par question et tu gagneras 2 points par bonne réponse.',
         'Ça continue tant que tu réponds juste : à la première erreur, la série s\'arrête.',
       ] },
       { title: 'LES MINI-JEUX', burst: 'MINI-\nJEU !', lines: [
@@ -419,7 +419,7 @@ const en: Dict = {
       { title: 'THE BOOST', burst: 'BOOST!', lines: [
         'Drop to last place in a duo or a group? You get a Boost.',
         'Launch it from Rivals whenever you like, as long as you are still last.',
-        'Pick the category: 9 seconds per question, +2 points per right answer.',
+        'You pick your category, you get 9 seconds per question and you earn 2 points per right answer.',
         'It goes on while you answer right: the first mistake ends the streak.',
       ] },
       { title: 'THE MINI-GAMES', burst: 'MINI-\nGAME!', lines: [
