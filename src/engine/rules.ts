@@ -66,8 +66,8 @@ export function isCorrect(a: AnswerInput): boolean {
 
 /**
  * Points d'une réponse. Les mines ne touchent que les mauvaises réponses.
- * Carte Who da Boss ? : celui qui lance le défi voit tous ses points doublés,
- * gains comme pertes ; pour les autres, seules les pertes sont doublées.
+ * Carte Who da Boss ? : celui qui lance le défi double ses gains et ne perd jamais
+ * de points ; pour les autres, les gains sont normaux et les pertes doublées.
  */
 export function answerPoints(
   a: AnswerInput,
@@ -77,6 +77,7 @@ export function answerPoints(
 ): number {
   const table = a.sure ? RULES.sure : RULES.normal;
   if (isCorrect(a)) return table.correct * (isChallenger ? cardMultiplier : 1);
+  if (cardMultiplier > 1 && isChallenger) return 0;
   return table.wrong * mineMultiplier(minesFromOthers) * cardMultiplier;
 }
 

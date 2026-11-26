@@ -119,8 +119,9 @@ const fr = {
       { title: 'LA CARTE WHO DA BOSS ?', burst: '×2', lines: [
         'Tu gagnes 1 point bonus quand un rival saute sur ta mine, quand tu réussis 3 « SÛR ! » dans une partie, ou avec un Boost réussi.',
         '3 points bonus = 1 carte « Who da Boss ? », valable 3 jours. Joue-la depuis ton profil.',
-        'Tu lances un défi sur le thème de ton choix, contre un rival ou tout ton groupe : tous tes points comptent double.',
-        'Pour tes adversaires, seules les pertes comptent double : à eux de ne pas se tromper !',
+        'Tu lances un défi sur le thème de ton choix, contre un rival ou tout ton groupe.',
+        'Toi, tu ne peux pas perdre de points, et tes bonnes réponses comptent double.',
+        'Tes adversaires gagnent des points normalement, mais leurs erreurs comptent double : à eux de ne pas se tromper !',
       ] },
       { title: 'LES AUTRES RÈGLES', burst: '!!!', lines: [
         'Forfait : si tu ne joues pas à temps, tu marques 0 point et tu finis dernier.',
@@ -249,8 +250,9 @@ const en: Dict = {
       { title: 'THE WHO DA BOSS? CARD', burst: '×2', lines: [
         'You earn 1 bonus point when a rival steps on your mine, when you get 3 right "SURE!" in a game, or with a right Boost.',
         '3 bonus points = 1 "Who da Boss?" card, valid for 3 days. Play it from your profile.',
-        'You launch a challenge on the theme of your choice, against a rival or your whole group: all your points count double.',
-        'For your opponents, only losses count double: they had better not slip up!',
+        'You launch a challenge on the theme of your choice, against a rival or your whole group.',
+        'You cannot lose points, and your right answers count double.',
+        'Your opponents score normally, but their mistakes count double: they had better not slip up!',
       ] },
       { title: 'OTHER RULES', burst: '!!!', lines: [
         'Forfeit: if you do not play in time, you score 0 and finish last.',

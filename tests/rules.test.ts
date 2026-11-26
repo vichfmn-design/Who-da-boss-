@@ -34,10 +34,10 @@ test('une mine ne touche que les mauvaises réponses', () => {
   assert.equal(answerPoints(wrong(true), 3), -12);
 });
 
-test('carte Who da Boss ? : tout est doublé, pertes comprises', () => {
+test('carte Who da Boss ? : le lanceur double ses gains, ses adversaires doublent leurs pertes', () => {
   assert.equal(answerPoints(right(), 0, 2), 2);
   assert.equal(answerPoints(right(true), 0, 2), 6);
-  assert.equal(answerPoints(wrong(true), 0, 2), -6);
+  assert.equal(answerPoints(wrong(true), 0, 2, false), -6);
 });
 
 test('partie : mines, bonus et classement', () => {
@@ -127,12 +127,13 @@ test('fenêtre de jeu, forfait et joker', () => {
   assert.equal(matchWindow(new Date(2026, 10, 25), 7).closesAt.getDate(), 2);
 });
 
-test('carte : le lanceur double tout, les autres seulement leurs pertes', () => {
+test('carte : le lanceur double ses gains et ne perd rien, les autres doublent leurs pertes', () => {
   const right = { choiceIndex: 0, correctIndex: 0, sure: false };
   const wrong = { choiceIndex: 1, correctIndex: 0, sure: true };
   assert.equal(answerPoints(right, 0, 2, true), 2);
   assert.equal(answerPoints(right, 0, 2, false), 1);
-  assert.equal(answerPoints(wrong, 0, 2, true), -6);
+  assert.equal(answerPoints(wrong, 0, 2, true), 0);
+  assert.equal(answerPoints(wrong, 1, 2, true), 0);
   assert.equal(answerPoints(wrong, 0, 2, false), -6);
   assert.equal(answerPoints(wrong, 1, 2, false), -12);
 });

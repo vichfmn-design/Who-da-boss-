@@ -1,7 +1,7 @@
 -- Boost et carte Who da Boss ? (appliquée sur le projet Supabase le 26 novembre 2026).
 -- Boost : une question flash bonus en fin de partie (1 par partie, 3 par semaine).
 --   Juste en 10 s : +3 points dans la partie et +1 point bonus. Faux ou temps écoulé : 0.
--- Carte : le lanceur du défi double tous ses points ; les autres doublent seulement leurs pertes.
+-- Carte : le lanceur du défi double ses gains et ne perd jamais de points ; les autres doublent leurs pertes.
 create table if not exists public.boosts (
   id uuid primary key default gen_random_uuid(),
   match_id uuid not null references public.matches(id) on delete cascade,
@@ -77,7 +77,8 @@ begin
 end $$;
 
 -- finalize_match : voir 20261125000002_game.sql, avec trois changements :
---   1. bonne réponse dans une partie « card » : ×2 seulement pour le lanceur (matches.challenger) ;
+--   1. partie « card » : le lanceur (matches.challenger) a ses gains ×2 et 0 sur ses erreurs ;
+--      les autres ont leurs gains ×1 et leurs pertes ×2 ;
 --   2. points du joueur = somme des réponses + points de son Boost ;
 --   3. +1 point bonus (raison « boost ») pour un Boost réussi, sauf forfait.
 -- Le texte complet de la fonction est celui appliqué sur le projet (migration « boost_and_card_rules »).

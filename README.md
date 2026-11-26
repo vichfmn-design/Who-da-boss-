@@ -21,7 +21,7 @@ Jeu de duels quotidiens entre proches : 5 questions de culture générale délir
 | Forfait (0 point) | ✅ |
 | Rythme par connexion : tous les jours, tous les X jours, 1 fois par semaine | ✅ |
 | Groupes de 2 à 4 joueurs | ✅ création + invitation |
-| Points bonus → carte Who da Boss ? (3 jours ; le lanceur double tout, les autres leurs pertes) | ✅ |
+| Points bonus → carte Who da Boss ? (3 jours ; le lanceur double ses gains et ne perd rien, les autres doublent leurs pertes) | ✅ |
 | Boost : question bonus flash (10 s, +3 points et +1 point bonus, 3 par semaine) | ✅ |
 | Titres évolutifs (duo, groupe, mondial) | ✅ |
 | Tableau DUO / GROUPE / GÉNÉRAL (rang mondial) | ✅ |
