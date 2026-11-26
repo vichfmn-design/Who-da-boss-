@@ -46,6 +46,7 @@ function Gate() {
       <Stack.Screen name="duel/[id]" options={{ gestureEnabled: false }} />
       <Stack.Screen name="reveal/[id]" />
       <Stack.Screen name="invite/[code]" />
+      <Stack.Screen name="boost/[id]" />
     </Stack>
   );
 }

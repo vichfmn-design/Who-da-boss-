@@ -54,8 +54,30 @@ export type MyStats = {
   victim: { pseudo: string; i_won: number } | null;
 };
 
-export type BoostQuestion = { prompt: string; choices: string[]; started_at: string };
-export type BoostResult = { correct: boolean; correct_index: number; points: number; explanation: string | null };
+export type BoostGame = 'frappe' | 'rebus' | 'chiffre' | 'reflexe' | 'memoire' | 'chrono';
+export type BoostContent = {
+  text?: string;                                          // frappe
+  items?: { emoji: string; choices: string[] }[];         // rebus
+  q?: string; unit?: string;                              // chiffre
+  delays?: number[];                                      // reflexe
+  sequence?: number[];                                    // memoire
+  target?: number;                                        // chrono
+};
+export type BoostChallenge = {
+  id: string; game: BoostGame; status: 'open' | 'closed'; closes_at: string;
+  connection_id: string | null; group_id: string | null; label: string | null;
+  i_finished: boolean; winner: string | null; winner_points: number | null;
+};
+export type MyBoosts = {
+  tokens: { connection_id: string | null; group_id: string | null; count: number }[];
+  challenges: BoostChallenge[];
+};
+export type BoostInfo = {
+  id: string; game: BoostGame; status: 'open' | 'closed'; closes_at: string; launcher: string | null; label: string | null;
+  winner: string | null; winner_is_me: boolean | null; winner_points: number | null; answer: number | null;
+  me: { started: boolean; finished: boolean; display: string | null } | null;
+  players: { pseudo: string; me: boolean; finished: boolean; display: string | null; points: number }[];
+};
 
 export type TitleRow = {
   scope: 'duo' | 'group' | 'global';
@@ -82,10 +104,16 @@ export const api = {
   removeMine: (matchId: string) => rpc<void>('remove_mine', { p_match: matchId }),
   finish: (matchId: string) => rpc<boolean>('finish_my_match', { p_match: matchId }),
   reveal: (matchId: string) => rpc<Reveal>('get_reveal', { p_match: matchId }),
-  boostsLeft: () => rpc<number>('boosts_left'),
-  startBoost: (matchId: string) => rpc<BoostQuestion>('start_boost', { p_match: matchId }),
-  submitBoost: (matchId: string, choice: number | null) =>
-    rpc<BoostResult>('submit_boost', { p_match: matchId, p_choice: choice }),
+  myBoosts: () => rpc<MyBoosts>('my_boosts'),
+  launchBoost: (connectionId?: string, groupId?: string) =>
+    rpc<string>('launch_boost', { p_connection: connectionId ?? null, p_group: groupId ?? null }),
+  getBoost: (id: string) => rpc<BoostInfo>('get_boost', { p_challenge: id }),
+  startBoostGame: (id: string) => rpc<{ game: BoostGame; content: BoostContent }>('start_boost_game', { p_challenge: id }),
+  submitBoostGame: (id: string, payload: Record<string, unknown>) =>
+    rpc<{ display: string; ok: boolean }>('submit_boost_game', { p_challenge: id, p_payload: payload }),
+  standings: (connectionId?: string, groupId?: string) =>
+    rpc<{ user_id: string; pseudo: string; points: number; wins: number; rank: number }[]>(
+      'season_standings', { p_connection: connectionId ?? null, p_group: groupId ?? null }),
   myCard: async () => {
     const { data } = await supabase.from('cards').select('id, expires_at')
       .is('used_at', null).gt('expires_at', new Date().toISOString()).order('expires_at').limit(1);

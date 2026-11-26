@@ -70,8 +70,9 @@ export default function Board() {
         return;
       }
       if (!selected) { setScores([]); setTitles([]); return; }
-      const filter = tab === 'duo' ? { connectionId: selected } : { groupId: selected };
-      setScores(await api.seasonScores(filter).catch(() => []));
+      // Classement serveur : points des parties + points de Boost
+      const rows = await api.standings(tab === 'duo' ? selected : undefined, tab === 'group' ? selected : undefined).catch(() => []);
+      setScores(rows.map((r) => ({ userId: r.user_id, pseudo: r.pseudo, points: r.points, wins: r.wins })));
       setTitles(await api.titles(tab, selected).catch(() => []));
     })();
   }, [tab, selected]);

@@ -1,0 +1,18 @@
+-- Boost v2 : 6 mini-jeux (appliqué sur le projet Supabase le 26 novembre 2026,
+-- migrations « boost_minigames_schema », « boost_content_seed », « boost_minigames_logic »,
+-- « finalize_v3_last_place »). Ce fichier résume ce qui a été appliqué ; pour
+-- récupérer le SQL exact : npx supabase db pull.
+--
+-- Tables : boost_tokens (jetons, 2 gagnés en tombant dernier d'un duo / groupe),
+--          scope_last_place (dernier actuel de chaque duo / groupe),
+--          boost_content (12 phrases, 24 rébus emoji, 20 nombres à estimer),
+--          boost_challenges (un mini-jeu tiré au sort, ouvert 24 h),
+--          boost_entries (score de chaque joueur ; plus petit = meilleur).
+-- Fonctions : season_standings (classement : points des parties + points de Boost),
+--             check_last_place (appelée en fin de partie et de Boost),
+--             launch_boost, get_boost, start_boost_game, submit_boost_game,
+--             resolve_boost (gagnant = meilleur score ; points = sa place au classement,
+--             le leader 0), close_due_boosts (dans tick), my_boosts.
+-- finalize_match v3 : carte (le lanceur double ses gains et ne perd rien),
+--             plus d'ancienne « question flash », appel à check_last_place.
+-- L'ancienne table boosts (question flash, jamais utilisée) est supprimée.

@@ -1,6 +1,6 @@
 // Rivaux : défier un ami en duo, créer un groupe, ajouter des amis (rival existant ou lien par message),
 // rythme, signaler / bloquer. Toutes les actions sont des boutons visibles (pas d'appui long caché).
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { AlertButton } from 'react-native';
@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ComicButton, ComicTitle, SpeedLinesBackground } from '../../src/components/comic';
 import { t } from '../../src/i18n';
 import { Alert } from '../../src/lib/alert';
-import { api } from '../../src/lib/api';
+import { api, type MyBoosts } from '../../src/lib/api';
 import { extractInviteCode, inviteUrl } from '../../src/lib/links';
 import { useSession } from '../../src/lib/session';
 import { shareText } from '../../src/lib/share';
@@ -30,9 +30,12 @@ export default function Rivals() {
   const [code, setCode] = useState('');
   const [groupName, setGroupName] = useState('');
   const [busy, setBusy] = useState(false);
+  const [boosts, setBoosts] = useState<MyBoosts>({ tokens: [], challenges: [] });
+  const router = useRouter();
 
   const load = useCallback(async () => {
     if (!me) return;
+    api.myBoosts().then(setBoosts).catch(() => {});
     const { data: conns } = await supabase
       .from('connections')
       .select('id, rhythm_days, a:profiles!connections_user_a_fkey(id, pseudo), b:profiles!connections_user_b_fkey(id, pseudo)');
@@ -56,6 +59,32 @@ export default function Rivals() {
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   const fail = (e: unknown) => Alert.alert(t().errors.generic, (e as Error).message);
+
+  // Boost du duo / groupe : jetons disponibles et défi en cours
+  const B = t().boost;
+  const tokensFor = (c?: string, g?: string) =>
+    boosts.tokens.find((x) => (c && x.connection_id === c) || (g && x.group_id === g))?.count ?? 0;
+  const openFor = (c?: string, g?: string) =>
+    boosts.challenges.find((x) => x.status === 'open' && ((c && x.connection_id === c) || (g && x.group_id === g)));
+  function launch(c?: string, g?: string) {
+    Alert.alert(B.title, B.launchConfirm, [
+      { text: R.cancel, style: 'cancel' },
+      { text: B.launch, onPress: () => {
+          api.launchBoost(c, g).then((id) => router.push(`/boost/${id}`)).catch(fail);
+        } },
+    ]);
+  }
+  function BoostButton({ c, g }: { c?: string; g?: string }) {
+    const open = openFor(c, g);
+    if (open) {
+      return <ComicButton label={open.i_finished ? B.pending : B.play} size={18} color={colors.blue} textColor={colors.yellow}
+        onPress={() => router.push(`/boost/${open.id}`)} style={{ marginTop: 8 }} />;
+    }
+    const n = tokensFor(c, g);
+    if (n === 0) return null;
+    return <ComicButton label={`${B.have(n)} · ${B.launch}`} size={18} color={colors.blue} textColor={colors.yellow}
+      onPress={() => launch(c, g)} style={{ marginTop: 8 }} />;
+  }
 
   // Duo : un lien unique à envoyer par message (Messages, WhatsApp…)
   async function inviteDuo() {
@@ -191,14 +220,16 @@ export default function Rivals() {
 
           {rivals.length > 0 && <Text style={styles.section}>{R.duos}</Text>}
           {rivals.map((r) => (
-            <Pressable key={r.connectionId} onPress={() => rivalOptions(r)} accessibilityRole="button"
-              style={[styles.card, comicShadow(4)]}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.name}>{r.pseudo.toUpperCase()}</Text>
-                <Text style={styles.sub}>{R.rhythm(r.rhythm)}</Text>
-              </View>
-              <Text style={styles.more}>•••</Text>
-            </Pressable>
+            <View key={r.connectionId} style={[styles.card, styles.duoCard, comicShadow(4)]}>
+              <Pressable onPress={() => rivalOptions(r)} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.name}>{r.pseudo.toUpperCase()}</Text>
+                  <Text style={styles.sub}>{R.rhythm(r.rhythm)}</Text>
+                </View>
+                <Text style={styles.more}>•••</Text>
+              </Pressable>
+              <BoostButton c={r.connectionId} />
+            </View>
           ))}
 
           <Text style={styles.section}>{R.groups}</Text>
@@ -219,6 +250,7 @@ export default function Rivals() {
                 </Pressable>
                 <ComicButton label={full ? R.full : R.addFriend} disabled={full} onPress={() => addToGroup(g)}
                   color={colors.yellow} textColor={colors.ink} size={20} style={{ marginTop: 6 }} />
+                <BoostButton g={g.id} />
               </View>
             );
           })}
@@ -250,6 +282,7 @@ const styles = StyleSheet.create({
   card: { backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, borderRadius: 14, padding: 12,
     flexDirection: 'row', alignItems: 'center' },
   groupCard: { backgroundColor: colors.red, flexDirection: 'column', alignItems: 'stretch' },
+  duoCard: { flexDirection: 'column', alignItems: 'stretch' },
   name: { fontFamily: fonts.comic, fontSize: 24, letterSpacing: 1 },
   sub: { fontFamily: fonts.bodyBold, fontSize: 12 },
   more: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 2, paddingHorizontal: 6 },
