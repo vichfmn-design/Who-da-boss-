@@ -14,6 +14,8 @@ import { Alert } from '../../src/lib/alert';
 
 const SECONDS = RULES.secondsPerQuestion;
 const BOOST_SECONDS = 10;
+// Boost en pause : il deviendra un des 10 mini-jeux (à valider), la question flash est désactivée.
+const BOOST_ENABLED = false;
 
 export default function Duel() {
   const D = t().duel;
@@ -88,7 +90,7 @@ export default function Duel() {
   }, [busy, id, index, choice, sure, finish]);
 
   async function afterLastQuestion() {
-    const n = await api.boostsLeft().catch(() => 0);
+    const n = BOOST_ENABLED ? await api.boostsLeft().catch(() => 0) : 0;
     if (n > 0) { setBoostsLeft(n); setPhase('boostOffer'); }
     else await finish();
   }

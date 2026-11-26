@@ -150,25 +150,27 @@ export default function Board() {
             })}
 
             <Pressable onPress={() => setShowCats((v) => !v)} accessibilityRole="button"
-              accessibilityState={{ expanded: showCats }} style={styles.catHeader}>
-              <Text style={[styles.titleName, { color: colors.yellow }]}>{t().titleInfo.categories}</Text>
-              <View style={{ flex: 1 }} />
+              accessibilityState={{ expanded: showCats }} style={[styles.titleRow, showCats && styles.catOpen]}>
+              <Star size={18} fill={themeTitles.some((x) => x.holder === me) ? colors.red : colors.ink} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.titleName}>{t().titleInfo.categories}</Text>
+                <Text style={styles.titleInfo}>{t().titleInfo.categoriesInfo}</Text>
+              </View>
               <Text style={styles.chevron}>{showCats ? '▲' : '▼'}</Text>
             </Pressable>
-            {showCats && (
-              <View style={{ padding: 10, gap: 4 }}>
-                <Text style={styles.titleInfo}>{t().titleInfo.categoriesInfo}</Text>
-                {Object.entries(themeNames).map(([slug, name]) => {
-                  const row = themeTitles.find((x) => x.title_key === `theme_boss:${slug}`);
-                  return (
-                    <View key={slug} style={styles.themeRow}>
-                      <Text style={styles.small}>{t().titles.theme_boss(name)}</Text>
-                      <Text style={[styles.small, row?.holder === me && { color: colors.red }]}>{who(row)}</Text>
-                    </View>
-                  );
-                })}
-              </View>
-            )}
+            {showCats && Object.entries(themeNames).map(([slug, name]) => {
+              const row = themeTitles.find((x) => x.title_key === `theme_boss:${slug}`);
+              return (
+                <View key={slug} style={[styles.titleRow, styles.subRow]}>
+                  <Star size={14} fill={row?.holder === me ? colors.red : colors.ink} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.titleName, { fontSize: 16 }]}>{t().titles.theme_boss(name)}</Text>
+                    <Text style={styles.titleInfo}>{t().titleInfo.themeInfo(name)}</Text>
+                  </View>
+                  <Text style={[styles.holder, row?.holder === me && styles.holderMe]}>{who(row)}</Text>
+                </View>
+              );
+            })}
           </View>
           <Text style={styles.titleInfo}>{t().titleInfo.steal}</Text>
         </ScrollView>
@@ -197,8 +199,9 @@ const styles = StyleSheet.create({
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 10, paddingVertical: 7, borderBottomWidth: 2, borderColor: colors.ink },
   titleName: { fontFamily: fonts.comic, fontSize: 18, letterSpacing: 0.5 },
   titleInfo: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.grey },
-  catHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.ink, paddingHorizontal: 12, paddingVertical: 9 },
-  chevron: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.yellow },
+  catOpen: { backgroundColor: colors.paleYellow },
+  subRow: { paddingLeft: 26, backgroundColor: '#FFFDF0' },
+  chevron: { fontFamily: fonts.bodyHeavy, fontSize: 16, color: colors.ink, paddingHorizontal: 4 },
   holder: { fontFamily: fonts.comic, fontSize: 15, borderWidth: 2, borderColor: colors.ink, borderRadius: 999, paddingHorizontal: 8, overflow: 'hidden' },
   holderMe: { backgroundColor: colors.red, color: colors.yellow },
   themeRow: { flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: 1, borderColor: '#D0D0D0', paddingBottom: 2 },

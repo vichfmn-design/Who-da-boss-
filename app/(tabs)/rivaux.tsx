@@ -17,7 +17,7 @@ import { colors, comicShadow, fonts } from '../../src/theme';
 
 type Rival = { connectionId: string; userId: string; pseudo: string; rhythm: number };
 type Member = { userId: string; pseudo: string };
-type Group = { id: string; name: string; rhythm: number; members: Member[] };
+type Group = { id: string; name: string; rhythm: number; members: Member[]; createdBy: string | null };
 
 const MAX_GROUP = 4;
 
@@ -44,12 +44,12 @@ export default function Rivals() {
     }));
 
     const { data: gs } = await supabase
-      .from('groups').select('id, name, rhythm_days, group_members(user_id, profiles(pseudo))').order('created_at');
+      .from('groups').select('id, name, rhythm_days, created_by, group_members(user_id, profiles(pseudo))').order('created_at');
     setGroups(((gs ?? []) as unknown as {
-      id: string; name: string; rhythm_days: number;
+      id: string; name: string; rhythm_days: number; created_by: string | null;
       group_members: { user_id: string; profiles: { pseudo: string } | null }[];
     }[]).map((g) => ({
-      id: g.id, name: g.name, rhythm: g.rhythm_days,
+      id: g.id, name: g.name, rhythm: g.rhythm_days, createdBy: g.created_by,
       members: g.group_members.map((m) => ({ userId: m.user_id, pseudo: m.profiles?.pseudo ?? '?' })),
     })));
   }, [me]);
@@ -97,7 +97,7 @@ export default function Rivals() {
     setBusy(true);
     try {
       const id = await api.createGroup(groupName.trim());
-      const created: Group = { id, name: groupName.trim(), rhythm: 1, members: me ? [{ userId: me, pseudo: '' }] : [] };
+      const created: Group = { id, name: groupName.trim(), rhythm: 1, createdBy: me ?? null, members: me ? [{ userId: me, pseudo: '' }] : [] };
       setGroupName('');
       await load();
       Alert.alert(R.groupCreated, undefined, [
@@ -134,6 +134,8 @@ export default function Rivals() {
     Alert.alert(r.pseudo, R.rhythm(r.rhythm), [
       { text: R.changeRhythm, onPress: () => changeRhythm({ connectionId: r.connectionId }) },
       { text: R.report, onPress: () => { supabase.from('reports').insert({ reporter: me, reported_user: r.userId }).then(() => {}); } },
+      { text: R.deleteDuo, style: 'destructive', onPress: () => confirm(R.deleteDuoConfirm(r.pseudo),
+          () => api.deleteConnection(r.connectionId)) },
       { text: R.block, style: 'destructive', onPress: async () => {
           await supabase.from('blocks').insert({ blocker: me, blocked: r.userId });
           await supabase.from('connections').delete().eq('id', r.connectionId);
@@ -141,6 +143,39 @@ export default function Rivals() {
         } },
       { text: R.cancel, style: 'cancel' },
     ]);
+  }
+
+  // Confirmation avant une action qui efface quelque chose
+  function confirm(message: string, action: () => Promise<unknown>) {
+    Alert.alert(R.options, message, [
+      { text: R.cancel, style: 'cancel' },
+      { text: R.confirm, style: 'destructive', onPress: () => { action().then(load).catch(fail); } },
+    ]);
+  }
+
+  // Options d'un groupe : rythme, ajouter, retirer (créateur), quitter, supprimer (créateur)
+  function groupOptions(g: Group) {
+    const isCreator = g.createdBy === me;
+    const others = g.members.filter((m) => m.userId !== me);
+    const buttons: AlertButton[] = [
+      { text: R.changeRhythm, onPress: () => changeRhythm({ groupId: g.id }) },
+    ];
+    if (g.members.length < MAX_GROUP) buttons.push({ text: R.addFriend, onPress: () => addToGroup(g) });
+    if (isCreator && others.length > 0) {
+      buttons.push({ text: R.removeMember, onPress: () => {
+        Alert.alert(R.removeWho, undefined, [
+          ...others.map((m) => ({ text: m.pseudo, onPress: () => confirm(R.removeConfirm(m.pseudo),
+            () => api.removeFromGroup(g.id, m.userId)) })),
+          { text: R.cancel, style: 'cancel' as const },
+        ]);
+      } });
+    }
+    buttons.push({ text: R.leaveGroup, style: 'destructive', onPress: () => confirm(R.leaveConfirm(g.name), () => api.leaveGroup(g.id)) });
+    if (isCreator) {
+      buttons.push({ text: R.deleteGroup, style: 'destructive', onPress: () => confirm(R.deleteGroupConfirm(g.name), () => api.deleteGroup(g.id)) });
+    }
+    buttons.push({ text: R.cancel, style: 'cancel' });
+    Alert.alert(g.name, R.members(g.members.length), buttons);
   }
 
   return (
@@ -171,10 +206,13 @@ export default function Rivals() {
             const full = g.members.length >= MAX_GROUP;
             return (
               <View key={g.id} style={[styles.card, styles.groupCard, comicShadow(4)]}>
-                <Pressable onPress={() => changeRhythm({ groupId: g.id })} accessibilityRole="button" style={{ gap: 2 }}>
-                  <Text style={[styles.name, { color: colors.yellow }]}>{g.name.toUpperCase()}</Text>
+                <Pressable onPress={() => groupOptions(g)} accessibilityRole="button" style={{ gap: 2 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={[styles.name, { color: colors.yellow, flex: 1 }]}>{g.name.toUpperCase()}</Text>
+                    <Text style={[styles.more, { color: colors.yellow }]}>•••</Text>
+                  </View>
                   <Text style={[styles.sub, { color: colors.white }]}>
-                    {g.members.map((m) => (m.userId === me ? t().board.you : m.pseudo)).join(', ')}
+                    {g.members.map((m) => `${m.userId === me ? t().board.you : m.pseudo}${m.userId === g.createdBy ? ` (${R.creator})` : ''}`).join(', ')}
                   </Text>
                   <Text style={[styles.sub, { color: colors.white }]}>{R.members(g.members.length)} · {R.rhythm(g.rhythm)}</Text>
                   {g.members.length < 2 && <Text style={[styles.sub, { color: colors.yellow }]}>{R.waitingMembers}</Text>}
@@ -207,7 +245,7 @@ export default function Rivals() {
 const styles = StyleSheet.create({
   wrap: { padding: 20, gap: 14, paddingBottom: 32 },
   text: { fontFamily: fonts.bodyBold, fontSize: 15 },
-  hint: { fontFamily: fonts.bodyBold, fontSize: 13, marginTop: -4 },
+  hint: { fontFamily: fonts.bodyBold, fontSize: 13, marginTop: 6 },
   section: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 1, marginTop: 6 },
   card: { backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, borderRadius: 14, padding: 12,
     flexDirection: 'row', alignItems: 'center' },

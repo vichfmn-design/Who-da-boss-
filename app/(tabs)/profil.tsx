@@ -7,7 +7,8 @@ import { Burst, ComicButton, Star, SpeedLinesBackground } from '../../src/compon
 import { getLang, setLang, t, type Lang } from '../../src/i18n';
 import { useSession } from '../../src/lib/session';
 import { supabase } from '../../src/lib/supabase';
-import { api } from '../../src/lib/api';
+import { api, type MyStats } from '../../src/lib/api';
+import { StatsDashboard } from '../../src/components/StatsDashboard';
 import { colors, comicShadow, fonts } from '../../src/theme';
 import { Alert } from '../../src/lib/alert';
 
@@ -19,6 +20,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const [held, setHeld] = useState<HeldTitle[]>([]);
   const [cards, setCards] = useState(0);
+  const [stats, setStats] = useState<MyStats | null>(null);
 
   const load = useCallback(async () => {
     if (!session) return;
@@ -27,6 +29,7 @@ export default function ProfileScreen() {
     const { count } = await supabase.from('cards').select('id', { count: 'exact', head: true })
       .is('used_at', null).gt('expires_at', new Date().toISOString());
     setCards(count ?? 0);
+    api.myStats().then(setStats).catch(() => {});
     refreshProfile();
   }, [session, refreshProfile]);
   useFocusEffect(useCallback(() => { load(); }, [load]));
@@ -109,6 +112,8 @@ export default function ProfileScreen() {
           {cards > 0 && (
             <ComicButton label={P.playCard} color={colors.blue} textColor={colors.yellow} onPress={playCard} size={26} />
           )}
+
+          <StatsDashboard stats={stats} />
 
           <Text style={styles.section}>{t().board.titles}</Text>
           <View style={styles.chips}>

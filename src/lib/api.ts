@@ -42,6 +42,18 @@ export type Reveal = {
   }[];
 };
 
+export type MyStats = {
+  played: number; wins: number; losses: number; forfeits: number; season_points: number; best_game: number | null;
+  answered: number; correct: number; sure_total: number; sure_correct: number;
+  avg_ms_correct: number | null; fastest_ms: number | null;
+  mines_placed: number; mines_triggered: number; mines_hit: number;
+  boosts_played: number; boosts_won: number; bonus_earned: number; cards_won: number; best_streak: number;
+  themes: { slug: string; name: string; answered: number; correct: number }[];
+  favorite_rival: { pseudo: string; games: number } | null;
+  nemesis: { pseudo: string; they_won: number } | null;
+  victim: { pseudo: string; i_won: number } | null;
+};
+
 export type BoostQuestion = { prompt: string; choices: string[]; started_at: string };
 export type BoostResult = { correct: boolean; correct_index: number; points: number; explanation: string | null };
 
@@ -83,6 +95,11 @@ export const api = {
   acceptInvite: (code: string) => rpc<{ connection_id?: string; group_id?: string; group_name?: string }>('accept_invite', { p_code: code }),
   createGroup: (name: string) => rpc<string>('create_group', { p_name: name }),
   addToGroup: (groupId: string, userId: string) => rpc<string>('add_to_group', { p_group: groupId, p_user: userId }),
+  deleteConnection: (connectionId: string) => rpc<void>('delete_connection', { p_connection: connectionId }),
+  leaveGroup: (groupId: string) => rpc<void>('leave_group', { p_group: groupId }),
+  removeFromGroup: (groupId: string, userId: string) => rpc<void>('remove_from_group', { p_group: groupId, p_user: userId }),
+  deleteGroup: (groupId: string) => rpc<void>('delete_group', { p_group: groupId }),
+  myStats: () => rpc<MyStats>('my_stats'),
   setRhythm: (days: number, connectionId?: string, groupId?: string) =>
     rpc<void>('set_rhythm', { p_days: days, p_connection: connectionId ?? null, p_group: groupId ?? null }),
   playCard: (cardId: string, theme: string, connectionId?: string, groupId?: string) =>

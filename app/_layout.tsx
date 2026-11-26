@@ -6,6 +6,7 @@ import { Stack, usePathname, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 import { DialogHost } from '../src/lib/alert';
 import { setPendingInvite, usePrefs } from '../src/lib/prefs';
 import { SessionProvider, useSession } from '../src/lib/session';
@@ -62,8 +63,17 @@ export default function RootLayout() {
   return (
     <SessionProvider>
       <StatusBar style="dark" />
-      <Gate />
+      {/* Sur ordinateur, l'app garde une largeur de téléphone, centrée */}
+      <View style={styles.app}>
+        <Gate />
+      </View>
       <DialogHost />
     </SessionProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  app: Platform.OS === 'web'
+    ? { flex: 1, width: '100%', maxWidth: 560, alignSelf: 'center', overflow: 'hidden' }
+    : { flex: 1 },
+});
