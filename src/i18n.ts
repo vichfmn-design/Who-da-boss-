@@ -8,7 +8,7 @@ const fr = {
   duelsWaiting: (n: number) => (n === 0 ? 'AUCUN DUEL EN ATTENTE' : n === 1 ? '1 DUEL T\'ATTEND !' : `${n} DUELS T'ATTENDENT !`),
   waitingFor: (who: string) => `${who} doit encore jouer`,
   yourTurn: (who: string) => `${who} a déjà joué. À toi !`,
-  tabs: { play: 'JOUER', rivals: 'RIVAUX', board: 'TABLEAU', profile: 'PROFIL' },
+  tabs: { play: 'JOUER', rivals: 'RIVAUX', board: 'CLASSEMENT', profile: 'PROFIL' },
   login: {
     title: 'CONNEXION', withApple: 'Continuer avec Apple', email: 'Ton e-mail', sendCode: 'RECEVOIR UN CODE',
     code: 'Code reçu par e-mail', verify: 'VALIDER', codeSent: 'Code envoyé, regarde tes e-mails.',
@@ -34,7 +34,7 @@ const fr = {
   },
   reveal: {
     boom: 'BOOM !', paf: 'PAF !', won: 'TU ES LE BOSS !', lost: 'PERDU...', mineHit: 'BOUM ! Sur ta mine',
-    seeBoard: 'VOIR LE TABLEAU', points: (n: number) => `${n > 0 ? '+' : ''}${n} pts`, forfeit: 'forfait',
+    seeBoard: 'VOIR LE CLASSEMENT', points: (n: number) => `${n > 0 ? '+' : ''}${n} pts`, forfeit: 'forfait',
   },
   rivals: {
     title: 'MES RIVAUX', invite: 'DÉFIER UN AMI EN DUO', inviteShare: (url: string) => `Je te défie sur Who da Boss ? Clique pour accepter le duel : ${url}`,
@@ -58,7 +58,7 @@ const fr = {
     confirm: 'Confirmer', creator: 'créateur',
   },
   board: {
-    title: 'LE TABLEAU', duo: 'DUO', group: 'GROUPE', global: 'GÉNÉRAL', titles: 'LES TITRES',
+    title: 'LE CLASSEMENT', duo: 'DUO', group: 'GROUPE', global: 'GÉNÉRAL', titles: 'LES TITRES',
     worldRank: 'CLASSEMENT MONDIAL', notRanked: 'Classé après 10 parties terminées.',
     holder: 'détenteur', you: 'TOI', nobody: 'personne pour l\'instant',
   },
@@ -199,7 +199,7 @@ const en: Dict = {
   duelsWaiting: (n) => (n === 0 ? 'NO DUEL WAITING' : n === 1 ? '1 DUEL IS WAITING!' : `${n} DUELS ARE WAITING!`),
   waitingFor: (who) => `${who} still has to play`,
   yourTurn: (who) => `${who} has played. Your turn!`,
-  tabs: { play: 'PLAY', rivals: 'RIVALS', board: 'BOARD', profile: 'PROFILE' },
+  tabs: { play: 'PLAY', rivals: 'RIVALS', board: 'RANKING', profile: 'PROFILE' },
   login: {
     title: 'SIGN IN', withApple: 'Continue with Apple', email: 'Your email', sendCode: 'GET A CODE',
     code: 'Code from your email', verify: 'CONFIRM', codeSent: 'Code sent, check your inbox.',
@@ -223,7 +223,7 @@ const en: Dict = {
   },
   reveal: {
     boom: 'BOOM!', paf: 'POW!', won: "YOU'RE DA BOSS!", lost: 'LOST...', mineHit: 'BOOM! On your mine',
-    seeBoard: 'SEE THE BOARD', points: (n) => `${n > 0 ? '+' : ''}${n} pts`, forfeit: 'forfeit',
+    seeBoard: 'SEE THE RANKING', points: (n) => `${n > 0 ? '+' : ''}${n} pts`, forfeit: 'forfeit',
   },
   rivals: {
     title: 'MY RIVALS', invite: 'CHALLENGE A FRIEND', inviteShare: (url) => `I challenge you on Who da Boss? Tap to accept the duel: ${url}`,
@@ -247,7 +247,7 @@ const en: Dict = {
     confirm: 'Confirm', creator: 'creator',
   },
   board: {
-    title: 'THE BOARD', duo: 'DUO', group: 'GROUP', global: 'WORLD', titles: 'TITLES',
+    title: 'THE RANKING', duo: 'DUO', group: 'GROUP', global: 'WORLD', titles: 'TITLES',
     worldRank: 'WORLD RANKING', notRanked: 'Ranked after 10 finished games.',
     holder: 'holder', you: 'YOU', nobody: 'nobody yet',
   },
