@@ -68,6 +68,16 @@ npx expo start --dev-client
 
 La connexion Apple et les notifications demandent ce « development build ». Pour un premier essai rapide, Expo Go suffit, avec la connexion par e-mail.
 
+### 4. Version web à tester sur iPhone (Render)
+
+Comme pour Hellomoïra, l'app existe aussi en version web, hébergée sur Render : on l'ouvre avec un lien dans Safari, puis **Partager → Sur l'écran d'accueil** pour l'avoir comme une app (icône, plein écran).
+
+- Essai sur le Mac : `npm run web`.
+- Compilation : `npm run build:web` (résultat dans `dist/`).
+- Render : **New → Blueprint**, dépôt `vichfmn-design/Who-da-boss-`. Le fichier `render.yaml` crée un site statique gratuit, reconstruit à chaque push sur `main`. Renseigne `EXPO_PUBLIC_SUPABASE_URL` et `EXPO_PUBLIC_SUPABASE_ANON_KEY` quand Render les demande.
+- Supabase → **Authentication → URL Configuration** : mets l'adresse Render dans **Site URL**.
+- Sur le web : connexion par code e-mail uniquement (pas de connexion Apple), pas de notifications push. Les fenêtres de dialogue et le partage d'invitation ont une version web (`src/lib/alert.web.tsx`, `src/lib/share.web.ts`).
+
 ## Tests
 
 ```bash

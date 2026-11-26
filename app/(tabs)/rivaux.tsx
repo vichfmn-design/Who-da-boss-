@@ -2,7 +2,7 @@
 import * as Linking from 'expo-linking';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ComicButton, ComicTitle, SpeedLinesBackground } from '../../src/components/comic';
 import { t } from '../../src/i18n';
@@ -10,6 +10,8 @@ import { api } from '../../src/lib/api';
 import { useSession } from '../../src/lib/session';
 import { supabase } from '../../src/lib/supabase';
 import { colors, comicShadow, fonts } from '../../src/theme';
+import { Alert } from '../../src/lib/alert';
+import { shareText } from '../../src/lib/share';
 
 type Rival = { connectionId: string; userId: string; pseudo: string; rhythm: number };
 type Group = { id: string; name: string; rhythm: number; members: string[] };
@@ -50,7 +52,7 @@ export default function Rivals() {
     try {
       const c = await api.createInvite(groupId);
       const url = Linking.createURL(`/invite/${c}`);
-      await Share.share({ message: R.inviteShare(url) });
+      await shareText(R.inviteShare(url));
     } catch (e) { Alert.alert(t().errors.generic, (e as Error).message); }
   }
 

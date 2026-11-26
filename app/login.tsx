@@ -1,12 +1,13 @@
 // Connexion : Apple (iPhone) ou code reçu par e-mail.
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useState } from 'react';
-import { Alert, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Burst, ComicButton, Panel, SpeedLinesBackground } from '../src/components/comic';
 import { t } from '../src/i18n';
 import { supabase } from '../src/lib/supabase';
 import { colors, fonts } from '../src/theme';
+import { Alert } from '../src/lib/alert';
 
 export default function Login() {
   const L = t().login;

@@ -1,7 +1,7 @@
 // Profil : titres détenus, points bonus et cartes, langue, déconnexion, suppression du compte.
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Burst, ComicButton, Star, SpeedLinesBackground } from '../../src/components/comic';
 import { setLang, t, type Lang } from '../../src/i18n';
@@ -9,6 +9,7 @@ import { useSession } from '../../src/lib/session';
 import { supabase } from '../../src/lib/supabase';
 import { api } from '../../src/lib/api';
 import { colors, comicShadow, fonts } from '../../src/theme';
+import { Alert } from '../../src/lib/alert';
 
 type HeldTitle = { title_key: string; scope: string; value: number };
 

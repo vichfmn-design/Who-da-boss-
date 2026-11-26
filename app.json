@@ -18,19 +18,46 @@
     },
     "android": {
       "package": "com.whodaboss.app",
-      "adaptiveIcon": { "backgroundColor": "#FFE014" }
+      "adaptiveIcon": {
+        "backgroundColor": "#FFE014"
+      }
     },
     "plugins": [
       "expo-router",
       "expo-font",
       "expo-apple-authentication",
       "expo-localization",
-      ["expo-notifications", { "color": "#E3170A" }],
-      ["expo-splash-screen", { "backgroundColor": "#FFE014" }]
+      [
+        "expo-notifications",
+        {
+          "color": "#E3170A"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFE014"
+        }
+      ]
     ],
-    "experiments": { "typedRoutes": true },
+    "experiments": {
+      "typedRoutes": true
+    },
     "extra": {
-      "eas": { "projectId": "REMPLACER_PAR_TON_PROJECT_ID_EAS" }
+      "eas": {
+        "projectId": "REMPLACER_PAR_TON_PROJECT_ID_EAS"
+      }
+    },
+    "icon": "./assets/icon.png",
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png",
+      "name": "Who da Boss ?",
+      "shortName": "Who da Boss",
+      "lang": "fr",
+      "themeColor": "#FFE014",
+      "backgroundColor": "#FFE014"
     }
   }
 }

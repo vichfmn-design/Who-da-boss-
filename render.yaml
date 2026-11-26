@@ -1,0 +1,25 @@
+# Hébergement de la version web sur Render (site statique, gratuit).
+# Render > New > Blueprint > choisir le dépôt vichfmn-design/Who-da-boss- : ce fichier crée le site.
+# À chaque push sur main, Render reconstruit et remet le site en ligne.
+services:
+  - type: web
+    name: who-da-boss
+    runtime: static
+    branch: main
+    buildCommand: npm install && npx expo export --platform web
+    staticPublishPath: dist
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+    routes:
+      # Toutes les pages (/duel/…, /invite/CODE…) sont gérées par l'app.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      # Valeurs à coller dans Render (Supabase > Project Settings > API).
+      - key: EXPO_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: EXPO_PUBLIC_SUPABASE_ANON_KEY
+        sync: false

@@ -1,11 +1,12 @@
 // Lien d'invitation whodaboss://invite/CODE : accepte et renvoie vers Rivaux.
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { ActivityIndicator, Alert } from 'react-native';
+import { ActivityIndicator } from 'react-native';
 import { SpeedLinesBackground } from '../../src/components/comic';
 import { t } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { colors } from '../../src/theme';
+import { Alert } from '../../src/lib/alert';
 
 export default function Invite() {
   const { code } = useLocalSearchParams<{ code: string }>();

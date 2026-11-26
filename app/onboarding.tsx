@@ -1,12 +1,13 @@
 // Premier lancement : pseudo + thèmes préférés (3 minimum).
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ComicButton, ComicTitle, SpeedLinesBackground } from '../src/components/comic';
 import { getLang, t } from '../src/i18n';
 import { useSession } from '../src/lib/session';
 import { supabase } from '../src/lib/supabase';
 import { colors, comicShadow, fonts } from '../src/theme';
+import { Alert } from '../src/lib/alert';
 
 type Theme = { slug: string; name_fr: string; name_en: string };
 

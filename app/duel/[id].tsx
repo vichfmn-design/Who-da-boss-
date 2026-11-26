@@ -3,13 +3,14 @@
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bomb, Burst, ComicButton, Panel, SpeechBubble, SpeedLinesBackground } from '../../src/components/comic';
 import { RULES } from '../../src/engine/rules';
 import { t } from '../../src/i18n';
 import { api, type MatchQuestions } from '../../src/lib/api';
 import { BURST_B, colors, comicShadow, fonts } from '../../src/theme';
+import { Alert } from '../../src/lib/alert';
 
 const SECONDS = RULES.secondsPerQuestion;
 

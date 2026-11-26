@@ -6,6 +6,7 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { DialogHost } from '../src/lib/alert';
 import { SessionProvider, useSession } from '../src/lib/session';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -51,6 +52,7 @@ export default function RootLayout() {
     <SessionProvider>
       <StatusBar style="dark" />
       <Gate />
+      <DialogHost />
     </SessionProvider>
   );
 }
