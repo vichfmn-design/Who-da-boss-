@@ -16,7 +16,9 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   // L'explosion « WHO DA BOSS ? » remplit l'écran (largeur de téléphone, limitée sur ordinateur)
   const { width, height } = useWindowDimensions();
-  const size = Math.min(Math.min(width, 560) - 120, height * 0.56);
+  const size = Math.min(Math.min(width, 560) - 50, height * 0.6);
+  const box = Math.min(size + 60, Math.min(width, 560));
+  const ring = box / 2 - 18;
   // 5 étoiles autour de l'explosion : 1 petite, 3 moyennes, 1 grande, placées au hasard
   const stars = useMemo(() => {
     const sizes = [16, 26, 26, 26, 40].sort(() => Math.random() - 0.5);
@@ -60,11 +62,11 @@ export default function Home() {
             <Text style={styles.bubbleText}>{t().duelsWaiting(toPlay.length)}</Text>
           </SpeechBubble>
 
-          <View style={{ alignSelf: 'center', width: size + 90, height: size + 90, alignItems: 'center', justifyContent: 'center' }}>
+          <View style={{ alignSelf: 'center', width: box, height: box, alignItems: 'center', justifyContent: 'center' }}>
           {stars.map((st, k) => (
             <View key={k} pointerEvents="none" style={{ position: 'absolute',
-              left: (size + 90) / 2 + st.x * (size / 2 + 22) - st.size / 2,
-              top: (size + 90) / 2 + st.y * (size / 2 + 22) - st.size / 2,
+              left: box / 2 + st.x * ring - st.size / 2,
+              top: box / 2 + st.y * ring - st.size / 2,
               transform: [{ rotate: `${st.rot}deg` }] }}>
               <Star size={st.size} />
             </View>
@@ -76,8 +78,8 @@ export default function Home() {
             style={({ pressed }) => ({ alignSelf: 'center', transform: [{ scale: pressed ? 0.96 : 1 }] })}
           >
             <Burst width={size} height={size} fill={colors.red} rotate={-6} shadow={9}>
-              <Text style={[styles.logo, { fontSize: size * 0.2, lineHeight: size * 0.185 }]}>{'WHO DA\nBOSS ?'}</Text>
-              <Text style={[styles.tap, { fontSize: Math.max(19, size * 0.058) }]}>{t().tapToPlay}</Text>
+              <Text style={[styles.logo, { fontSize: size * 0.155, lineHeight: size * 0.15 }]}>{'WHO DA\nBOSS ?'}</Text>
+              <Text style={[styles.tap, { fontSize: Math.max(17, size * 0.05) }]}>{t().tapToPlay}</Text>
             </Burst>
           </Pressable>
           </View>
