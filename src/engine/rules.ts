@@ -9,7 +9,7 @@
 
 export const RULES = {
   questionsPerMatch: 5,
-  secondsPerQuestion: 15,
+  secondsPerQuestion: 20,
   choicesPerQuestion: 4,
 
   /** Réponse normale : +1 si juste, −1 si fausse. */
@@ -54,7 +54,7 @@ export function mineMultiplier(minesFromOthers: number): number {
 }
 
 export type AnswerInput = {
-  /** null = pas de réponse dans les 15 secondes (compte comme fausse). */
+  /** null = pas de réponse dans les 20 secondes (compte comme fausse). */
   choiceIndex: number | null;
   correctIndex: number;
   sure: boolean;

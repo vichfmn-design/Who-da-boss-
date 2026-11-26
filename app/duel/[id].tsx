@@ -1,4 +1,4 @@
-// Le duel : 5 questions, 15 secondes chacune, bouton SÛR ! après la question,
+// Le duel : 5 questions, 20 secondes chacune, bouton SÛR ! après la question,
 // mine à gauche avec sa bulle d'explication, VALIDER !
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router';
@@ -91,7 +91,7 @@ export default function Duel() {
   }, [busy, id, index, choice, sure, finish]);
 
 
-  // Chrono de 15 secondes ; à zéro, la question compte comme fausse
+  // Chrono de 20 secondes ; à zéro, la question compte comme fausse
   useEffect(() => {
     if (!data || waiting) return;
     const timer = setInterval(() => {

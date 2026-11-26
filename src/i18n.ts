@@ -156,8 +156,8 @@ const fr = {
         'Même thème, mêmes questions pour tout le monde. Tu joues quand tu veux, avant minuit.',
         'On voit qui est le Boss une fois que tout le monde a joué !',
       ] },
-      { title: 'PAS DE PRIME À LA VITESSE', burst: '15 S', lines: [
-        'Tu as 15 secondes par question. Sans réponse, elle compte comme fausse.',
+      { title: 'PAS DE PRIME À LA VITESSE', burst: '20 S', lines: [
+        'Tu as 20 secondes par question. Sans réponse, elle compte comme fausse.',
         'Répondre vite ne rapporte aucun point de plus : prends le temps de réfléchir.',
         'La vitesse sert seulement à départager deux joueurs à égalité.',
       ] },
@@ -403,8 +403,8 @@ const en: Dict = {
         'Same theme, same questions for everyone. Play whenever you like, before midnight.',
         'Results come when everyone has played: that is when we see who is da Boss!',
       ] },
-      { title: 'NO SPEED BONUS', burst: '15 S', lines: [
-        'You have 15 seconds per question. No answer counts as wrong.',
+      { title: 'NO SPEED BONUS', burst: '20 S', lines: [
+        'You have 20 seconds per question. No answer counts as wrong.',
         'Answering fast gives no extra points: take time to think.',
         'Speed only breaks a tie between two players.',
       ] },
