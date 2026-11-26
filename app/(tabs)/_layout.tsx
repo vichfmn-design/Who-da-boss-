@@ -72,9 +72,7 @@ function ComicTabBar({ state, navigateToTab }: TabBarProps) {
           <Animated.View pointerEvents="none"
             style={[styles.track, { width: tabWidth, transform: [{ translateX: x }] }]}>
             <Animated.View style={[StyleSheet.absoluteFill, styles.ripple, { opacity: rippleOpacity, transform: [{ scale: rippleScale }] }]} />
-            <Animated.View style={[styles.bubble, { transform: [{ scaleX: Animated.multiply(sx, press) }, { scaleY: Animated.multiply(sy, press) }] }]}>
-              <View style={styles.shine} />
-            </Animated.View>
+            <Animated.View style={[styles.bubble, { transform: [{ scaleX: Animated.multiply(sx, press) }, { scaleY: Animated.multiply(sy, press) }] }]} />
             <Animated.View style={[styles.drop, { left: -3, top: '45%', opacity: dropOpacity, transform: [{ translateX: dropLeftX }, { translateY: dropLeftY }] }]} />
             <Animated.View style={[styles.drop, styles.dropSmall, { right: -3, top: '30%', opacity: dropOpacity, transform: [{ translateX: dropRightX }, { translateY: dropRightY }] }]} />
           </Animated.View>
@@ -143,7 +141,6 @@ const styles = StyleSheet.create({
     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 999, backgroundColor: 'rgba(255, 224, 20, 0.92)',
     borderWidth: 2, borderColor: 'rgba(255, 255, 255, 0.85)', overflow: 'hidden',
   },
-  shine: { position: 'absolute', top: 4, left: '23%', width: '54%', height: 6, borderRadius: 999, backgroundColor: 'rgba(255, 255, 255, 0.55)' },
   ripple: { borderRadius: 999, borderWidth: 2, borderColor: 'rgba(255, 255, 255, 0.95)' },
   drop: { position: 'absolute', width: 7, height: 7, borderRadius: 4, backgroundColor: colors.yellow },
   dropSmall: { width: 5, height: 5, borderRadius: 3 },
