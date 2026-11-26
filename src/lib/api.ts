@@ -99,7 +99,7 @@ export const api = {
   myMatches: () => rpc<MyMatch[]>('get_my_matches'),
   matchQuestions: (matchId: string) => rpc<MatchQuestions>('get_match_questions', { p_match: matchId }),
   submitAnswer: (matchId: string, index: number, choice: number | null, sure: boolean, ms: number) =>
-    rpc<{ mine_hit: boolean; mines: number } | null>('submit_answer', { p_match: matchId, p_index: index, p_choice: choice, p_sure: sure, p_ms: ms }),
+    rpc<{ mine_hit: boolean; mines: number; miners?: { pseudo: string; selfie: string | null }[] } | null>('submit_answer', { p_match: matchId, p_index: index, p_choice: choice, p_sure: sure, p_ms: ms }),
   placeMine: (matchId: string, index: number) => rpc<void>('place_mine', { p_match: matchId, p_index: index }),
   removeMine: (matchId: string) => rpc<void>('remove_mine', { p_match: matchId }),
   finish: (matchId: string) => rpc<boolean>('finish_my_match', { p_match: matchId }),

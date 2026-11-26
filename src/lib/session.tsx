@@ -5,7 +5,7 @@ import { setLang, type Lang } from '../i18n';
 import { registerForPush } from './push';
 import { supabase } from './supabase';
 
-export type Profile = { id: string; pseudo: string; lang: Lang; timezone: string; bonus_balance: number };
+export type Profile = { id: string; pseudo: string; lang: Lang; timezone: string; bonus_balance: number; mine_selfie?: string | null };
 
 type Ctx = {
   ready: boolean;

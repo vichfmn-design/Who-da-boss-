@@ -1,10 +1,12 @@
 // Profil : titres détenus, points bonus et cartes, langue, déconnexion, suppression du compte.
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Burst, ComicButton, SpeedLinesBackground } from '../../src/components/comic';
-import { getLang, setLang, t, type Lang } from '../../src/i18n';
+import { Bomb, Burst, ComicButton, SpeedLinesBackground } from '../../src/components/comic';
+import { pickSelfie } from '../../src/lib/selfie';
+import { uploadSelfie, useSelfieUrl } from '../../src/lib/selfieUrl';
+import { getLang, t } from '../../src/i18n';
 import { useSession } from '../../src/lib/session';
 import { supabase } from '../../src/lib/supabase';
 import { api, type MyStats } from '../../src/lib/api';
@@ -19,6 +21,22 @@ export default function ProfileScreen() {
   const router = useRouter();
   const [cards, setCards] = useState(0);
   const [stats, setStats] = useState<MyStats | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const selfieUrl = useSelfieUrl(profile?.mine_selfie);
+
+  // Selfie de mine : photo prise avec l'appareil avant, envoyée dans l'espace privé du jeu
+  async function takeSelfie() {
+    if (!session) return;
+    const blob = await pickSelfie();
+    if (!blob) { if (Platform.OS !== 'web') Alert.alert(P.mine, P.selfieWeb); return; }
+    setUploading(true);
+    try {
+      await uploadSelfie(session.user.id, blob, profile?.mine_selfie);
+      await refreshProfile();
+      Alert.alert(P.mine, P.selfieSaved);
+    } catch (e) { Alert.alert(t().errors.generic, (e as Error).message); }
+    setUploading(false);
+  }
 
   const load = useCallback(async () => {
     if (!session) return;
@@ -30,12 +48,6 @@ export default function ProfileScreen() {
   }, [session, refreshProfile]);
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  async function changeLang(l: Lang) {
-    if (!session) return;
-    await supabase.from('profiles').update({ lang: l }).eq('id', session.user.id);
-    setLang(l);
-    refreshProfile();
-  }
 
   function confirmDelete() {
     Alert.alert(P.delete, P.deleteConfirm, [
@@ -107,15 +119,20 @@ export default function ProfileScreen() {
 
           <StatsDashboard stats={stats} />
 
-          <Text style={styles.section}>{P.language}</Text>
-          <View style={styles.chips}>
-            {(['fr', 'en'] as Lang[]).map((l) => (
-              <Pressable key={l} onPress={() => changeLang(l)}
-                style={[styles.chip, comicShadow(3), profile?.lang === l && { backgroundColor: colors.ink }]}>
-                <Text style={[styles.chipText, profile?.lang === l && { color: colors.yellow }]}>{l === 'fr' ? 'FRANÇAIS' : 'ENGLISH'}</Text>
-              </Pressable>
-            ))}
+          <Text style={styles.section}>{P.mine}</Text>
+          <View style={[styles.mineCard, comicShadow(5)]}>
+            <View style={styles.selfieRing}>
+              {selfieUrl
+                ? <Image source={{ uri: selfieUrl }} style={styles.selfie} accessibilityLabel={P.mine} />
+                : <Bomb size={56} />}
+            </View>
+            <View style={{ flex: 1, gap: 8 }}>
+              <Text style={styles.small}>{P.mineInfo}</Text>
+              <ComicButton label={profile?.mine_selfie ? P.changeSelfie : P.takeSelfie} size={18} disabled={uploading}
+                onPress={takeSelfie} style={{ paddingHorizontal: 8 }} />
+            </View>
           </View>
+
 
           <ComicButton label={P.rules} color={colors.yellow} textColor={colors.ink} onPress={() => router.push('/regles?from=profil')} size={24} />
           <ComicButton label={P.logout} color={colors.ink} onPress={() => supabase.auth.signOut()} size={24} />
@@ -141,5 +158,10 @@ const styles = StyleSheet.create({
   chip: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink,
     borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   chipText: { fontFamily: fonts.comic, fontSize: 15, letterSpacing: 0.5 },
+  mineCard: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: colors.white, borderWidth: 3,
+    borderColor: colors.ink, borderRadius: 14, padding: 12 },
+  selfieRing: { width: 92, height: 92, borderRadius: 46, borderWidth: 4, borderColor: colors.ink, backgroundColor: colors.paleYellow,
+    alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  selfie: { width: '100%', height: '100%' },
   delete: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.red, textAlign: 'center', textDecorationLine: 'underline' },
 });

@@ -3,7 +3,8 @@
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSelfieUrl } from '../../src/lib/selfieUrl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import { Bomb, Burst, ComicButton, Panel, SpeechBubble, SpeedLinesBackground } from '../../src/components/comic';
@@ -14,6 +15,22 @@ import { BURST_B, colors, comicShadow, fonts } from '../../src/theme';
 import { Alert } from '../../src/lib/alert';
 
 const SECONDS = RULES.secondsPerQuestion;
+
+/** Le selfie de celui qui a posé la mine, sous le BOOM (bombe si pas de selfie). */
+function MinerSelfie({ pseudo, path }: { pseudo: string; path: string | null }) {
+  const url = useSelfieUrl(path);
+  return (
+    <View style={{ alignItems: 'center', gap: 6 }}>
+      <View style={[{ width: 120, height: 120, borderRadius: 60, borderWidth: 5, borderColor: colors.ink, backgroundColor: colors.white,
+        overflow: 'hidden', alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '-4deg' }] }, comicShadow(5)]}>
+        {url ? <Image source={{ uri: url }} style={{ width: '100%', height: '100%' }} accessibilityLabel={pseudo} /> : <Bomb size={64} />}
+      </View>
+      <View style={{ backgroundColor: colors.ink, paddingHorizontal: 10, paddingVertical: 2, borderRadius: 999 }}>
+        <Text style={{ fontFamily: fonts.comic, fontSize: 18, letterSpacing: 0.5, color: colors.yellow }}>{t().duel.trapBy(pseudo)}</Text>
+      </View>
+    </View>
+  );
+}
 
 /** Petit nuage BD (blanc, contour noir) autour de l'explosion de mine. */
 function Cloud({ style }: { style?: object }) {
@@ -42,6 +59,7 @@ export default function Duel() {
   const [waiting, setWaiting] = useState(false);
   // « BOOM ! Une mine vient d'exploser ! » : mauvaise réponse sur une question minée par un rival
   const [boom, setBoom] = useState<number | null>(null);
+  const [miners, setMiners] = useState<{ pseudo: string; selfie: string | null }[]>([]);
   const afterBoom = useRef<(() => void) | null>(null);
   const startedAt = useRef(Date.now());
 
@@ -89,6 +107,7 @@ export default function Duel() {
       if (res?.mine_hit) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
         afterBoom.current = next;
+        setMiners(res.miners ?? []);
         setBoom(res.mines);
         setBusy(false);
         return;
@@ -148,6 +167,9 @@ export default function Duel() {
               </Burst>
               <Cloud style={{ position: 'absolute', top: -6, left: -14 }} />
               <Cloud style={{ position: 'absolute', top: 0, right: -14 }} />
+            </View>
+            <View style={{ flexDirection: 'row', gap: 14, justifyContent: 'center', flexWrap: 'wrap', marginTop: -24 }}>
+              {miners.map((m) => <MinerSelfie key={m.pseudo} pseudo={m.pseudo} path={m.selfie} />)}
             </View>
             <Panel tilt={1}><Text style={styles.rule}>{D.mineBoomLoss(boom)}</Text></Panel>
             <Text style={styles.rule}>{D.tapToContinue}</Text>

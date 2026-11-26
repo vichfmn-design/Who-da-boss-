@@ -31,6 +31,7 @@ const fr = {
     waiting: 'EN ATTENTE DES AUTRES', waitingText: 'Tu as fini ! La révélation arrive quand tout le monde a joué.',
     timeUp: 'TEMPS ÉCOULÉ !',
     cardMatch: 'DÉFI ×2', mineBoom: 'BOOM !', mineBoomSub: 'UNE MINE VIENT D\'EXPLOSER !',
+    trapBy: (p: string) => `Piège de ${p} !`,
     mineBoomLoss: (n: number) => `Tes pertes sur cette question sont multipliées par ${n + 1}.`, tapToContinue: 'Touche pour continuer',
   },
   reveal: {
@@ -82,6 +83,9 @@ const fr = {
     language: 'Langue', logout: 'SE DÉCONNECTER', delete: 'Supprimer mon compte',
     deleteConfirm: 'Toutes tes parties, tes titres et tes réactions seront effacés. Continuer ?', cancel: 'Annuler', confirm: 'Supprimer',
     rules: 'LES RÈGLES DU JEU',
+    mine: 'MA MINE', mineInfo: 'Ton selfie apparaît sous le BOOM ! quand un rival saute sur ta mine.',
+    takeSelfie: 'PRENDRE MON SELFIE', changeSelfie: 'CHANGER MON SELFIE',
+    selfieWeb: 'Le selfie se prend pour l\'instant depuis la version web de l\'app.', selfieSaved: 'Selfie enregistré : gare à ceux qui sautent sur ta mine !',
     playCard: 'JOUER MA CARTE ×2', cardUntil: (d: string) => `Ta carte est valable jusqu'au ${d}.`,
     cardWho: 'Défier qui ?', cardTheme: 'Sur quel thème ?', cardNoRival: 'Ajoute d\'abord un rival ou un groupe dans Rivaux.',
     stats: 'MES STATS', played: 'Parties', winPct: 'Victoires', lossPct: 'Défaites', forfeits: 'Forfaits',
@@ -223,6 +227,7 @@ const en: Dict = {
     waiting: 'WAITING FOR THE OTHERS', waitingText: 'Done! Results come when everyone has played.',
     timeUp: "TIME'S UP!",
     cardMatch: 'CHALLENGE ×2', mineBoom: 'BOOM!', mineBoomSub: 'A MINE JUST EXPLODED!',
+    trapBy: (p) => `${p}'s trap!`,
     mineBoomLoss: (n) => `Your losses on this question are multiplied by ${n + 1}.`, tapToContinue: 'Tap to continue',
   },
   reveal: {
@@ -274,6 +279,9 @@ const en: Dict = {
     language: 'Language', logout: 'SIGN OUT', delete: 'Delete my account',
     deleteConfirm: 'All your games, titles and reactions will be erased. Continue?', cancel: 'Cancel', confirm: 'Delete',
     rules: 'HOW TO PLAY',
+    mine: 'MY MINE', mineInfo: 'Your selfie shows up under the BOOM! when a rival steps on your mine.',
+    takeSelfie: 'TAKE MY SELFIE', changeSelfie: 'CHANGE MY SELFIE',
+    selfieWeb: 'For now, take your selfie from the web version of the app.', selfieSaved: 'Selfie saved: beware, rivals!',
     playCard: 'PLAY MY ×2 CARD', cardUntil: (d) => `Your card is valid until ${d}.`,
     cardWho: 'Challenge who?', cardTheme: 'Which theme?', cardNoRival: 'First add a rival or a group in Rivals.',
     stats: 'MY STATS', played: 'Games', winPct: 'Wins', lossPct: 'Losses', forfeits: 'Forfeits',
@@ -389,12 +397,16 @@ const en: Dict = {
 export type Lang = 'fr' | 'en';
 const dicts: Record<Lang, Dict> = { fr, en };
 
+/** Langues proposées : français seulement pour l'instant (l'anglais est prêt pour plus tard). */
+export const ENABLED_LANGS: Lang[] = ['fr'];
+
 export function deviceLang(): Lang {
   const code = getLocales()[0]?.languageCode ?? 'fr';
-  return code === 'en' ? 'en' : 'fr';
+  const l: Lang = code === 'en' ? 'en' : 'fr';
+  return ENABLED_LANGS.includes(l) ? l : 'fr';
 }
 
 let current: Lang = deviceLang();
-export const setLang = (l: Lang) => { current = l; };
+export const setLang = (l: Lang) => { current = ENABLED_LANGS.includes(l) ? l : 'fr'; };
 export const getLang = () => current;
 export const t = () => dicts[current];
