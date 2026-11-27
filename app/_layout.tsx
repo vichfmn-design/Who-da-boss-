@@ -49,7 +49,6 @@ function Gate() {
       <Stack.Screen name="invite/[code]" />
       <Stack.Screen name="boost/[id]" />
       <Stack.Screen name="minijeu/[id]" />
-      <Stack.Screen name="jouer" />
     </Stack>
   );
 }

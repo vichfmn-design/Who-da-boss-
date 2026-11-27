@@ -4,11 +4,11 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Burst, ComicButton, SpeechBubble, SpeedLinesBackground, Star, WackyTitle } from '../src/components/comic';
-import { t } from '../src/i18n';
-import { api, type MyMatch } from '../src/lib/api';
-import { Alert } from '../src/lib/alert';
-import { colors, comicShadow, fonts } from '../src/theme';
+import { Burst, ComicButton, SpeechBubble, SpeedLinesBackground, Star, WackyTitle } from '../../src/components/comic';
+import { t } from '../../src/i18n';
+import { api, type MyMatch } from '../../src/lib/api';
+import { Alert } from '../../src/lib/alert';
+import { colors, comicShadow, fonts } from '../../src/theme';
 
 const DUEL = { fill: '#4DA6E8', glow: '#BFE3FA', shadow: '#123E73' };
 const GROUP = { fill: '#3DB167', glow: '#BDF0CC', shadow: '#0E4D29' };
@@ -44,11 +44,6 @@ export default function Jouer() {
     <SpeedLinesBackground cy={10}>
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.wrap}>
-          <View style={styles.top}>
-            <Pressable onPress={() => router.back()} style={[styles.pill, comicShadow(3)]} accessibilityRole="button">
-              <Text style={styles.pillText}>{J.back}</Text>
-            </Pressable>
-          </View>
           <WackyTitle text={J.title} size={38} />
 
           {!matches && <ActivityIndicator color={colors.ink} style={{ marginTop: 40 }} />}
@@ -141,7 +136,7 @@ export default function Jouer() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { padding: 20, gap: 6, paddingBottom: 60 },
+  wrap: { padding: 20, gap: 6, paddingBottom: 120 },
   top: { flexDirection: 'row' },
   pill: { backgroundColor: colors.white, borderWidth: 3, borderColor: colors.ink, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 3 },
   pillText: { fontFamily: fonts.comic, fontSize: 18, letterSpacing: 1 },

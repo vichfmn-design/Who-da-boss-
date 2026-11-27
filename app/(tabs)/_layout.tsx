@@ -54,7 +54,11 @@ function ComicTabBar({ state, navigateToTab }: TabBarProps) {
   const labels: Record<string, string> = {
     index: t().tabs.play, rivaux: t().tabs.rivals, tableau: t().tabs.board, profil: t().tabs.profile,
   };
-  const count = state.routes.length;
+  // « jouer » (la page des parties du jour) n'a pas de bouton : on y reste sur l'onglet JOUER
+  const routes = state.routes.filter((r) => r.name !== 'jouer');
+  const current = state.routes[state.index]?.name;
+  const activeIndex = Math.max(0, routes.findIndex((r) => r.name === (current === 'jouer' ? 'index' : current)));
+  const count = routes.length;
   const [barWidth, setBarWidth] = useState(0);
   const tabWidth = barWidth > 0 ? (barWidth - PAD * 2) / count : 0;
 
@@ -69,7 +73,7 @@ function ComicTabBar({ state, navigateToTab }: TabBarProps) {
 
   useEffect(() => {
     if (!tabWidth) return;
-    const target = state.index * tabWidth;
+    const target = activeIndex * tabWidth;
     if (first.current) { x.setValue(target); first.current = false; return; }
     // Glissement avec léger dépassement (cubic-bezier(0.2, 1.1, 0.28, 1) chez Hellomoïra)
     Animated.spring(x, { toValue: target, useNativeDriver: native, speed: 14, bounciness: 7 }).start();
@@ -83,7 +87,7 @@ function ComicTabBar({ state, navigateToTab }: TabBarProps) {
     drops.setValue(0);
     Animated.timing(ripple, { toValue: 1, duration: 530, easing: Easing.out(Easing.quad), useNativeDriver: native }).start();
     Animated.timing(drops, { toValue: 1, duration: 520, easing: Easing.out(Easing.quad), useNativeDriver: native }).start();
-  }, [state.index, tabWidth, x, sx, sy, ripple, drops]);
+  }, [activeIndex, tabWidth, x, sx, sy, ripple, drops]);
 
   const onLayout = (e: LayoutChangeEvent) => setBarWidth(e.nativeEvent.layout.width);
   const pressTo = (v: number) =>
@@ -109,8 +113,9 @@ function ComicTabBar({ state, navigateToTab }: TabBarProps) {
             <Animated.View style={[styles.drop, styles.dropSmall, { right: -3, top: '30%', opacity: dropOpacity, transform: [{ translateX: dropRightX }, { translateY: dropRightY }] }]} />
           </Animated.View>
         )}
-        {state.routes.map((route, i) => {
-          const focused = state.index === i;
+        {routes.map((route, i) => {
+          const focused = state.routes[state.index]?.key === route.key;
+          const highlighted = activeIndex === i;
           const onPress = () => {
             if (focused) return;
             if (typeof navigateToTab === 'function') navigateToTab(route.key);
@@ -131,8 +136,8 @@ function ComicTabBar({ state, navigateToTab }: TabBarProps) {
               hitSlop={6}
               style={styles.tab}
             >
-              <TabIcon name={route.name} color={focused ? colors.ink : colors.white} />
-              <Text style={[styles.label, { color: focused ? colors.ink : colors.white }]}>{labels[route.name] ?? route.name}</Text>
+              <TabIcon name={route.name} color={highlighted ? colors.ink : colors.white} />
+              <Text style={[styles.label, { color: highlighted ? colors.ink : colors.white }]}>{labels[route.name] ?? route.name}</Text>
             </Pressable>
           );
         })}
@@ -156,6 +161,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="rivaux" />
       <Tabs.Screen name="tableau" />
       <Tabs.Screen name="profil" />
+      <Tabs.Screen name="jouer" />
     </Tabs>
   );
 }
