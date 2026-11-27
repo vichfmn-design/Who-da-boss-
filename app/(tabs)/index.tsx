@@ -1,8 +1,10 @@
 // Accueil : la grosse explosion « WHO DA BOSS ? » lance le prochain duel à jouer.
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
+import { BoomVideo, type BoomVideoHandle } from '../../src/components/BoomVideo';
 import { Burst, SpeechBubble, SpeedLinesBackground, Star } from '../../src/components/comic';
 import { t } from '../../src/i18n';
 import { api, type MyMatch } from '../../src/lib/api';
@@ -40,6 +42,13 @@ export default function Home() {
   const toPlay = matches.filter((m) => m.status === 'open' && !m.i_finished);
   const next = toPlay[0];
   const miniTodo = matches.filter((m) => m.minigame_todo).length;
+  // Toucher WHO DA BOSS ? : explosion (vidéo) puis la page des parties du jour
+  const boom = useRef<BoomVideoHandle>(null);
+  const goPlay = () => {
+    if (!(next || matches.length > 0)) { router.push('/rivaux'); return; }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
+    if (!boom.current?.play()) router.push('/jouer');
+  };
 
   return (
     <SpeedLinesBackground cy={42}>
@@ -74,7 +83,7 @@ export default function Home() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t().tapToPlay}
-            onPress={() => (next || matches.length > 0 ? router.push('/jouer') : router.push('/rivaux'))}
+            onPress={goPlay}
             style={({ pressed }) => ({ alignSelf: 'center', transform: [{ scale: pressed ? 0.96 : 1 }] })}
           >
             <Burst width={size} height={size} fill={colors.red} rotate={-6} shadow={9}>
@@ -87,6 +96,7 @@ export default function Home() {
 
         </ScrollView>
       </SafeAreaView>
+      <BoomVideo ref={boom} src="/anim/home-boom.mp4" onEnd={() => router.push('/jouer')} />
     </SpeedLinesBackground>
   );
 }
