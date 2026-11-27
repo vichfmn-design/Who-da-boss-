@@ -113,7 +113,7 @@ function Results({ info }: { info: BoostInfo }) {
       <Text style={styles.title}>{B.results}</Text>
       {info.winner
         ? <Text style={styles.text}>{info.winner_is_me ? M.winnerMe : M.winner(info.winner)}</Text>
-        : <Text style={styles.text}>{B.noWinner}</Text>}
+        : <Text style={styles.text}>{info.players.filter((p) => p.finished && p.display).length >= 2 ? M.tie : M.nobody}</Text>}
       {info.answer !== null && <Text style={styles.small}>{B.answer(info.answer.toLocaleString('fr-FR'), '')}</Text>}
       {info.players.map((p, i) => (
         <View key={p.pseudo} style={[styles.resultRow, i === 0 && info.winner && { backgroundColor: colors.yellow }]}>

@@ -219,6 +219,7 @@ const fr = {
   },
   mini: {
     title: 'MINI-JEU', button: '🎮 MINI-JEU BONUS', big: 'MINI-JEUX', bigSub: '+1 point bonus au meilleur',
+    tie: 'ÉGALITÉ ! Personne ne gagne le point bonus.', nobody: 'Personne n\'a réussi ce mini-jeu.',
     intro: 'Mini-jeu bonus de ta partie, facultatif : le meilleur score gagne 1 point bonus vers ta carte Who da Boss ?',
     winner: (p: string) => `${p} a le meilleur score : +1 point bonus !`, winnerMe: 'Meilleur score : +1 point bonus pour toi !',
   },
@@ -473,6 +474,7 @@ const en: Dict = {
   },
   mini: {
     title: 'MINI-GAME', button: '🎮 BONUS MINI-GAME', big: 'MINI-GAMES', bigSub: '+1 bonus point to the best',
+    tie: 'TIE! Nobody wins the bonus point.', nobody: 'Nobody made it.',
     intro: 'Optional bonus mini-game of your game: the best score earns 1 bonus point towards your Who da Boss? card.',
     winner: (p) => `${p} has the best score: +1 bonus point!`, winnerMe: 'Best score: +1 bonus point for you!',
   },
