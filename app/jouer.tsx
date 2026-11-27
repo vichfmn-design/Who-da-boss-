@@ -19,6 +19,15 @@ export default function Jouer() {
   const { width } = useWindowDimensions();
   const [matches, setMatches] = useState<MyMatch[] | null>(null);
   const [played, setPlayed] = useState<MyMatch[]>([]);
+  const [openName, setOpenName] = useState<string | null>(null);
+  // Parties jouées regroupées par rival (duel) ou par groupe
+  const groups = Object.values(played.reduce<Record<string, { key: string; name: string; isGroup: boolean; games: MyMatch[] }>>((acc, m) => {
+    const key = m.group_id ?? m.connection_id ?? m.match_id;
+    const name = (m.group_id ? (m.group_name ?? m.opponents) : m.opponents) ?? '';
+    (acc[key] ??= { key, name, isGroup: !!m.group_id, games: [] }).games.push(m);
+    return acc;
+  }, {})).map((g) => ({ ...g, games: g.games.sort((a, b) => b.opens_at.localeCompare(a.opens_at)) }))
+    .sort((a, b) => Number(b.games.some((m) => m.minigame_todo)) - Number(a.games.some((m) => m.minigame_todo)) || a.name.localeCompare(b.name));
   const w = Math.min(Math.min(width, 560) - 70, 330);
   const h = Math.round(w * 0.78);
 
@@ -86,24 +95,43 @@ export default function Jouer() {
           {played.length > 0 && (
             <>
               <Text style={styles.playedTitle}>{J.played}</Text>
-              {played.map((m) => (
-                <Pressable key={m.match_id} onPress={() => router.push(`/reveal/${m.match_id}`)} accessibilityRole="button"
-                  style={[styles.playedRow, comicShadow(3), { backgroundColor: m.group_id ? GROUP.fill : DUEL.fill }]}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.playedName} numberOfLines={1}>{(m.group_id ? (m.group_name ?? m.opponents) : m.opponents ?? '')?.toUpperCase()}</Text>
-                    <Text style={styles.playedSub}>{m.theme_name}</Text>
-                  </View>
-                  {m.minigame_todo && (
-                    <Pressable accessibilityRole="button" accessibilityLabel={J.miniTodo} onPress={() => {
-                      api.matchMinigame(m.match_id).then((cid) => router.push(`/minijeu/${cid}`))
-                        .catch((e: Error) => Alert.alert(t().errors.generic, e.message));
-                    }} style={[styles.miniTag, comicShadow(2)]}>
-                      <Text style={styles.miniTagText}>{J.miniTodo}</Text>
+              {/* Un menu déroulant par rival / groupe ; dedans, ses parties (les plus récentes d'abord) */}
+              {groups.map((g) => {
+                const isOpen = openName === g.key;
+                const todo = g.games.some((m) => m.minigame_todo);
+                return (
+                  <View key={g.key} style={{ gap: 6 }}>
+                    <Pressable onPress={() => setOpenName(isOpen ? null : g.key)} accessibilityRole="button"
+                      accessibilityState={{ expanded: isOpen }}
+                      style={[styles.playedRow, comicShadow(3), { backgroundColor: g.isGroup ? GROUP.fill : DUEL.fill }]}>
+                      <Text style={styles.chev}>{isOpen ? '▼' : '▶'}</Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.playedName} numberOfLines={1}>{g.name.toUpperCase()}</Text>
+                        <Text style={styles.playedSub}>{J.gamesCount(g.games.length)}</Text>
+                      </View>
+                      {todo && <View style={[styles.miniTag, comicShadow(2)]}><Text style={styles.miniTagText}>🎮</Text></View>}
                     </Pressable>
-                  )}
-                  <Text style={styles.playedState}>{m.status === 'closed' ? J.results : J.waiting}</Text>
-                </Pressable>
-              ))}
+                    {isOpen && g.games.map((m) => (
+                      <Pressable key={m.match_id} onPress={() => router.push(`/reveal/${m.match_id}`)} accessibilityRole="button"
+                        style={[styles.gameRow, comicShadow(2)]}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.gameTheme} numberOfLines={1}>{m.theme_name}</Text>
+                          <Text style={styles.gameDate}>{new Date(m.opens_at).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</Text>
+                        </View>
+                        {m.minigame_todo && (
+                          <Pressable accessibilityRole="button" accessibilityLabel={J.miniTodo} onPress={() => {
+                            api.matchMinigame(m.match_id).then((cid) => router.push(`/minijeu/${cid}`))
+                              .catch((e: Error) => Alert.alert(t().errors.generic, e.message));
+                          }} style={[styles.miniTag, comicShadow(2)]}>
+                            <Text style={styles.miniTagText}>{J.miniTodo}</Text>
+                          </Pressable>
+                        )}
+                        <Text style={styles.playedState}>{m.status === 'closed' ? J.results : J.waiting}</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                );
+              })}
             </>
           )}
         </ScrollView>
@@ -125,6 +153,11 @@ const styles = StyleSheet.create({
   bubble: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 1, color: colors.ink, textAlign: 'center' },
   waiting: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.red, textAlign: 'center' },
   star: { position: 'absolute', bottom: 6 },
+  chev: { fontFamily: fonts.comic, fontSize: 18, color: colors.white },
+  gameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginLeft: 18, backgroundColor: colors.white, borderWidth: 2,
+    borderColor: colors.ink, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },
+  gameTheme: { fontFamily: fonts.comic, fontSize: 17, letterSpacing: 0.5, color: colors.ink },
+  gameDate: { fontFamily: fonts.bodyBold, fontSize: 11, color: colors.grey },
   miniTag: { backgroundColor: colors.blue, borderWidth: 2, borderColor: colors.ink, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },
   miniTagText: { fontFamily: fonts.comic, fontSize: 15, letterSpacing: 0.5, color: colors.yellow },
   playedTitle: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 1, marginTop: 18 },

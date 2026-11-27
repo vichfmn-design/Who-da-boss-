@@ -215,7 +215,7 @@ const fr = {
     title: 'À TOI DE JOUER !', back: '← RETOUR', duel: 'DUEL\nDU JOUR', group: 'GROUPE\nDU JOUR', card: 'CARTE\n×2',
     length: '5 QUESTIONS · 2 MIN', none: 'RIEN À JOUER POUR L\'INSTANT !', toRivals: 'DÉFIER UN AMI',
     theyPlayed: 'Ils ont déjà joué !',
-    played: 'TES PARTIES JOUÉES', waiting: 'EN ATTENTE', results: 'RÉSULTATS !', miniTodo: '🎮 MINI-JEU',
+    played: 'TES PARTIES JOUÉES', waiting: 'EN ATTENTE', results: 'RÉSULTATS !', miniTodo: '🎮 MINI-JEU', gamesCount: (n: number) => `${n} partie${n > 1 ? 's' : ''}`,
   },
   mini: {
     title: 'MINI-JEU', button: '🎮 MINI-JEU BONUS', big: 'MINI-JEUX', bigSub: '+1 point bonus au meilleur',
@@ -470,7 +470,7 @@ const en: Dict = {
     title: 'YOUR TURN!', back: '← BACK', duel: 'DUEL\nOF THE DAY', group: 'GROUP\nOF THE DAY', card: 'CARD\n×2',
     length: '5 QUESTIONS · 2 MIN', none: 'NOTHING TO PLAY RIGHT NOW!', toRivals: 'CHALLENGE A FRIEND',
     theyPlayed: 'They already played!',
-    played: 'YOUR PLAYED GAMES', waiting: 'WAITING', results: 'RESULTS!', miniTodo: '🎮 MINI-GAME',
+    played: 'YOUR PLAYED GAMES', waiting: 'WAITING', results: 'RESULTS!', miniTodo: '🎮 MINI-GAME', gamesCount: (n) => `${n} game${n > 1 ? 's' : ''}`,
   },
   mini: {
     title: 'MINI-GAME', button: '🎮 BONUS MINI-GAME', big: 'MINI-GAMES', bigSub: '+1 bonus point to the best',
