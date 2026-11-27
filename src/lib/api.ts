@@ -19,6 +19,7 @@ export type MyMatch = {
   my_points: number | null;
   my_rank: number | null;
   group_name: string | null;
+  minigame_todo?: boolean;
 };
 
 export type MatchQuestions = {

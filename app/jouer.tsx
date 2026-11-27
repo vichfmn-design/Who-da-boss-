@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Burst, ComicButton, SpeechBubble, SpeedLinesBackground, Star, WackyTitle } from '../src/components/comic';
 import { t } from '../src/i18n';
 import { api, type MyMatch } from '../src/lib/api';
+import { Alert } from '../src/lib/alert';
 import { colors, comicShadow, fonts } from '../src/theme';
 
 const DUEL = { fill: '#4DA6E8', glow: '#BFE3FA', shadow: '#123E73' };
@@ -24,7 +25,9 @@ export default function Jouer() {
   useFocusEffect(useCallback(() => {
     api.myMatches().then((m) => {
       setMatches(m.filter((x) => x.status === 'open' && !x.i_finished));
-      setPlayed(m.filter((x) => x.i_finished || x.status === 'closed'));
+      // Les parties dont le mini-jeu reste à jouer en premier
+      setPlayed(m.filter((x) => x.i_finished || x.status === 'closed')
+        .sort((a, b) => Number(!!b.minigame_todo) - Number(!!a.minigame_todo)));
     }).catch(() => setMatches([]));
   }, []));
 
@@ -90,6 +93,14 @@ export default function Jouer() {
                     <Text style={styles.playedName} numberOfLines={1}>{(m.group_id ? (m.group_name ?? m.opponents) : m.opponents ?? '')?.toUpperCase()}</Text>
                     <Text style={styles.playedSub}>{m.theme_name}</Text>
                   </View>
+                  {m.minigame_todo && (
+                    <Pressable accessibilityRole="button" accessibilityLabel={J.miniTodo} onPress={() => {
+                      api.matchMinigame(m.match_id).then((cid) => router.push(`/minijeu/${cid}`))
+                        .catch((e: Error) => Alert.alert(t().errors.generic, e.message));
+                    }} style={[styles.miniTag, comicShadow(2)]}>
+                      <Text style={styles.miniTagText}>{J.miniTodo}</Text>
+                    </Pressable>
+                  )}
                   <Text style={styles.playedState}>{m.status === 'closed' ? J.results : J.waiting}</Text>
                 </Pressable>
               ))}
@@ -114,6 +125,8 @@ const styles = StyleSheet.create({
   bubble: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 1, color: colors.ink, textAlign: 'center' },
   waiting: { fontFamily: fonts.bodyHeavy, fontSize: 11, color: colors.red, textAlign: 'center' },
   star: { position: 'absolute', bottom: 6 },
+  miniTag: { backgroundColor: colors.blue, borderWidth: 2, borderColor: colors.ink, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },
+  miniTagText: { fontFamily: fonts.comic, fontSize: 15, letterSpacing: 0.5, color: colors.yellow },
   playedTitle: { fontFamily: fonts.comic, fontSize: 22, letterSpacing: 1, marginTop: 18 },
   playedRow: { flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 3, borderColor: colors.ink, borderRadius: 12,
     paddingHorizontal: 12, paddingVertical: 8 },

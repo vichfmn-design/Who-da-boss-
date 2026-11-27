@@ -5,6 +5,7 @@ import { getLocales } from 'expo-localization';
 const fr = {
   appName: 'WHO DA BOSS ?',
   tapToPlay: 'TOUCHE POUR JOUER',
+  miniWaiting: (n: number) => (n === 1 ? '🎮 1 MINI-JEU T\'ATTEND !' : `🎮 ${n} MINI-JEUX T'ATTENDENT !`),
   duelsWaiting: (n: number) => (n === 0 ? 'AUCUNE PARTIE EN ATTENTE' : n === 1 ? '1 PARTIE T\'ATTEND !' : `${n} PARTIES T'ATTENDENT !`),
   waitingFor: (who: string) => `${who} doit encore jouer`,
   yourTurn: (who: string) => `${who} a déjà joué. À toi !`,
@@ -214,7 +215,7 @@ const fr = {
     title: 'À TOI DE JOUER !', back: '← RETOUR', duel: 'DUEL\nDU JOUR', group: 'GROUPE\nDU JOUR', card: 'CARTE\n×2',
     length: '5 QUESTIONS · 2 MIN', none: 'RIEN À JOUER POUR L\'INSTANT !', toRivals: 'DÉFIER UN AMI',
     theyPlayed: 'Ils ont déjà joué !',
-    played: 'TES PARTIES JOUÉES', waiting: 'EN ATTENTE', results: 'RÉSULTATS !',
+    played: 'TES PARTIES JOUÉES', waiting: 'EN ATTENTE', results: 'RÉSULTATS !', miniTodo: '🎮 MINI-JEU',
   },
   mini: {
     title: 'MINI-JEU', button: '🎮 MINI-JEU BONUS', big: 'MINI-JEUX', bigSub: '+1 point bonus au meilleur',
@@ -260,6 +261,7 @@ type Dict = typeof fr;
 const en: Dict = {
   appName: 'WHO DA BOSS?',
   tapToPlay: 'TAP TO PLAY',
+  miniWaiting: (n) => (n === 1 ? '🎮 1 MINI-GAME IS WAITING!' : `🎮 ${n} MINI-GAMES ARE WAITING!`),
   duelsWaiting: (n) => (n === 0 ? 'NO GAME WAITING' : n === 1 ? '1 GAME IS WAITING!' : `${n} GAMES ARE WAITING!`),
   waitingFor: (who) => `${who} still has to play`,
   yourTurn: (who) => `${who} has played. Your turn!`,
@@ -467,7 +469,7 @@ const en: Dict = {
     title: 'YOUR TURN!', back: '← BACK', duel: 'DUEL\nOF THE DAY', group: 'GROUP\nOF THE DAY', card: 'CARD\n×2',
     length: '5 QUESTIONS · 2 MIN', none: 'NOTHING TO PLAY RIGHT NOW!', toRivals: 'CHALLENGE A FRIEND',
     theyPlayed: 'They already played!',
-    played: 'YOUR PLAYED GAMES', waiting: 'WAITING', results: 'RESULTS!',
+    played: 'YOUR PLAYED GAMES', waiting: 'WAITING', results: 'RESULTS!', miniTodo: '🎮 MINI-GAME',
   },
   mini: {
     title: 'MINI-GAME', button: '🎮 BONUS MINI-GAME', big: 'MINI-GAMES', bigSub: '+1 bonus point to the best',

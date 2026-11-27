@@ -39,6 +39,7 @@ export default function Home() {
 
   const toPlay = matches.filter((m) => m.status === 'open' && !m.i_finished);
   const next = toPlay[0];
+  const miniTodo = matches.filter((m) => m.minigame_todo).length;
 
   return (
     <SpeedLinesBackground cy={42}>
@@ -58,7 +59,7 @@ export default function Home() {
           </View>
 
           <SpeechBubble style={{ alignSelf: 'center', transform: [{ rotate: '-3deg' }] }}>
-            <Text style={styles.bubbleText}>{t().duelsWaiting(toPlay.length)}</Text>
+            <Text style={styles.bubbleText}>{toPlay.length === 0 && miniTodo > 0 ? t().miniWaiting(miniTodo) : t().duelsWaiting(toPlay.length)}</Text>
           </SpeechBubble>
 
           <View style={{ alignSelf: 'center', width: box, height: box, alignItems: 'center', justifyContent: 'center' }}>
