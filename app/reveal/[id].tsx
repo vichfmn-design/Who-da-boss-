@@ -1,7 +1,7 @@
 // La révélation : BOOM ! si tu gagnes, PAF ! sinon, puis le détail question par question.
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bomb, Burst, ComicButton, Panel, SpeechBubble, SpeedLinesBackground, Star } from '../../src/components/comic';
 import { t } from '../../src/i18n';
@@ -59,14 +59,18 @@ export default function RevealScreen() {
       <SpeedLinesBackground cy={20}>
         <SafeAreaView style={{ flex: 1 }}>
           <ScrollView contentContainerStyle={styles.wrap}>
-            <Burst width={320} height={220} fill={colors.skyDeep} shape={BURST_B} rotate={-4} style={{ alignSelf: 'center' }}>
-              <Text style={[styles.sub, { fontSize: 32, textAlign: 'center' }]}>{R.waitTitle}</Text>
-            </Burst>
+            {/* Le gros bouton « MINI-JEUX » (bleu foncé, même explosion) : le mini-jeu bonus de la partie */}
+            <Pressable onPress={miniGame} accessibilityRole="button" accessibilityLabel={t().mini.big}
+              style={({ pressed }) => ({ alignSelf: 'center', transform: [{ scale: pressed ? 0.96 : 1 }] })}>
+              <Burst width={320} height={220} fill={colors.blue} shape={BURST_B} rotate={-4}>
+                <Text style={[styles.sub, { fontSize: 44, textAlign: 'center', color: colors.yellow }]}>{t().mini.big}</Text>
+                <Text style={[styles.sub, { fontSize: 15, textAlign: 'center' }]}>{t().mini.bigSub}</Text>
+              </Burst>
+            </Pressable>
             <Panel tilt={-1} style={{ gap: 6 }}>
               <Text style={styles.text}>{R.waitCount(pending.players_finished, pending.players_total)}</Text>
               <Text style={styles.small}>{R.waitInfo}</Text>
             </Panel>
-            <ComicButton label={t().mini.button} color={colors.blue} textColor={colors.yellow} size={26} onPress={miniGame} />
             <Text style={styles.qNum}>{R.myAnswers}</Text>
             {pending.answers.map((a) => (
               <Panel key={a.index} tilt={a.index % 2 ? 1 : -1} style={{ gap: 6 }}>

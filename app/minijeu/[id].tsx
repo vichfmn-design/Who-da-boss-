@@ -260,7 +260,7 @@ function Memoire({ content, onSubmit }: { content: BoostContent; onSubmit: Submi
     const step = () => {
       if (k >= len) { setShown(-1); setPhase('input'); setPos(0); return; }
       setShown(k);
-      tm = setTimeout(() => { setShown(-1); k += 1; tm = setTimeout(step, 250); }, 550);
+      tm = setTimeout(() => { setShown(-1); k += 1; tm = setTimeout(step, 400); }, 600);
     };
     tm = setTimeout(step, 400);
     return () => clearTimeout(tm);
@@ -278,7 +278,15 @@ function Memoire({ content, onSubmit }: { content: BoostContent; onSubmit: Submi
     <>
       <Text style={styles.counter}>{B.level(len)} · {phase === 'show' ? B.watch : B.yourTurn}</Text>
       <Panel tilt={-1} style={{ alignItems: 'center', minHeight: 110, justifyContent: 'center' }}>
-        <Text style={styles.memo}>{phase === 'show' ? (shown >= 0 ? EMOJIS[seq[shown]] : ' ') : `${pos} / ${len}`}</Text>
+        {phase === 'show' && shown >= 0 ? (
+          // Nouvel élément à chaque affichage (key) + numéro : un emoji répété réapparaît bien
+          <View key={`m${shown}`} style={{ alignItems: 'center' }}>
+            <Text style={styles.memo}>{EMOJIS[seq[shown]]}</Text>
+            <Text style={styles.memoNum}>{shown + 1} / {len}</Text>
+          </View>
+        ) : (
+          <Text style={styles.memo}>{phase === 'show' ? ' ' : `${pos} / ${len}`}</Text>
+        )}
       </Panel>
       <View style={styles.memoGrid}>
         {EMOJIS.map((e, k) => (
@@ -344,6 +352,7 @@ const styles = StyleSheet.create({
   answerText: { fontFamily: fonts.comic, fontSize: 20, letterSpacing: 0.5, textAlign: 'center', color: colors.ink },
   zone: { height: 320, borderWidth: 4, borderColor: colors.ink, borderRadius: 20, alignItems: 'center', justifyContent: 'center', gap: 12 },
   memo: { fontSize: 72, fontFamily: fonts.comic },
+  memoNum: { fontFamily: fonts.comic, fontSize: 16, letterSpacing: 1, color: colors.grey },
   memoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'center' },
   memoKey: { width: '29%', aspectRatio: 1, borderWidth: 3, borderColor: colors.ink, borderRadius: 16, backgroundColor: colors.white,
     alignItems: 'center', justifyContent: 'center' },

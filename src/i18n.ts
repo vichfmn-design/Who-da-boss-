@@ -217,7 +217,7 @@ const fr = {
     played: 'TES PARTIES JOUÉES', waiting: 'EN ATTENTE', results: 'RÉSULTATS !',
   },
   mini: {
-    title: 'MINI-JEU', button: '🎮 MINI-JEU BONUS',
+    title: 'MINI-JEU', button: '🎮 MINI-JEU BONUS', big: 'MINI-JEUX', bigSub: '+1 point bonus au meilleur',
     intro: 'Mini-jeu bonus de ta partie, facultatif : le meilleur score gagne 1 point bonus vers ta carte Who da Boss ?',
     winner: (p: string) => `${p} a le meilleur score : +1 point bonus !`, winnerMe: 'Meilleur score : +1 point bonus pour toi !',
   },
@@ -470,7 +470,7 @@ const en: Dict = {
     played: 'YOUR PLAYED GAMES', waiting: 'WAITING', results: 'RESULTS!',
   },
   mini: {
-    title: 'MINI-GAME', button: '🎮 BONUS MINI-GAME',
+    title: 'MINI-GAME', button: '🎮 BONUS MINI-GAME', big: 'MINI-GAMES', bigSub: '+1 bonus point to the best',
     intro: 'Optional bonus mini-game of your game: the best score earns 1 bonus point towards your Who da Boss? card.',
     winner: (p) => `${p} has the best score: +1 bonus point!`, winnerMe: 'Best score: +1 bonus point for you!',
   },
